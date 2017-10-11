@@ -1,0 +1,59 @@
+File listing
+------------
+
+1 - PLAID804.exe (functionality unchanged since 802, GUI has been modified)
+version 804 of a C# application which provides a GUI for managing a PLAID applet. 
+
+2 - mono-pcsc.dll (unchanged)
+A library which provides the PC/SC functionality and must be located in the same directory as Plaid.exe.
+
+3 - PLAID804.java (modified since 804)
+version 804 of the Javacard source code of the on-chip card holder PLAID applet.
+
+4 - plaid804.cap (modified since 804)
+The complied PLAID804.java converted app (cap).
+
+
+Package release notes
+---------------------
+
+8.04
+----
+* (PLAID804.java) A bug in the RSA shillkey constructor has been corrected to more accurately emulate a modulus using random 
+data. This is necessary as some modern cards partially validate the data before allowing the setting of a modulus value.
+
+8.03
+----
+* (PLAID803.java) The Card Holder applet has been rewritten (while maintaining backwards compatibility). Enhancements 
+include faster authentication, a smaller applet and lower RAM requirements.
+* (PLAID803.java) Multiple bugs corrected relating to the operations provided by the "Reinitialise PLAID applet" and 
+"Reset PLAID variables" buttons.
+
+8.02
+----
+* (Plaid.exe/Plaid.java) Modified the AID of the selectable PLAID applet to match the value specified in AS-5185. 
+The AID value used is A0 00 00 04 64.
+
+* (Plaid.exe) The first keysetID priority can be set to a value of 0x7777 to represent a value which 
+the card has no knowledge of. The GUI has been modified so this value is included in
+the APDU sent to the user's ICC (previously sent 0x0000).
+
+8.01
+----
+* (Plaid.exe) Correct bug in the C# GUI when selecting the protocol T=1 in the configuration tab.
+
+8.00
+----
+* Initial release for AS-5815 compliant version.
+
+
+Known limitations
+-----------------
+* Secure uploading of keys to the ICC is yet to be implemented.
+
+
+Parameters
+----------
+The User cap has been generated with the following parameters:
+Selectable applet AID:	0xa0:0x00:0x00:0x04:0x64
+Package AID:		0xa0:0x00:0x00:0x04:0x64:0x00:0x61:0x66:0x67:0x6D

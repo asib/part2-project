@@ -1,0 +1,41 @@
+File listing
+------------
+
+1 - SAM804.exe (functionality unchanged since 802, GUI has been modified)
+Version 0.804 of a C# application which provides a GUI for managing a SAM implementation of PLAID. 
+
+2 - mono-pcsc.dll (unchanged)
+A library which provides the PC/SC functionality and must be located in the same directory as SAM.exe.
+
+3 - SAM804.java (modified since pre-release)
+The Javacard source code of the on-chip SAM applet.
+
+4 - SAM804.cap (modified since pre-release)
+The complied SAM804.java converted app (cap).
+
+
+Package release notes
+---------------------
+
+8.04
+----
+* (SAM804.java) The SAM applet has been rewritten (while maintaining backwards compatibility). Enhancements 
+include faster authentication, a smaller applet and lower RAM requirements.
+* Multiple keysets can be used in the RSA decryption for the Initial Authenticate command.
+
+Pre-release (802)
+-----------------
+* Initial version circulated to vendors who requested the software.
+
+
+Known limitations
+-----------------
+* The SAM does not have a "Secure State" once the keys have been loaded.
+* Secure uploading of keys to the SAM is yet to be implemented.
+
+
+Parameters
+----------
+The SAM cap has been generated with the following parameters:
+Selectable applet AID:	0xa0:0x00:0x77:0x6b:0x67:0x66
+Package AID:		0xa0:0x00:0x77:0x6b:0x67:0x67
