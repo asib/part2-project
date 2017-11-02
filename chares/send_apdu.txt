@@ -1,0 +1,7 @@
+establish_context
+enable_trace
+card_connect
+select -AID f23412345610100001
+send_apdu -APDU 80010000080102030405060708
+card_disconnect
+release_context
