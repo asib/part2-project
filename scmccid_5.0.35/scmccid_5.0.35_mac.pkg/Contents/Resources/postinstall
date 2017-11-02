@@ -1,0 +1,502 @@
+#!/bin/bash
+
+# postinstall and postupgrade script need to be identical.
+# If you modify this script, please synchronize with the other one.
+
+# Description:
+# This script generates a single driver bundle with all the supported VID PID
+# for Mac 10.5.x OSes and later.
+# For Mac 10.4.x OS and before, for each VID PID a separate driver bundle
+# is generated.
+# This script assumes that the driver binary (libscmccid) will be copied by the
+# PackageMaker at /usr/local/scm/ini location.
+# This script temporarily generates Bundle.txt, Header.txt, Vid.txt, Pid.txt,
+# Name.txt and Footer.txt files at /usr/local/scm/ini location for generating
+# driver bundle(s) and later removes them.
+
+# For every new version of the driver,
+# Change the CFBundleVersion value in the CreateHeaderFile ().
+
+# To add support for a new reader,
+# 1. Add the bundle name at the end of CreateBundleFile ().
+# 2. Add the Vid at the end of CreateVidFile ().
+# 3. Add the Pid at the end of CreatePidFile ().
+# 4. Add the FriendlyName at the end of CreateNameFile ().
+
+# Global variables 
+BundleFile="/usr/local/identiv/ini/Bundle.txt";
+HeaderFile="/usr/local/identiv/ini/Header.txt";
+VidFile="/usr/local/identiv/ini/Vid.txt";
+PidFile="/usr/local/identiv/ini/Pid.txt";
+NameFile="/usr/local/identiv/ini/Name.txt";
+FooterFile="/usr/local/identiv/ini/Footer.txt";
+BinaryFile="/usr/local/identiv/ini/libscmccid";
+declare -i MacMinorVersion=`sw_vers -productVersion | awk -F. '{print $2}'`;
+
+function CreateBundleFile ()
+{
+	echo "scmccid_5111.bundle" > $BundleFile;
+	echo "scmccid_5114.bundle" >> $BundleFile;
+	echo "scmccid_5120.bundle" >> $BundleFile;
+	echo "scmccid_5121.bundle" >> $BundleFile;
+	echo "scmccid_5124.bundle" >> $BundleFile;
+	echo "scmccid_e001.bundle" >> $BundleFile;
+	echo "scmccid_e002.bundle" >> $BundleFile;
+	echo "scmccid_e003.bundle" >> $BundleFile;
+	echo "scmccid_5113.bundle" >> $BundleFile;
+	echo "scmccid_5115.bundle" >> $BundleFile;
+	echo "scmccid_5116.bundle" >> $BundleFile;
+	echo "scmccid_5117.bundle" >> $BundleFile;
+	echo "scmccid_5118.bundle" >> $BundleFile;
+	echo "scmccid_5119.bundle" >> $BundleFile;
+	echo "scmccid_511d.bundle" >> $BundleFile;
+	echo "scmccid_5410.bundle" >> $BundleFile;
+	echo "scmccid_5151.bundle" >> $BundleFile;
+	echo "scmccid_0824.bundle" >> $BundleFile;
+	echo "scmccid_0924.bundle" >> $BundleFile;
+	echo "scmccid_1024.bundle" >> $BundleFile;
+	echo "scmccid_1524.bundle" >> $BundleFile;
+	echo "scmccid_1624.bundle" >> $BundleFile;
+	echo "scmccid_003e.bundle" >> $BundleFile;
+	echo "scmccid_512a.bundle" >> $BundleFile;
+	echo "scmccid_512c.bundle" >> $BundleFile;
+	echo "scmccid_512d.bundle" >> $BundleFile;
+	echo "scmccid_5250.bundle" >> $BundleFile;
+	
+	echo "scmccid_5810.bundle" >> $BundleFile;
+	echo "scmccid_5811.bundle" >> $BundleFile;
+	echo "scmccid_5812.bundle" >> $BundleFile;
+	echo "scmccid_5813.bundle" >> $BundleFile;
+	echo "scmccid_5814.bundle" >> $BundleFile;
+	echo "scmccid_5815.bundle" >> $BundleFile;
+	echo "scmccid_5816.bundle" >> $BundleFile;
+	echo "scmccid_5817.bundle" >> $BundleFile;
+	echo "scmccid_5818.bundle" >> $BundleFile;
+	echo "scmccid_5819.bundle" >> $BundleFile;
+	echo "scmccid_581A.bundle" >> $BundleFile;
+	echo "scmccid_581B.bundle" >> $BundleFile;
+	echo "scmccid_581C.bundle" >> $BundleFile;
+	echo "scmccid_5710.bundle" >> $BundleFile;
+	echo "scmccid_5711.bundle" >> $BundleFile;
+	echo "scmccid_5712.bundle" >> $BundleFile;
+	echo "scmccid_5713.bundle" >> $BundleFile;
+	echo "scmccid_5790.bundle" >> $BundleFile;
+	echo "scmccid_5791.bundle" >> $BundleFile;
+	echo "scmccid_5720.bundle" >> $BundleFile;
+	echo "scmccid_5721.bundle" >> $BundleFile;
+	echo "scmccid_5723.bundle" >> $BundleFile;
+	echo "scmccid_5724.bundle" >> $BundleFile;
+	echo "scmccid_5725.bundle" >> $BundleFile;
+	echo "scmccid_5726.bundle" >> $BundleFile;
+	echo "scmccid_5750.bundle" >> $BundleFile;	
+	echo "scmccid_5700.bundle" >> $BundleFile;
+	echo "scmccid_5701.bundle" >> $BundleFile;
+}
+
+function CreateHeaderFile ()
+{
+	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $HeaderFile;
+	echo "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" >> $HeaderFile;
+	echo "<plist version=\"1.0\">" >> $HeaderFile;
+	echo "<dict>" >> $HeaderFile;
+	echo "<key>CFBundleDevelopmentRegion</key>" >> $HeaderFile;
+	echo "<string>English</string>" >> $HeaderFile;
+	echo "<key>CFBundleExecutable</key>" >> $HeaderFile;
+	echo "<string>libscmccid</string>" >> $HeaderFile;
+	echo "<key>CFBundleIdentifier</key>" >> $HeaderFile;
+	echo "<string>com.scmmicro.drivers.scmccid</string>" >> $HeaderFile;
+	echo "<key>CFBundleInfoDictionaryVersion</key>" >> $HeaderFile;
+	echo "<string>6.0</string>" >> $HeaderFile;
+	echo "<key>CFBundlePackageType</key>" >> $HeaderFile;
+	echo "<string>BNDL</string>" >> $HeaderFile;
+	echo "<key>CFBundleSignature</key>" >> $HeaderFile;
+	echo "<string>????</string>" >> $HeaderFile;
+	echo "<key>CFBundleVersion</key>" >> $HeaderFile;
+	echo "<string>5.0.35</string>" >> $HeaderFile;
+	echo "<key>ifdCapabilities</key>" >> $HeaderFile;
+	echo "<string>0x00000000</string>" >> $HeaderFile;
+	echo "<key>ifdManufacturerString</key>" >> $HeaderFile;
+	echo "<string>Identiv</string>" >> $HeaderFile;
+	echo "<key>ifdManufacturerURL</key>" >> $HeaderFile;
+	echo "<string>http://www.identiv.com</string>" >> $HeaderFile;
+	echo "<key>ifdProtocolSupport</key>" >> $HeaderFile;
+	echo "<string>0x00000001</string>" >> $HeaderFile;
+	echo "<key>ifdVersionNumber</key>" >> $HeaderFile;
+	echo "<string>0x00000001</string>" >> $HeaderFile;
+	echo "<key>ifdProductString</key>" >> $HeaderFile;
+	echo "<string>Generic CCID driver</string>" >> $HeaderFile;
+}
+
+function CreateVidFile ()
+{
+	echo "<string>0x04E6</string>" > $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x03F0</string>" >> $VidFile;
+	echo "<string>0x03F0</string>" >> $VidFile;
+	echo "<string>0x03F0</string>" >> $VidFile;
+	echo "<string>0x03F0</string>" >> $VidFile;
+	echo "<string>0x03F0</string>" >> $VidFile;
+	echo "<string>0x046A</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;
+	echo "<string>0x04E6</string>" >> $VidFile;	
+
+}
+
+function CreatePidFile ()
+{
+	echo "<string>0x5111</string>" > $PidFile;
+	echo "<string>0x5114</string>" >> $PidFile;
+	echo "<string>0x5120</string>" >> $PidFile;
+	echo "<string>0x5121</string>" >> $PidFile;
+	echo "<string>0x5124</string>" >> $PidFile;
+	echo "<string>0xE001</string>" >> $PidFile;
+	echo "<string>0xE002</string>" >> $PidFile;
+	echo "<string>0xE003</string>" >> $PidFile;
+	echo "<string>0x5113</string>" >> $PidFile;
+	echo "<string>0x5115</string>" >> $PidFile;
+	echo "<string>0x5116</string>" >> $PidFile;
+	echo "<string>0x5117</string>" >> $PidFile;
+	echo "<string>0x5118</string>" >> $PidFile;
+	echo "<string>0x5119</string>" >> $PidFile;
+	echo "<string>0x511D</string>" >> $PidFile;
+	echo "<string>0x5410</string>" >> $PidFile;
+	echo "<string>0x5151</string>" >> $PidFile;
+	echo "<string>0x0824</string>" >> $PidFile;
+	echo "<string>0x0924</string>" >> $PidFile;
+	echo "<string>0x1024</string>" >> $PidFile;
+	echo "<string>0x1524</string>" >> $PidFile;
+	echo "<string>0x1624</string>" >> $PidFile;
+	echo "<string>0x003E</string>" >> $PidFile;
+	echo "<string>0x512A</string>" >> $PidFile;
+	echo "<string>0x512C</string>" >> $PidFile;
+	echo "<string>0x512D</string>" >> $PidFile;
+	echo "<string>0x5250</string>" >> $PidFile;
+
+	echo "<string>0x5810</string>" >> $PidFile;
+	echo "<string>0x5811</string>" >> $PidFile;
+	echo "<string>0x5812</string>" >> $PidFile;
+	echo "<string>0x5813</string>" >> $PidFile;
+	echo "<string>0x5814</string>" >> $PidFile;
+	echo "<string>0x5815</string>" >> $PidFile;
+	echo "<string>0x5816</string>" >> $PidFile;
+	echo "<string>0x5817</string>" >> $PidFile;
+	echo "<string>0x5818</string>" >> $PidFile;
+	echo "<string>0x5819</string>" >> $PidFile;
+	echo "<string>0x581A</string>" >> $PidFile;
+	echo "<string>0x581B</string>" >> $PidFile;
+	echo "<string>0x581C</string>" >> $PidFile;
+	echo "<string>0x5710</string>" >> $PidFile;
+	echo "<string>0x5711</string>" >> $PidFile;
+	echo "<string>0x5712</string>" >> $PidFile;
+	echo "<string>0x5713</string>" >> $PidFile;
+	echo "<string>0x5790</string>" >> $PidFile;
+	echo "<string>0x5791</string>" >> $PidFile;
+	echo "<string>0x5720</string>" >> $PidFile;
+	echo "<string>0x5721</string>" >> $PidFile;
+	echo "<string>0x5723</string>" >> $PidFile;
+	echo "<string>0x5724</string>" >> $PidFile;
+	echo "<string>0x5725</string>" >> $PidFile;
+	echo "<string>0x5726</string>" >> $PidFile;
+	echo "<string>0x5750</string>" >> $PidFile;
+	echo "<string>0x5700</string>" >> $PidFile;
+	echo "<string>0x5701</string>" >> $PidFile;	
+}
+
+function CreateNameFile ()
+{
+	echo "<string>SCR331 DI Smart Card Reader</string>" > $NameFile;
+	echo "<string>SCR331 DI Smart Card Reader</string>" >> $NameFile;
+	echo "<string>SDI010 USB Smart Card Reader</string>" >> $NameFile;
+	echo "<string>SDI010 USB Smart Card Reader</string>" >> $NameFile;
+	echo "<string>SCR331 DI Smart Card Reader</string>" >> $NameFile;
+	echo "<string>SCR331 USB Smart Card Reader</string>" >> $NameFile;
+	echo "<string>SCR332 USB Smart Card Reader</string>" >> $NameFile;
+	echo "<string>SPR532 USB Smart Card Reader</string>" >> $NameFile;
+	echo "<string>SCR333 USB Smart Card Reader</string>" >> $NameFile;
+	echo "<string>SCR335 USB Smart Card Reader</string>" >> $NameFile;
+	echo "<string>SCR3310 Smart Card Reader</string>" >> $NameFile;
+	echo "<string>USB SIM Card Reader</string>" >> $NameFile;
+	echo "<string>Expresscard SIM Card Reader</string>" >> $NameFile;
+	echo "<string>Expresscard SmartCard Reader</string>" >> $NameFile;
+	echo "<string>SCR3311 Smart Card Reader</string>" >> $NameFile;
+	echo "<string>SCR35xx Smart Card Reader</string>" >> $NameFile;
+	echo "<string>SCR338 Smart Card Reader</string>" >> $NameFile;
+	echo "<string>HP USB Smart Card Reader</string>" >> $NameFile;
+	echo "<string>HP USB Smartcard Keyboard</string>" >> $NameFile;
+	echo "<string>HP USB Smart Card Reader</string>" >> $NameFile;
+	echo "<string>HP USB Smart Card Reader KR</string>" >> $NameFile;
+	echo "<string>HP USB Smart Card Reader JP</string>" >> $NameFile;
+	echo "<string>SmartTerminal ST-2xxx</string>" >> $NameFile;
+	echo "<string>SDI010 USB Smart Card Reader</string>" >> $NameFile;
+	echo "<string>SDI011 USB Smart Card Reader</string>" >> $NameFile;
+	echo "<string>SDI010 USB Smart Card Reader</string>" >> $NameFile;
+	echo "<string>SCR339 Keyboard SC Reader</string>" >> $NameFile;
+	
+	echo "<string>Identiv uTrust 2700 R Smart Card Reader</string>" >> $NameFile;
+	echo "<string>Identiv uTrust 2900 R Smart Card Reader</string>" >> $NameFile;
+	echo "<string>Identiv uTrust 2910 R Smart Card Reader</string>" >> $NameFile;
+	echo "<string>Identiv SCR3310 uTrust 2700 R</string>" >> $NameFile;
+	echo "<string>Identiv SCR3500 A Contact Reader</string>" >> $NameFile;
+	echo "<string>Identiv SCR3500 B Contact Reader</string>" >> $NameFile;
+	echo "<string>Identiv uTrust 3512 SAM slot Token</string>" >> $NameFile;
+	echo "<string>Identiv uTrust 3522 embd SE Token</string>" >> $NameFile;
+	echo "<string>Identiv @MAXX Light2 token</string>" >> $NameFile;
+	echo "<string>Identiv @MAXX ID-1 Smart Card Reader</string>" >> $NameFile;
+	echo "<string>Identiv uTrust 3522 embd SE RFID Token</string>" >> $NameFile;
+	echo "<string>Identiv uTrust 2910 R Taglio SC Reader</string>" >> $NameFile;
+	echo "<string>Identiv SCR35xx USB Smart Card Reader</string>" >> $NameFile;
+	echo "<string>Identiv uTrust 2700 F Smart Card Reader</string>" >> $NameFile;
+	echo "<string>Identiv uTrust 2710 F Smart Card Reader</string>" >> $NameFile;
+	echo "<string>Identiv SCR331 uTrust 2700 F</string>" >> $NameFile;
+	echo "<string>Identiv uTrust 2980 F Smart Card Reader</string>" >> $NameFile;
+	echo "<string>Identiv uTrust 3700 F CL Reader</string>" >> $NameFile;
+	echo "<string>Identiv uTrust 3701 F CL Reader</string>" >> $NameFile;
+	echo "<string>Identiv uTrust 4700 F Dual Interface Reader</string>" >> $NameFile;
+	echo "<string>Identiv uTRust 4710 F CL + SAM Reader</string>" >> $NameFile;
+	echo "<string>Identiv uTrust 4000 F DTC</string>" >> $NameFile;
+	echo "<string>Identiv uTrust 4701 F Dual Interface Reader</string>" >> $NameFile;
+	echo "<string>Identiv uTRust 4711 F CL + SAM Reader</string>" >> $NameFile;
+	echo "<string>Identiv uTrust 4701 F CT_CL Reader</string>" >> $NameFile;
+	echo "<string>Identiv uTrust 2190 F Keyboard Smartcard Reader</string>" >> $NameFile;
+	echo "<string>Identiv STC4 Dfu Adapter</string>" >> $NameFile;
+	echo "<string>Identiv STC4 Dfu Adapter</string>" >> $NameFile;
+	
+
+}
+
+function CreateFooterFile ()
+{
+	echo "</dict>" > $FooterFile;
+	echo "</plist>" >> $FooterFile;
+}
+
+function CreateFiles ()
+{
+	CreateBundleFile;
+	CreateHeaderFile;
+	CreateVidFile;
+	CreatePidFile;
+	CreateNameFile;
+	CreateFooterFile;
+}
+
+function RemoveFiles ()
+{
+	rm -f $BundleFile;
+	rm -f $HeaderFile;
+	rm -f $VidFile;
+	rm -f $PidFile;
+	rm -f $NameFile;
+	rm -f $FooterFile;
+	rm -f $BinaryFile;
+}
+
+function CreateHeader ()
+{
+	cat $HeaderFile > $1;
+}
+
+function AppendVidKey ()
+{
+	echo "<key>ifdVendorID</key>" >> $1;
+}
+
+function AppendPidKey ()
+{
+	echo "<key>ifdProductID</key>" >> $1;
+}
+
+function AppendNameKey ()
+{
+	echo "<key>ifdFriendlyName</key>" >> $1;
+}
+
+function AppendArrayStartTag ()
+{
+	echo "<array>" >> $1;
+}
+
+function AppendArrayEndTag ()
+{
+	echo "</array>" >> $1;
+}
+
+function AppendFooter ()
+{
+	cat $FooterFile >> $1;
+	chmod 744 $1;
+}
+
+function AppendVidValue_Tiger ()
+{
+	cat $VidFile | sed -n ''"$2"' s/.*/&/p' >> $1;
+}
+
+function AppendPidValue_Tiger ()
+{
+	cat $PidFile | sed -n ''"$2"' s/.*/&/p' >> $1;
+}
+
+function AppendNameValue_Tiger ()
+{
+	cat $NameFile | sed -n ''"$2"' s/.*/&/p' >> $1;
+}
+
+function CreateBundles_Tiger ()
+{
+	declare -i Counter=1;
+	declare -i Max=`cat $BundleFile | wc -l`;
+
+	while [ $Counter -le $Max ]
+	do
+		Bundle=`cat $BundleFile | sed -n ''"$Counter"' s/.*/&/p'`;
+		BundlePath="/usr/libexec/SmartCardServices/drivers/$Bundle";
+		LinkPath="/usr/local/pcsc/drivers/$Bundle";
+		LinkPath1="/usr/local/lib/pcsc/drivers/$Bundle";
+		DriverPath="$BundlePath/Contents/MacOS";
+		Infoplist="$BundlePath/Contents/Info.plist";
+		
+		rm -rf $LinkPath;
+		rm -rf $LinkPath1;
+		rm -rf $BundlePath;
+		mkdir -p $DriverPath;
+		cp -f $BinaryFile $DriverPath;
+
+		CreateHeader $Infoplist;
+
+		AppendVidKey $Infoplist;
+		AppendVidValue_Tiger $Infoplist $Counter;
+
+		AppendPidKey $Infoplist;
+		AppendPidValue_Tiger $Infoplist $Counter;
+
+		AppendNameKey $Infoplist;
+		AppendNameValue_Tiger $Infoplist $Counter;
+
+		AppendFooter $Infoplist;
+
+		ln -sf $BundlePath $LinkPath;
+		ln -sf $BundlePath $LinkPath1;
+
+		Counter=Counter+1;
+	done
+}
+
+function ModifyIni_Tiger ()
+{
+	sed 's/\(MultiSlotSupportForNativeMacPcscd=\)0/\11/' /usr/local/scm/ini/scmccid.ini > /usr/local/scm/ini/newscmccid.ini;
+	mv -f /usr/local/scm/ini/newscmccid.ini /usr/local/scm/ini/scmccid.ini;
+}
+
+function AppendVidValue_Leopard ()
+{
+	cat $VidFile >> $1;
+}
+
+function AppendPidValue_Leopard ()
+{
+	cat $PidFile >> $1;
+}
+
+function AppendNameValue_Leopard ()
+{
+	cat $NameFile >> $1;
+}
+
+function CreateBundle_Leopard ()
+{
+	Bundle="scmccid.bundle";
+	BundlePath="/usr/local/libexec/SmartCardServices/drivers/$Bundle";
+	LinkPath="/usr/local/pcsc/drivers/$Bundle";
+	LinkPath1="/usr/local/lib/pcsc/drivers/$Bundle";
+	LinkPath2="/usr/libexec/SmartCardServices/drivers/$Bundle";
+	DriverPath="$BundlePath/Contents/MacOS";
+	Infoplist="$BundlePath/Contents/Info.plist";
+	
+	rm -rf $LinkPath;
+	rm -rf $BundlePath;
+	rm -rf $LinkPath1;
+	mkdir -p $DriverPath;
+	cp -f $BinaryFile $DriverPath;
+
+	CreateHeader $Infoplist;
+
+	AppendVidKey $Infoplist;
+	AppendArrayStartTag $Infoplist;
+	AppendVidValue_Leopard $Infoplist;
+	AppendArrayEndTag $Infoplist;
+
+	AppendPidKey $Infoplist;
+	AppendArrayStartTag $Infoplist;
+	AppendPidValue_Leopard $Infoplist;
+	AppendArrayEndTag $Infoplist;
+
+	AppendNameKey $Infoplist;
+	AppendArrayStartTag $Infoplist;
+	AppendNameValue_Leopard $Infoplist;
+	AppendArrayEndTag $Infoplist;
+
+	AppendFooter $Infoplist;
+
+	ln -sf $BundlePath $LinkPath;
+	ln -sf $BundlePath $LinkPath1;
+	ln -sf $BundlePath $LinkPath2;
+}
+
+CreateFiles;
+
+if [ $MacMinorVersion -le 4 ]
+then
+	CreateBundles_Tiger;
+	ModifyIni_Tiger;
+else
+	CreateBundle_Leopard;
+fi
+
+RemoveFiles;

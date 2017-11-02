@@ -1,0 +1,8 @@
+#!/bin/bash
+
+mkdir -p /usr/local/identiv/ini
+mkdir -p /usr/libexec/SmartCardServices/drivers
+mkdir -p /usr/local/libexec/SmartCardServices/drivers/
+mkdir -p /usr/local/pcsc/drivers
+mkdir -p /usr/local/lib/pcsc/drivers
+

@@ -1,0 +1,59 @@
+// ReadMe file for SCMCCID driver
+
+Required Packages : pcsc daemon
+
+Installation:
+The installer will install the driver bundle(s) in
+/usr/ local/ libexec/ SmartCardServices/ drivers directory. 
+Symbolic link(s) will be created in / usr/ local/ pcsc/ drivers and in 
+/ usr/ libexec/ SmartCardServices/ drivers.
+The scmccid.ini file is copied to /usr/local/identiv/ini.
+
+Uninstallation:
+To uninstall, type the following command in a terminal from from the package directory.
+sudo ./uninstall.sh
+ 
+Configuration (optional):
+
+a) To force F and D value externally, modify the file "scmccid.ini" file 
+under the directory "/usr/local/identiv/ini/" and update the values. The 
+following is an example. Lines starting with ";"  are ignored.
+
+FValue=1
+DValue=8
+
+b)Maximum buffer size of the command/APDU handled by driver from 
+application is 128Kbytes. This is configurable by the following entry 
+in the ini file.
+
+BufferSize=131072
+
+c) To replace a particular ATR, add a line as below,
+in the ini file.
+
+3b021122=3b03112233
+
+where the LValue is the ATR to be replaced and the RValue is the ATR 
+to replace it with.
+
+d) For SDI010 smart card readers with firmware V7.06 and later, the 
+number of contactless slots can be configured using the "NumOfPDO" 
+entry in the ini file.
+
+(eg) NumOfPDO=2  will expose 2 Contactless slots.
+
+e) For SCR3310V2 readers, the Card Reset Order can be used to 
+change the smart card power-on sequence i.e. it shall direct the reader 
+to start the card reset by applying by .Class A. voltage first and then 
+retry sequentially with the other classes or vice versa.
+
+CardResetOrder=1
+
+It can take the following options
+	0 - It starts with Class C voltage
+	1 - It starts with Class A voltage
+
+f) For SCR3310V2 readers, the ATR timeout value can be specified (in 
+milliseconds) with the following INI option
+
+ATRTimeout=100
