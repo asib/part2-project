@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<project name="simple_symenc">
+  <taskdef name="javacard" classname="pro.javacard.ant.JavaCard" classpath="ant-javacard.jar"/>
+
+  <target name="jc">
+    <javacard>
+      <cap jckit="/Users/jacobfenton/Desktop/piiproj/java_card_kit-2_2_2" version="1.0" aid="f234123456101000" output="simple_symenc.cap" sources="/Users/jacobfenton/Desktop/piiproj/simple_symenc/src/main/java/org/bitbucket/jfent/simple_symenc">
+        <applet class="org.bitbucket.jfent.simple_dsa.SimpleSymmetricEncryptionApplet" aid="f23412345610100001"/>
+      </cap>
+    </javacard>
+  </target>
+</project>
