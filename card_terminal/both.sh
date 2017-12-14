@@ -1,0 +1,1 @@
+./cmp.sh && ./run.sh

@@ -9,6 +9,7 @@
     <javac srcdir="./src/main/java" destdir="./build/classes">
         <classpath>
             <pathelement path="./lib/commons-cli-1.4.jar"/>
+            <pathelement path="./lib/commons-codec-1.11.jar"/>
         </classpath>
     </javac>
 </target>
@@ -16,7 +17,7 @@
 <target name="jar">
     <mkdir dir="./build/jar"/>
     <jar destfile="./build/jar/card_terminal.jar" basedir="./build/classes">
-        <zipgroupfileset dir="./lib" includes="commons-cli-1.4.jar" />
+        <zipgroupfileset dir="./lib" includes="*.jar" />
         <manifest>
           <attribute name="Main-Class" value="org.bitbucket.jfent.card_terminal.CardTerminal"/>
         </manifest>
