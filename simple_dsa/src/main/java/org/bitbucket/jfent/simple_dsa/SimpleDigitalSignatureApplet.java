@@ -18,13 +18,7 @@ public class SimpleDigitalSignatureApplet extends Applet {
    * Constants
    *
    */
-  final static byte CHALLENGE = (byte)0x01; // INS byte for Challenge
-  final static byte[] KEY_DATA = {(byte)0xeb, (byte)0x0e, (byte)0x36, (byte)0x2c,
-                                  (byte)0x21, (byte)0xeb, (byte)0x3e, (byte)0x47,
-                                  (byte)0xf9, (byte)0xa2, (byte)0xeb, (byte)0x2f,
-                                  (byte)0xba, (byte)0x9e, (byte)0x30, (byte)0xd7};
-  final static short EXPECTED_CHALLENGE_LENGTH = (short)0x10;
-  final static short EXPECTED_CIPHER_LENGTH = (short)0x10;
+  final static byte GENERATE_DSA_KEY_PAIR = (byte)0x01; // INS byte for Challenge
 
   /*
    *

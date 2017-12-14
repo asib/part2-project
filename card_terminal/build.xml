@@ -1,0 +1,31 @@
+<project>
+
+<target name="clean">
+    <delete dir="./build"/>
+</target>
+
+<target name="compile">
+    <mkdir dir="./build/classes"/>
+    <javac srcdir="./src/main/java" destdir="./build/classes">
+        <classpath>
+            <pathelement path="./lib/commons-cli-1.4.jar"/>
+        </classpath>
+    </javac>
+</target>
+
+<target name="jar">
+    <mkdir dir="./build/jar"/>
+    <jar destfile="./build/jar/card_terminal.jar" basedir="./build/classes">
+        <zipgroupfileset dir="./lib" includes="commons-cli-1.4.jar" />
+        <manifest>
+          <attribute name="Main-Class" value="org.bitbucket.jfent.card_terminal.CardTerminal"/>
+        </manifest>
+    </jar>
+</target>
+
+<target name="run">
+    <java jar="./build/jar/card_terminal.jar" fork="true">
+    </java>
+</target>
+
+</project>
