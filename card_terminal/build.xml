@@ -10,6 +10,8 @@
         <classpath>
             <pathelement path="./lib/commons-cli-1.4.jar"/>
             <pathelement path="./lib/commons-codec-1.11.jar"/>
+            <pathelement path="./lib/api.jar"/>
+            <pathelement path="./lib/opacity_fs_impl.jar"/>
         </classpath>
     </javac>
 </target>

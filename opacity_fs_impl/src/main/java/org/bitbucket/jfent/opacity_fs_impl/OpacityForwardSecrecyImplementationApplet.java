@@ -16,29 +16,30 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
    * Constants
    *
    */
-  final static byte GENERATE_KEY_PAIR = (byte)0x01; // INS byte for generating key pair.
-  final static byte STORE_SIGNATURE = (byte)0x02;   // INS byte for storing the terminal's signature.
-  final static byte CHECK_STORED_DATA = (byte)0x03; // INS byte for checking data was stored correctly after STORE_SIGNATURE instruction.
-  final static byte TERMINAL_KEY_TYPE = KeyBuilder.TYPE_EC_FP_PUBLIC;
-  final static short TERMINAL_KEY_LENGTH = KeyBuilder.LENGTH_EC_FP_128;
+  public final static byte GENERATE_KEY_PAIR = (byte)0x01; // INS byte for generating key pair.
+  public final static byte STORE_SIGNATURE = (byte)0x02;   // INS byte for storing the terminal's signature.
+  public final static byte CHECK_STORED_DATA = (byte)0x03; // INS byte for checking data was stored correctly after STORE_SIGNATURE instruction.
+  public final static byte TERMINAL_KEY_TYPE = KeyBuilder.TYPE_EC_FP_PUBLIC;
+  public final static short TERMINAL_KEY_LENGTH = KeyBuilder.LENGTH_EC_FP_128;
   /*
    * When we transmit EC keys, we have to transmit a byte array of parameters.
    * Since each parameter may not necessarily be of fixed length (e.g. if we change
    * the key length), we need to allow for variable length parameters. Thus, each
    * parameter is prefixed by a 2-byte length parameter.
    */
-  final static short KEY_PARAM_LENGTH_TAG = (short)2;
+  public final static short KEY_PARAM_LENGTH_TAG = (short)2;
   /*
-   * In order to transmit an EC public key, we have to transmit 5 parameters:
+   * In order to transmit an EC public key, we have to transmit 6 parameters:
    * W, A, B, G, R, Field.
    */
-  final static short KEY_NUM_PARAMS = (short)5;
-  final static byte KEY_PAIR_ALGORITHM = KeyPair.ALG_EC_FP;
-  final static short KEY_LENGTH = KeyBuilder.LENGTH_EC_FP_128;
-  final static short SIGNATURE_LENGTH = (short)20; // ALG_ECDSA_SHA produces 20 byte signature.
+  public final static short KEY_NUM_PARAMS = (short)6;
+  public final static byte KEY_PAIR_ALGORITHM = KeyPair.ALG_EC_FP;
+  public final static byte CARD_PUBLIC_KEY_TYPE = KeyBuilder.TYPE_EC_FP_PUBLIC;
+  public final static short KEY_LENGTH = KeyBuilder.LENGTH_EC_FP_128;
+  public final static short SIGNATURE_LENGTH = (short)20; // ALG_ECDSA_SHA produces 20 byte signature.
   // Expiry is stored in Unix time (an unsigned 32 bit integer, representing number
   // of seconds after 00:00:00 01/01/1970.
-  final static short CERTIFICATE_EXPIRY_LENGTH = (short)4;
+  public final static short CERTIFICATE_EXPIRY_LENGTH = (short)4;
 
   /*
    *

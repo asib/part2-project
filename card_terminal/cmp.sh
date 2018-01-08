@@ -1,1 +1,1 @@
-ant compile && ant jar
+ant clean && ant compile && ant jar
