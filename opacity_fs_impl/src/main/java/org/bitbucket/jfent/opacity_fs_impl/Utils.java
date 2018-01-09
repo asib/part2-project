@@ -11,49 +11,6 @@ public class Utils {
   public final static short NUM_PARAMS = OpacityForwardSecrecyImplementationApplet.KEY_NUM_PARAMS;
 
   /**
-   * Helper method that encodes the parts of an EC key that are common to both
-   * public and private EC keys.
-   *
-   * @param k      the ECKey to be encoded
-   * @param buffer the output buffer
-   * @param bOff   the offset into the output buffer at which point the encoded data will be written from
-   * @return       the number of bytes written to buffer
-   */
-  private static short encodeECKeyCommon(ECKey k, byte[] buffer, short bOff){
-    // A
-    short lenA = k.getA(buffer, (short)(bOff+LENGTH_TAG));
-    bOff += lenA;
-    Util.setShort(buffer, (short)(bOff-lenA), lenA);
-    bOff += LENGTH_TAG;
-
-    // B
-    short lenB = k.getB(buffer, (short)(bOff+LENGTH_TAG));
-    bOff += lenB;
-    Util.setShort(buffer, (short)(bOff-lenB), lenB);
-    bOff += LENGTH_TAG;
-
-    // G
-    short lenG = k.getG(buffer, (short)(bOff+LENGTH_TAG));
-    bOff += lenG;
-    Util.setShort(buffer, (short)(bOff-lenG), lenG);
-    bOff += LENGTH_TAG;
-
-    // R
-    short lenR = k.getR(buffer, (short)(bOff+LENGTH_TAG));
-    bOff += lenR;
-    Util.setShort(buffer, (short)(bOff-lenR), lenR);
-    bOff += LENGTH_TAG;
-
-    // Field
-    short lenField = k.getField(buffer, (short)(bOff+LENGTH_TAG));
-    bOff += lenField;
-    Util.setShort(buffer, (short)(bOff-lenField), lenField);
-    bOff += LENGTH_TAG;
-
-    return (short)(lenA+lenB+lenG+lenR+lenField+(LENGTH_TAG*(NUM_PARAMS-1)));
-  }
-
-  /**
    * Encodes the ECPublicKey as a byte array. The format of the array is as follows:
    * <p>
    * The fields appear in the following order: W, A, B, G, R, Field. Each field
@@ -67,14 +24,10 @@ public class Utils {
    */
   public static short encodeECPublicKey(ECPublicKey pk, byte[] buffer, short bOff) {
     // W
-    short lenW = pk.getW(buffer, (short)(bOff+LENGTH_TAG));
-    bOff += lenW;
-    Util.setShort(buffer, (short)(bOff-lenW), lenW);
-    bOff += LENGTH_TAG;
+    short lenW = pk.getW(buffer, (short)2);
+    Util.setShort(buffer, (short)0, lenW);
 
-    short lenCommonEncodedParams = encodeECKeyCommon(pk, buffer, bOff);
-
-    return (short)(lenW+LENGTH_TAG+lenCommonEncodedParams);
+    return (short)(lenW+LENGTH_TAG);
   }
 
   /**
@@ -91,14 +44,10 @@ public class Utils {
    */
   public static short encodeECPrivateKey(ECPrivateKey pk, byte[] buffer, short bOff) {
     // S
-    short lenS = pk.getS(buffer, (short)(bOff+LENGTH_TAG));
-    bOff += lenS;
-    Util.setShort(buffer, (short)(bOff-lenS), lenS);
-    bOff += LENGTH_TAG;
+    short lenS = pk.getS(buffer, (short)2);
+    Util.setShort(buffer, (short)0, lenS);
 
-    short lenCommonEncodedParams = encodeECKeyCommon(pk, buffer, bOff);
-
-    return (short)(lenS+LENGTH_TAG+lenCommonEncodedParams);
+    return (short)(lenS+LENGTH_TAG);
   }
 
   /**

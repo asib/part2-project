@@ -20,7 +20,7 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
   public final static byte STORE_SIGNATURE = (byte)0x02;   // INS byte for storing the terminal's signature.
   public final static byte CHECK_STORED_DATA = (byte)0x03; // INS byte for checking data was stored correctly after STORE_SIGNATURE instruction.
   public final static byte TERMINAL_KEY_TYPE = KeyBuilder.TYPE_EC_FP_PUBLIC;
-  public final static short TERMINAL_KEY_LENGTH = KeyBuilder.LENGTH_EC_FP_128;
+  public final static short TERMINAL_KEY_LENGTH = KeyBuilder.LENGTH_EC_FP_192;
   /*
    * When we transmit EC keys, we have to transmit a byte array of parameters.
    * Since each parameter may not necessarily be of fixed length (e.g. if we change
@@ -35,7 +35,7 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
   public final static short KEY_NUM_PARAMS = (short)6;
   public final static byte KEY_PAIR_ALGORITHM = KeyPair.ALG_EC_FP;
   public final static byte CARD_PUBLIC_KEY_TYPE = KeyBuilder.TYPE_EC_FP_PUBLIC;
-  public final static short KEY_LENGTH = KeyBuilder.LENGTH_EC_FP_128;
+  public final static short KEY_LENGTH = KeyBuilder.LENGTH_EC_FP_192;
   public final static short SIGNATURE_LENGTH = (short)20; // ALG_ECDSA_SHA produces 20 byte signature.
   // Expiry is stored in Unix time (an unsigned 32 bit integer, representing number
   // of seconds after 00:00:00 01/01/1970.
@@ -98,13 +98,15 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
 
     // Generate card key pair.
     cardKeyPair = new KeyPair(KEY_PAIR_ALGORITHM, KEY_LENGTH);
+    //Prime192v1.setKeyPairParameters(cardKeyPair);
     cardKeyPair.genKeyPair();
 
-    apdu.setOutgoingLength((short)(KEY_LENGTH+(KEY_PARAM_LENGTH_TAG*KEY_NUM_PARAMS)));
-
+    apdu.setOutgoingLength(KEY_LENGTH);
     // Fill APDU buffer with public key.
-    Utils.encodeECPublicKey((ECPublicKey)cardKeyPair.getPublic(), buffer, (short)0);
+    short dataLen = Utils.encodeECPublicKey((ECPublicKey)cardKeyPair.getPublic(),
+        buffer, (short)0);
 
+    //apdu.setOutgoingAndSend((short)0, dataLen);
     apdu.sendBytes((short)0, KEY_LENGTH);
   }
 

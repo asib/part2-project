@@ -15,6 +15,7 @@ import javacard.security.ECPrivateKey;
 import javacard.security.KeyBuilder;
 import javacard.security.KeyPair;
 import javacard.security.Signature;
+import javacard.framework.Util;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.DecoderException;
 import org.bitbucket.jfent.opacity_fs_impl.Utils;
@@ -46,10 +47,10 @@ public class CardTerminal {
     System.out.println("    Provision a smart card with the provided CRSID, group ID and certificate expiry.");
     System.out.println();
     System.out.println("  list");
-    System.out.println("    List the details stored on the smart card, i.e. CRSID, group ID, certificate expiry");
+    System.out.println("    List the details stored on the smart card, i.e. CRSID, group ID, certificate expiry.");
     System.out.println();
     System.out.println("  genkeypair");
-    System.out.println("    Generate a key pair that the terminal will use when signing card keys");
+    System.out.println("    Generate a key pair that the terminal will use when signing card keys.");
     System.out.println();
   }
 
@@ -140,6 +141,15 @@ public class CardTerminal {
       System.out.println(e.getMessage());
     }
 
+    // Now generate the key pair.
+    KeyPair kp = new KeyPair(KEY_PAIR_ALGORITHM, TERMINAL_KEY_LENGTH);
+    kp.genKeyPair();
+
+    // Now set key parameters
+    Utils.decodeECPublicKey((ECPublicKey)kp.getPublic(), pubBytes, (short)0);
+    Utils.decodeECPrivateKey((ECPrivateKey)kp.getPrivate(), privBytes, (short)0);
+
+    return kp;
   }
 
   private static void sign(byte[] data) {
@@ -186,6 +196,70 @@ public class CardTerminal {
   }
 
   private static void list() {
+    CardTerminalAPI api = null;
+    try {
+      api = new CardTerminalAPI();
+      api.selectAuthenticationApplet();
+
+      byte[] cardPublicKeyBytes = api.sendGenerateKeyPairCommand();
+      byte[] tmp;
+      short bOff = 0;
+
+      // W
+      short lenW = Util.getShort(cardPublicKeyBytes, bOff);
+      bOff += (short)2;
+      tmp = new byte[lenW];
+      System.arraycopy(cardPublicKeyBytes, bOff, tmp, 0, lenW);
+      System.out.println("W: " + Hex.encodeHexString(tmp));
+      bOff += lenW;
+
+      // A
+      short lenA = Util.getShort(cardPublicKeyBytes, bOff);
+      bOff += (short)2;
+      tmp = new byte[lenA];
+      System.arraycopy(cardPublicKeyBytes, bOff, tmp, 0, lenA);
+      System.out.println("A: " + Hex.encodeHexString(tmp));
+      bOff += lenA;
+
+      // B
+      short lenB = Util.getShort(cardPublicKeyBytes, bOff);
+      bOff += (short)2;
+      tmp = new byte[lenB];
+      System.arraycopy(cardPublicKeyBytes, bOff, tmp, 0, lenB);
+      System.out.println("B: " + Hex.encodeHexString(tmp));
+      bOff += lenB;
+
+      // G
+      short lenG = Util.getShort(cardPublicKeyBytes, bOff);
+      bOff += (short)2;
+      tmp = new byte[lenG];
+      System.arraycopy(cardPublicKeyBytes, bOff, tmp, 0, lenG);
+      System.out.println("G: " + Hex.encodeHexString(tmp));
+      bOff += lenG;
+
+      // R
+      short lenR = Util.getShort(cardPublicKeyBytes, bOff);
+      bOff += (short)2;
+      tmp = new byte[lenR];
+      System.arraycopy(cardPublicKeyBytes, bOff, tmp, 0, lenR);
+      System.out.println("R: " + Hex.encodeHexString(tmp));
+      bOff += lenR;
+
+      // Field
+      short lenField = Util.getShort(cardPublicKeyBytes, bOff);
+      bOff += (short)2;
+      tmp = new byte[lenField];
+      System.arraycopy(cardPublicKeyBytes, bOff, tmp, 0, lenField);
+      System.out.println("F: " + Hex.encodeHexString(tmp));
+    } catch (CardException e) {
+      System.out.println("Error during communication with card:");
+      System.out.println(e.getMessage());
+      System.exit(0);
+    } catch (CardCommunicationException e) {
+      System.out.println(e.getMessage());
+    } finally {
+      api.close();
+    }
   }
 
   private static byte[] convertCRSID(String crsID) {

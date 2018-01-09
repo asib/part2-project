@@ -1,1 +1,1 @@
-./cmp.sh && ./run.sh
+./cmp.sh && ./run.sh $@
