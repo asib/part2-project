@@ -13,6 +13,7 @@ import javacard.security.KeyPair;
 import javacard.security.CryptoException;
 import javacard.framework.CardRuntimeException;
 import javacard.framework.CardException;
+import javacard.framework.SystemException;
 
 public class OpacityForwardSecrecyImplementationApplet extends Applet {
   /*
@@ -118,10 +119,12 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
 
   private void processStoreSignature(APDU apdu) {
     byte[] buffer = apdu.getBuffer();
+    short bOff = ISO7816.OFFSET_CDATA;
 
     // The first 56 bytes is the signature.
-    Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, cardSignature, (short)0,
+    Util.arrayCopyNonAtomic(buffer, bOff, cardSignature, (short)0,
         SIGNATURE_LENGTH);
+    bOff += SIGNATURE_LENGTH;
 
     // The next group of bytes are the terminal's public key parameters.
     // First, create key object.
@@ -130,16 +133,7 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
     Prime192v1.setKeyParameters((ECKey)terminalPublicKey);
 
     // Now initialize the parameters.
-    short bytesRead;
-    try {
-      bytesRead = Utils.decodeECPublicKey(terminalPublicKey, buffer,
-          SIGNATURE_LENGTH);
-    } catch (CardRuntimeException e) {
-      ISOException.throwIt((short)1);
-    }
-
-    if(true)return;
-    short bOff = (short)(SIGNATURE_LENGTH+bytesRead);
+    bOff += Utils.decodeECPublicKey(terminalPublicKey, buffer, bOff);
     // The rest of the buffer contains the following length-encoded data (in this
     // order): CRSID, Group ID, Certificate Expiry (constant length - 4 bytes).
     // Group ID is the ID of the group that the student belongs to, i.e. some
@@ -173,7 +167,7 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
     apdu.setOutgoing();
 
     short dataLength = (short)(SIGNATURE_LENGTH +
-      UNCOMPRESSED_W_ENCODED_LENGTH + KEY_PARAM_LENGTH_TAG +
+      UNCOMPRESSED_W_ENCODED_LENGTH + KEY_PARAM_LENGTH_TAG + // terminal public key
       crsID.length + KEY_PARAM_LENGTH_TAG +
       groupID.length + KEY_PARAM_LENGTH_TAG +
       CERTIFICATE_EXPIRY_LENGTH);
@@ -184,7 +178,7 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
         SIGNATURE_LENGTH);
 
     // Encode terminal's pubkey.
-    short bOff = 20;
+    short bOff = SIGNATURE_LENGTH;
     bOff += Utils.encodeECPublicKey(terminalPublicKey, buffer, bOff);
 
     // CRSID

@@ -4,6 +4,7 @@ import static org.bitbucket.jfent.opacity_fs_impl.OpacityForwardSecrecyImplement
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.nio.file.Path;
+import java.nio.ByteBuffer;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 import java.math.BigInteger;
 import java.security.Provider;
 import java.security.SecureRandom;
@@ -315,8 +317,21 @@ public class CardTerminal {
       cardStoredDataOS.write(certificateExpiry);
 
       byte[] cardStoredData = cardStoredDataOS.toByteArray();
-      System.out.println(Hex.encodeHexString(cardStoredData));
+
+      if (MODE_TEST) {
+        System.out.println(Hex.encodeHexString(signature));
+        System.out.println(Hex.encodeHexString(terminalPublicKey));
+      }
+
+      // Send data to card for storage.
       api.sendStoreSignatureCommand(cardStoredData);
+
+      // Now query the card to check data was stored correctly.
+      byte[] queriedStoredData = api.sendCheckStoredDataCommand();
+      if (!Arrays.equals(cardStoredData, queriedStoredData)) {
+        System.out.println("An error occured whilst attempting to provision the "
+            + "card, please try again.");
+      }
     } catch (CardException e) {
       System.out.println("Error during communication with card:");
       System.out.println(e.getMessage());
@@ -330,30 +345,59 @@ public class CardTerminal {
 
   private static void list() {
     CardTerminalAPI api = null;
+    byte[] storedData;
     try {
       api = new CardTerminalAPI();
       api.selectAuthenticationApplet();
-
-      byte[] cardPublicKeyBytes = api.sendGenerateKeyPairCommand();
-      byte[] tmp;
-      short bOff = 0;
-
-      // W
-      short lenW = Util.getShort(cardPublicKeyBytes, bOff);
-      bOff += (short)2;
-      tmp = new byte[lenW];
-      System.arraycopy(cardPublicKeyBytes, bOff, tmp, 0, lenW);
-      System.out.println("W: " + Hex.encodeHexString(tmp));
-      bOff += lenW;
+      storedData = api.sendCheckStoredDataCommand();
     } catch (CardException e) {
       System.out.println("Error during communication with card:");
       System.out.println(e.getMessage());
-      System.exit(0);
+      return;
     } catch (CardCommunicationException e) {
       System.out.println(e.getMessage());
+      return;
     } finally {
       api.close();
     }
+
+    int off = 0;
+
+    // Signature
+    byte[] sigBuff = new byte[SIGNATURE_LENGTH];
+    System.arraycopy(storedData, off, sigBuff, 0, SIGNATURE_LENGTH);
+    System.out.println("Signature: " + Hex.encodeHexString(sigBuff));
+
+    off += SIGNATURE_LENGTH;
+
+    // Terminal public key
+    short lenW = Util.getShort(storedData, (short)off);
+    off += 2;
+    byte[] termPub = new byte[lenW];
+    System.arraycopy(storedData, off, termPub, 0, lenW);
+    off += lenW;
+    System.out.println("Terminal Public Key: " + Hex.encodeHexString(termPub));
+
+    // CRSID
+    short lenCRSID = Util.getShort(storedData, (short)off);
+    off += 2;
+    byte[] crsID = new byte[lenCRSID];
+    System.arraycopy(storedData, off, crsID, 0, lenCRSID);
+    off += lenCRSID;
+    System.out.println("CRSID: " + Hex.encodeHexString(crsID));
+
+    // GroupID
+    short lenGroupID = Util.getShort(storedData, (short)off);
+    off += 2;
+    byte[] groupID = new byte[lenGroupID];
+    System.arraycopy(storedData, off, groupID, 0, lenGroupID);
+    off += lenGroupID;
+    System.out.println("Group ID: " + Hex.encodeHexString(groupID));
+
+    // Certificate expiry
+    byte[] expiry = new byte[CERTIFICATE_EXPIRY_LENGTH];
+    System.arraycopy(storedData, off, expiry, 0, CERTIFICATE_EXPIRY_LENGTH);
+    System.out.println("Certificate Expiry: " + Hex.encodeHexString(expiry));
   }
 
   private static byte[] convertCRSID(String crsID) {
@@ -416,6 +460,9 @@ public class CardTerminal {
         KeyPair kp = loadTerminalKeyPair();
         BCECPublicKey pubk = ((BCECPublicKey)kp.getPublic());
         System.out.println(Hex.encodeHexString(pubk.getQ().getEncoded(false)));
+        System.out.println(Hex.encodeHexString(pubk.getParameters().getCurve().getField().getCharacteristic().toByteArray()));
+        System.out.println(Hex.encodeHexString(pubk.getParameters().getCurve().getA().getEncoded()));
+        System.out.println(Hex.encodeHexString(pubk.getParameters().getCurve().getB().getEncoded()));
         System.out.println(Hex.encodeHexString(pubk.getParameters().getG().getEncoded(false)));
         System.out.println(Hex.encodeHexString(pubk.getParameters().getN().toByteArray()));
       } catch (Exception e) {
