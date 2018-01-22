@@ -12,6 +12,7 @@
             <pathelement path="./lib/commons-codec-1.11.jar"/>
             <pathelement path="./lib/api.jar"/>
             <pathelement path="./lib/opacity_fs_impl.jar"/>
+            <pathelement path="./lib/bcprov-ext-jdk15on-159.jar"/>
         </classpath>
     </javac>
 </target>
@@ -19,9 +20,10 @@
 <target name="jar">
     <mkdir dir="./build/jar"/>
     <jar destfile="./build/jar/card_terminal.jar" basedir="./build/classes">
-        <zipgroupfileset dir="./lib" includes="*.jar" />
+        <zipgroupfileset dir="./lib" excludes="bc*-jdk*.jar"/>
         <manifest>
           <attribute name="Main-Class" value="org.bitbucket.jfent.card_terminal.CardTerminal"/>
+          <attribute name="Class-Path" value="${user.dir}/lib/bcprov-ext-jdk15on-159.jar"/>
         </manifest>
     </jar>
 </target>

@@ -7,8 +7,12 @@ import javacard.framework.ISO7816;
 import javacard.framework.ISOException;
 import javacard.framework.JCSystem;
 import javacard.security.KeyBuilder;
+import javacard.security.ECKey;
 import javacard.security.ECPublicKey;
 import javacard.security.KeyPair;
+import javacard.security.CryptoException;
+import javacard.framework.CardRuntimeException;
+import javacard.framework.CardException;
 
 public class OpacityForwardSecrecyImplementationApplet extends Applet {
   /*
@@ -16,30 +20,33 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
    * Constants
    *
    */
-  public final static byte GENERATE_KEY_PAIR = (byte)0x01; // INS byte for generating key pair.
-  public final static byte STORE_SIGNATURE = (byte)0x02;   // INS byte for storing the terminal's signature.
-  public final static byte CHECK_STORED_DATA = (byte)0x03; // INS byte for checking data was stored correctly after STORE_SIGNATURE instruction.
-  public final static byte TERMINAL_KEY_TYPE = KeyBuilder.TYPE_EC_FP_PUBLIC;
-  public final static short TERMINAL_KEY_LENGTH = KeyBuilder.LENGTH_EC_FP_192;
+  public static final byte CLA_PROPRIETARY = (byte)0x80; // CLA byte for proprietary commands.
+  public static final byte GENERATE_KEY_PAIR = (byte)0x01; // INS byte for generating key pair.
+  public static final byte STORE_SIGNATURE = (byte)0x02;   // INS byte for storing the terminal's signature.
+  public static final byte CHECK_STORED_DATA = (byte)0x03; // INS byte for checking data was stored correctly after STORE_SIGNATURE instruction.
+  public static final byte TERMINAL_KEY_TYPE = KeyBuilder.TYPE_EC_FP_PUBLIC;
+  public static final short TERMINAL_KEY_LENGTH = KeyBuilder.LENGTH_EC_FP_192;
   /*
-   * When we transmit EC keys, we have to transmit a byte array of parameters.
-   * Since each parameter may not necessarily be of fixed length (e.g. if we change
+   * When we transmit EC keys, we have to transmit a byte array of containing a 
+   * parameter (W or S, depending on whether the key is public or private).
+   * Since the parameter may not necessarily be of fixed length (e.g. if we change
    * the key length), we need to allow for variable length parameters. Thus, each
-   * parameter is prefixed by a 2-byte length parameter.
+   * parameter is prefixed by a 2-byte length indicator.
    */
-  public final static short KEY_PARAM_LENGTH_TAG = (short)2;
-  /*
-   * In order to transmit an EC public key, we have to transmit 6 parameters:
-   * W, A, B, G, R, Field.
-   */
-  public final static short KEY_NUM_PARAMS = (short)6;
-  public final static byte KEY_PAIR_ALGORITHM = KeyPair.ALG_EC_FP;
-  public final static byte CARD_PUBLIC_KEY_TYPE = KeyBuilder.TYPE_EC_FP_PUBLIC;
-  public final static short KEY_LENGTH = KeyBuilder.LENGTH_EC_FP_192;
-  public final static short SIGNATURE_LENGTH = (short)20; // ALG_ECDSA_SHA produces 20 byte signature.
+  public static final short KEY_PARAM_LENGTH_TAG = (short)2;
+  public static final byte KEY_PAIR_ALGORITHM = KeyPair.ALG_EC_FP;
+  public static final byte CARD_PUBLIC_KEY_TYPE = KeyBuilder.TYPE_EC_FP_PUBLIC;
+  public static final short KEY_LENGTH = KeyBuilder.LENGTH_EC_FP_192;
+  public static final short SIGNATURE_LENGTH = (short)56; // ALG_ECDSA_SHA produces 56 byte signature.
   // Expiry is stored in Unix time (an unsigned 32 bit integer, representing number
   // of seconds after 00:00:00 01/01/1970.
-  public final static short CERTIFICATE_EXPIRY_LENGTH = (short)4;
+  public static final short CERTIFICATE_EXPIRY_LENGTH = (short)4;
+  // When we transmit a public key, we send just the W parameter, which we get
+  // by calling key.getW(). This returns W as a byte array, encoded according to
+  // ANSI X9.62 section 4.3.6 (briefly, the first byte is 0x04, signifying
+  // uncompressed encoding, followed by 24 bytes which encode W_x, and finally
+  // 24 bytes which encode W_y, for a total of 49 bytes).
+  public static final short UNCOMPRESSED_W_ENCODED_LENGTH = (short)49;
 
   /*
    *
@@ -90,30 +97,29 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
     byte[] buffer = apdu.getBuffer();
 
     // setOutgoing() will return L_e, the length of the expected response, and
-    // should equal KEY_LENGTH (as we send back our public key after generating
-    // a key pair).
+    // should equal UNCOMPRESSED_W_ENCODED_LENGTH+KEY_PARAM_LENGTH_TAG (as we
+    // send back our public key after generating a key pair).
     short expectedResponseLength = apdu.setOutgoing();
-    if (expectedResponseLength != KEY_LENGTH)
+    if (expectedResponseLength != UNCOMPRESSED_W_ENCODED_LENGTH+KEY_PARAM_LENGTH_TAG)
       ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 
     // Generate card key pair.
     cardKeyPair = new KeyPair(KEY_PAIR_ALGORITHM, KEY_LENGTH);
-    //Prime192v1.setKeyPairParameters(cardKeyPair);
+    Prime192v1.setKeyPairParameters(cardKeyPair);
     cardKeyPair.genKeyPair();
 
-    apdu.setOutgoingLength(KEY_LENGTH);
+    apdu.setOutgoingLength((short)(UNCOMPRESSED_W_ENCODED_LENGTH+KEY_PARAM_LENGTH_TAG));
     // Fill APDU buffer with public key.
     short dataLen = Utils.encodeECPublicKey((ECPublicKey)cardKeyPair.getPublic(),
         buffer, (short)0);
 
-    //apdu.setOutgoingAndSend((short)0, dataLen);
-    apdu.sendBytes((short)0, KEY_LENGTH);
+    apdu.sendBytes((short)0, (short)(UNCOMPRESSED_W_ENCODED_LENGTH+KEY_PARAM_LENGTH_TAG));
   }
 
   private void processStoreSignature(APDU apdu) {
     byte[] buffer = apdu.getBuffer();
 
-    // The first 20 bytes is the signature
+    // The first 56 bytes is the signature.
     Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, cardSignature, (short)0,
         SIGNATURE_LENGTH);
 
@@ -121,12 +127,18 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
     // First, create key object.
     terminalPublicKey = (ECPublicKey)KeyBuilder.buildKey(TERMINAL_KEY_TYPE,
         TERMINAL_KEY_LENGTH, false);
+    Prime192v1.setKeyParameters((ECKey)terminalPublicKey);
 
     // Now initialize the parameters.
-    short bytesRead = Utils.decodeECPublicKey(terminalPublicKey, buffer,
-        SIGNATURE_LENGTH);
+    short bytesRead;
+    try {
+      bytesRead = Utils.decodeECPublicKey(terminalPublicKey, buffer,
+          SIGNATURE_LENGTH);
+    } catch (CardRuntimeException e) {
+      ISOException.throwIt((short)1);
+    }
 
-
+    if(true)return;
     short bOff = (short)(SIGNATURE_LENGTH+bytesRead);
     // The rest of the buffer contains the following length-encoded data (in this
     // order): CRSID, Group ID, Certificate Expiry (constant length - 4 bytes).
@@ -161,9 +173,9 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
     apdu.setOutgoing();
 
     short dataLength = (short)(SIGNATURE_LENGTH +
-      TERMINAL_KEY_LENGTH + (KEY_PARAM_LENGTH_TAG*KEY_NUM_PARAMS) +
-      crsID.length +
-      groupID.length +
+      UNCOMPRESSED_W_ENCODED_LENGTH + KEY_PARAM_LENGTH_TAG +
+      crsID.length + KEY_PARAM_LENGTH_TAG +
+      groupID.length + KEY_PARAM_LENGTH_TAG +
       CERTIFICATE_EXPIRY_LENGTH);
     apdu.setOutgoingLength(dataLength);
 

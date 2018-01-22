@@ -13,11 +13,14 @@ import static org.bitbucket.jfent.opacity_fs_impl.OpacityForwardSecrecyImplement
 
 public class CardTerminalAPI {
   public enum Command {
-    SELECT, GENERATE_KEY_PAIR
+    SELECT, GENERATE_KEY_PAIR, STORE_SIGNATURE, CHECK_STORED_DATA
   }
 
   private static final byte[] AUTHENTICATION_APPLET_AID = {(byte)0xf2, (byte)0x34,
     (byte)0x12, (byte)0x34, (byte)0x56, (byte)0x10, (byte)0x10, (byte)0x00};
+
+  private static final int MAX_EXPECTED_CRSID_LENGTH = 0xf; // total guess
+  private static final int MAX_EXPECTED_GROUPID_LENGTH = 0xf; // total guess
 
   private Card card;
   private CardChannel channel;
@@ -56,7 +59,8 @@ public class CardTerminalAPI {
    */
   public void selectAuthenticationApplet() throws CardException,
          CardCommunicationException {
-    ResponseAPDU resp = channel.transmit(new CommandAPDU(0x00, 0xa4, 0x04, 0x00,
+    ResponseAPDU resp = channel.transmit(new CommandAPDU(ISO7816.CLA_ISO7816,
+          ISO7816.INS_SELECT, 0x04, 0x00,
           AUTHENTICATION_APPLET_AID));
 
     short sw = (short)resp.getSW();
@@ -66,8 +70,9 @@ public class CardTerminalAPI {
 
   public byte[] sendGenerateKeyPairCommand() throws CardException,
          CardCommunicationException {
-    ResponseAPDU resp = channel.transmit(new CommandAPDU(0x80, GENERATE_KEY_PAIR,
-          0x00, 0x00, KEY_LENGTH));
+    ResponseAPDU resp = channel.transmit(new CommandAPDU(CLA_PROPRIETARY,
+          GENERATE_KEY_PAIR, 0x00, 0x00,
+          UNCOMPRESSED_W_ENCODED_LENGTH+KEY_PARAM_LENGTH_TAG));
 
     short sw = (short)resp.getSW();
     if (sw != ISO7816.SW_NO_ERROR)
@@ -75,6 +80,32 @@ public class CardTerminalAPI {
 
     // If all went well, return the public key to be signed by the card terminal
     // application.
+    return resp.getData();
+  }
+
+  public void sendStoreSignatureCommand(byte[] data) throws CardException,
+         CardCommunicationException {
+    ResponseAPDU resp = channel.transmit(new CommandAPDU(CLA_PROPRIETARY,
+          STORE_SIGNATURE, 0x00, 0x00, data));
+
+    short sw = (short)resp.getSW();
+    if (sw != ISO7816.SW_NO_ERROR)
+      throw new CardCommunicationException(sw, Command.STORE_SIGNATURE);
+  }
+
+  public byte[] sendCheckStoredDataCommand() throws CardException,
+         CardCommunicationException {
+    ResponseAPDU resp = channel.transmit(new CommandAPDU(CLA_PROPRIETARY,
+          CHECK_STORED_DATA, 0x00, 0x00, SIGNATURE_LENGTH
+          +UNCOMPRESSED_W_ENCODED_LENGTH+KEY_PARAM_LENGTH_TAG
+          +MAX_EXPECTED_CRSID_LENGTH+KEY_PARAM_LENGTH_TAG
+          +MAX_EXPECTED_GROUPID_LENGTH+KEY_PARAM_LENGTH_TAG
+          +CERTIFICATE_EXPIRY_LENGTH));
+
+    short sw = (short)resp.getSW();
+    if (sw != ISO7816.SW_NO_ERROR)
+      throw new CardCommunicationException(sw, Command.CHECK_STORED_DATA);
+
     return resp.getData();
   }
 }
