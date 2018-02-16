@@ -1,1 +1,1 @@
-ant compile && ant jar && cp ./build/jar/opacity_fs_impl.jar ../card_terminal/lib/opacity_fs_impl.jar
+ant compile && ant jar && cp ./build/jar/opacity_fs_impl.jar ../card_terminal/lib/opacity_fs_impl.jar && cp ./build/jar/opacity_fs_impl.jar ../card_terminal_api/lib/opacity_fs_impl.jar && cp ./build/jar/opacity_fs_impl.jar ../door_opacity_fs_impl/lib/opacity_fs_impl.jar

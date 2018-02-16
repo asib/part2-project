@@ -1,4 +1,4 @@
-package org.bitbucket.jfent.card_terminal;
+package org.bitbucket.jfent.card_terminal_api;
 
 import javax.smartcardio.TerminalFactory;
 import javax.smartcardio.CardTerminals;
@@ -13,7 +13,7 @@ import static org.bitbucket.jfent.opacity_fs_impl.OpacityForwardSecrecyImplement
 
 public class CardTerminalAPI {
   public enum Command {
-    SELECT, GENERATE_KEY_PAIR, STORE_SIGNATURE, CHECK_STORED_DATA
+    SELECT, GENERATE_KEY_PAIR, STORE_SIGNATURE, CHECK_STORED_DATA, INITIATE_AUTH
   }
 
   private static final byte[] AUTHENTICATION_APPLET_AID = {(byte)0xf2, (byte)0x34,
@@ -105,6 +105,32 @@ public class CardTerminalAPI {
     short sw = (short)resp.getSW();
     if (sw != ISO7816.SW_NO_ERROR)
       throw new CardCommunicationException(sw, Command.CHECK_STORED_DATA);
+
+    return resp.getData();
+  }
+
+  public byte[] sendInitiateAuthenticationCommand(byte[] data) throws CardException,
+         CardCommunicationException {
+    // Response will contain:
+    //  - card ephemeral public key
+    //  - AES-encrypted card public key + signature
+    //
+    //  The length of the AES-encrypted chunk will be a multiple of the block
+    //  size, according to the following calculation:
+    final int EXPECTED_UNENCRYPTED_CHUNK_LENGTH = SIGNATURE_LENGTH
+      +UNCOMPRESSED_W_ENCODED_LENGTH+KEY_PARAM_LENGTH_TAG;
+    final int EXPECTED_ENCRYPTED_CHUNK_LENGTH = EXPECTED_UNENCRYPTED_CHUNK_LENGTH
+      +(AES_BLOCK_SIZE-(EXPECTED_UNENCRYPTED_CHUNK_LENGTH % AES_BLOCK_SIZE));
+    final int EXPECTED_INITIATE_AUTH_RESPONSE_LENGTH =
+       UNCOMPRESSED_W_ENCODED_LENGTH+KEY_PARAM_LENGTH_TAG
+      +EXPECTED_ENCRYPTED_CHUNK_LENGTH;
+
+    ResponseAPDU resp = channel.transmit(new CommandAPDU(CLA_PROPRIETARY,
+          INITIATE_AUTH, 0x00, 0x00, data, EXPECTED_INITIATE_AUTH_RESPONSE_LENGTH));
+
+    short sw = (short)resp.getSW();
+    if (sw != ISO7816.SW_NO_ERROR)
+      throw new CardCommunicationException(sw, Command.INITIATE_AUTH);
 
     return resp.getData();
   }

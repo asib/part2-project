@@ -4,6 +4,7 @@ import static org.bitbucket.jfent.opacity_fs_impl.OpacityForwardSecrecyImplement
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.nio.file.Path;
+import java.nio.file.Files;
 import java.nio.ByteBuffer;
 import java.io.IOException;
 import java.io.File;
@@ -33,6 +34,8 @@ import javacard.framework.Util;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.DecoderException;
 import org.bitbucket.jfent.opacity_fs_impl.Utils;
+import org.bitbucket.jfent.card_terminal_api.CardTerminalAPI;
+import org.bitbucket.jfent.card_terminal_api.CardCommunicationException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECParameterSpec;
@@ -49,6 +52,7 @@ public class CardTerminal {
   private static final String TERMINAL_PUBLIC_KEY_FILENAME = "ecdsa_pub";
   private static final String PROVISION_COMMAND = "provision";
   private static final String LIST_COMMAND = "list";
+  private static final String SIGN_COMMAND = "sign";
   private static final String GENERATE_TERMINAL_KEY_PAIR_COMMAND = "genkeypair";
   private static final String CURVE_NAME = "prime192v1";
   private static final String KEY_GENERATION_ALGORITHM = "ECDSA";
@@ -82,6 +86,9 @@ public class CardTerminal {
     System.out.println();
     System.out.println("  genkeypair");
     System.out.println("    Generate a key pair that the terminal will use when signing card keys.");
+    System.out.println();
+    System.out.println("  sign <infile> <outfile>");
+    System.out.println("    Sign the bytes in <infile> and write the signature to <outfile>.");
     System.out.println();
   }
 
@@ -400,6 +407,22 @@ public class CardTerminal {
     System.out.println("Certificate Expiry: " + Hex.encodeHexString(expiry));
   }
 
+  private static void signFile(String inPath, String outPath) throws IOException,
+          NoKeyPairException, NoSuchAlgorithmException, InvalidKeySpecException,
+          SignatureException, InvalidKeyException {
+    Path inFile = Paths.get(inPath).toAbsolutePath().normalize();
+    Path outFile = Paths.get(outPath).toAbsolutePath().normalize();
+
+    byte[] dataToBeSigned = Files.readAllBytes(inFile);
+
+    KeyPair kp = loadTerminalKeyPair();
+    if (kp == null)
+      throw new NoKeyPairException();
+    byte[] signature = sign(kp, dataToBeSigned);
+
+    Files.write(outFile, signature);
+  }
+
   private static byte[] convertCRSID(String crsID) {
     return crsID.getBytes(StandardCharsets.UTF_8);
   }
@@ -455,18 +478,16 @@ public class CardTerminal {
     } else if (args[0].equals(GENERATE_TERMINAL_KEY_PAIR_COMMAND)) {
       // Use default paths, which are "<WD>/ecdsa" and "<WD>/ecdsa_pub".
       genTerminalKeyPair();
-    } else if (args[0].equals("pub")) {
+    } else if (args[0].equals(SIGN_COMMAND)) {
+      if (args.length != 3) {
+        printHelp();
+        return;
+      }
+
       try {
-        KeyPair kp = loadTerminalKeyPair();
-        BCECPublicKey pubk = ((BCECPublicKey)kp.getPublic());
-        System.out.println(Hex.encodeHexString(pubk.getQ().getEncoded(false)));
-        System.out.println(Hex.encodeHexString(pubk.getParameters().getCurve().getField().getCharacteristic().toByteArray()));
-        System.out.println(Hex.encodeHexString(pubk.getParameters().getCurve().getA().getEncoded()));
-        System.out.println(Hex.encodeHexString(pubk.getParameters().getCurve().getB().getEncoded()));
-        System.out.println(Hex.encodeHexString(pubk.getParameters().getG().getEncoded(false)));
-        System.out.println(Hex.encodeHexString(pubk.getParameters().getN().toByteArray()));
+        signFile(args[1], args[2]);
       } catch (Exception e) {
-        System.out.println(e.getMessage());
+        e.printStackTrace();
       }
     } else {
       printHelp();

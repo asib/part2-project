@@ -10,10 +10,12 @@ import javacard.security.KeyBuilder;
 import javacard.security.ECKey;
 import javacard.security.ECPublicKey;
 import javacard.security.KeyPair;
+import javacard.security.Signature;
 import javacard.security.CryptoException;
 import javacard.framework.CardRuntimeException;
 import javacard.framework.CardException;
 import javacard.framework.SystemException;
+import javacardx.crypto.Cipher;
 
 public class OpacityForwardSecrecyImplementationApplet extends Applet {
   /*
@@ -25,8 +27,11 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
   public static final byte GENERATE_KEY_PAIR = (byte)0x01; // INS byte for generating key pair.
   public static final byte STORE_SIGNATURE = (byte)0x02;   // INS byte for storing the terminal's signature.
   public static final byte CHECK_STORED_DATA = (byte)0x03; // INS byte for checking data was stored correctly after STORE_SIGNATURE instruction.
+  public static final byte INITIATE_AUTH = (byte)0x04; // INS byte for initiating the authentication protocol.
   public static final byte TERMINAL_KEY_TYPE = KeyBuilder.TYPE_EC_FP_PUBLIC;
   public static final short TERMINAL_KEY_LENGTH = KeyBuilder.LENGTH_EC_FP_192;
+  public static final byte DOOR_KEY_TYPE = KeyBuilder.TYPE_EC_FP_PUBLIC;
+  public static final short DOOR_KEY_LENGTH = KeyBuilder.LENGTH_EC_FP_192;
   /*
    * When we transmit EC keys, we have to transmit a byte array of containing a 
    * parameter (W or S, depending on whether the key is public or private).
@@ -48,6 +53,11 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
   // uncompressed encoding, followed by 24 bytes which encode W_x, and finally
   // 24 bytes which encode W_y, for a total of 49 bytes).
   public static final short UNCOMPRESSED_W_ENCODED_LENGTH = (short)49;
+  // As per the OPACITY-FS protocol, we need to define our AES block cipher
+  // parameters.
+  // 0x80 is 128 bits.
+  public static final short AES_BLOCK_SIZE = (short)0x80;
+  public static final byte AES_BLOCK_CIPHER = Cipher.ALG_AES_BLOCK_128_CBC_NOPAD;
 
   /*
    *
@@ -89,6 +99,9 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
           break;
         case CHECK_STORED_DATA:
           processCheckStoredData(apdu);
+          break;
+        case INITIATE_AUTH:
+          processInitiateAuthentication(apdu);
           break;
       }
     }
@@ -198,5 +211,54 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
         CERTIFICATE_EXPIRY_LENGTH);
 
     apdu.sendBytes((short)0, dataLength);
+  }
+
+  private void processInitiateAuthentication(APDU apdu) {
+    // Buffer will contain:
+    //  - signature of door's pub key
+    //  - door's permanent pub key
+    //  - door's ephemeral pub key
+    byte[] buffer = apdu.getBuffer();
+    short bOff = ISO7816.OFFSET_CDATA + SIGNATURE_LENGTH;
+
+    // Next is the door's permanent public key
+    ECPublicKey doorPermanentPublicKey = (ECPublicKey)KeyBuilder.buildKey(
+        DOOR_KEY_TYPE, DOOR_KEY_LENGTH, false);
+    Prime192v1.setKeyParameters((ECKey)doorPermanentPublicKey);
+
+    // Now initialize the parameters.
+    bOff += Utils.decodeECPublicKey(doorPermanentPublicKey, buffer, bOff);
+
+    // Finally, the door's ephemeral public key
+    ECPublicKey doorEphemeralPublicKey = (ECPublicKey)KeyBuilder.buildKey(
+        DOOR_KEY_TYPE, DOOR_KEY_LENGTH, false);
+    Prime192v1.setKeyParameters((ECKey)doorEphemeralPublicKey);
+
+    // Now initialize the parameters.
+    Utils.decodeECPublicKey(doorEphemeralPublicKey, buffer, bOff);
+
+    /*
+     * First major step is to verify the door's permanent public key/signature.
+     */
+
+    // Initialize the signature object.
+    // TODO: Could potentially make this an instance variable an initialize it
+    // during install if authentication time is an issue.
+    Signature verifyDoorKey = Signature.getInstance(Signature.ALG_ECDSA_SHA, false);
+    verifyDoorKey.init(terminalPublicKey, Signature.MODE_VERIFY);
+
+    // Get the encoding of the door's permanent public key.
+    byte[] signatureData = new byte[UNCOMPRESSED_W_ENCODED_LENGTH];
+    doorPermanentPublicKey.getW(signatureData, (short)0);
+
+    // Rather than copy the door signature into a new byte array, we just get it
+    // directly from the buffer - avoids wasting memory.
+    boolean verified = verifyDoorKey.verify(signatureData, (short)0,
+        (short)signatureData.length, buffer, ISO7816.OFFSET_CDATA,
+        SIGNATURE_LENGTH);
+
+    if (!verified) {
+      ISOException.throwIt((short)0xf);
+    }
   }
 }

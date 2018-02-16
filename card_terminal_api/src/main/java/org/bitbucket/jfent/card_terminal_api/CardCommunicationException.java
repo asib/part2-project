@@ -1,4 +1,4 @@
-package org.bitbucket.jfent.card_terminal;
+package org.bitbucket.jfent.card_terminal_api;
 
 public class CardCommunicationException extends Exception {
   public CardCommunicationException(int sw, CardTerminalAPI.Command c) {
