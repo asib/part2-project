@@ -7,10 +7,13 @@ import javacard.framework.ISO7816;
 import javacard.framework.ISOException;
 import javacard.framework.JCSystem;
 import javacard.security.KeyBuilder;
+import javacard.security.AESKey;
 import javacard.security.ECKey;
 import javacard.security.ECPublicKey;
 import javacard.security.KeyPair;
 import javacard.security.Signature;
+import javacard.security.KeyAgreement;
+import javacard.security.MessageDigest;
 import javacard.security.CryptoException;
 import javacard.framework.CardRuntimeException;
 import javacard.framework.CardException;
@@ -27,13 +30,15 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
   public static final byte GENERATE_KEY_PAIR = (byte)0x01; // INS byte for generating key pair.
   public static final byte STORE_SIGNATURE = (byte)0x02;   // INS byte for storing the terminal's signature.
   public static final byte CHECK_STORED_DATA = (byte)0x03; // INS byte for checking data was stored correctly after STORE_SIGNATURE instruction.
+  public static final byte BASIC_AUTH = (byte)0x05; // INS byte for basic auth protocol. See details of protocol in documentation for method processBasicAuth().
   public static final byte INITIATE_AUTH = (byte)0x04; // INS byte for initiating the authentication protocol.
   public static final byte TERMINAL_KEY_TYPE = KeyBuilder.TYPE_EC_FP_PUBLIC;
   public static final short TERMINAL_KEY_LENGTH = KeyBuilder.LENGTH_EC_FP_192;
   public static final byte DOOR_KEY_TYPE = KeyBuilder.TYPE_EC_FP_PUBLIC;
   public static final short DOOR_KEY_LENGTH = KeyBuilder.LENGTH_EC_FP_192;
+  public static final byte AUTHENTICATION_DENIED = (byte)0xff;
   /*
-   * When we transmit EC keys, we have to transmit a byte array of containing a 
+   * When we transmit EC keys, we have to transmit a byte array of containing a
    * parameter (W or S, depending on whether the key is public or private).
    * Since the parameter may not necessarily be of fixed length (e.g. if we change
    * the key length), we need to allow for variable length parameters. Thus, each
@@ -55,9 +60,22 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
   public static final short UNCOMPRESSED_W_ENCODED_LENGTH = (short)49;
   // As per the OPACITY-FS protocol, we need to define our AES block cipher
   // parameters.
-  // 0x80 is 128 bits.
-  public static final short AES_BLOCK_SIZE = (short)0x80;
+  // 0x10 is 16 bytes, or 128 bits.
+  public static final short AES_BLOCK_SIZE = (short)0x10;
   public static final byte AES_BLOCK_CIPHER = Cipher.ALG_AES_BLOCK_128_CBC_NOPAD;
+  public static final byte AES_KEY_TYPE = KeyBuilder.TYPE_AES_TRANSIENT_DESELECT;
+  public static final short AES_KEY_SIZE = KeyBuilder.LENGTH_AES_128;
+  public static final byte ECDH_ALGORITHM = KeyAgreement.ALG_EC_SVDP_DH;
+  public static final byte SIGNATURE_ALGORITHM = Signature.ALG_ECDSA_SHA;
+  // The output of KeyAgreement.generateSecret() is always 20 bytes, since it's
+  // a SHA-1 hash.
+  public static final short ECDH_SECRET_LENGTH = (short)20;
+
+  public static final byte KDF_HASH_ALGORITHM = MessageDigest.ALG_MD5;
+  // MD5 block size is 512 bits, a.k.a. 64 bytes.
+  public static final short KDF_HASH_BLOCK_SIZE = (short)64;
+  // MD5 digest (output) size is 128 bits, a.k.a. 16 bytes.
+  public static final short KDF_HASH_OUTPUT_SIZE = MessageDigest.LENGTH_MD5;
 
   /*
    *
@@ -72,12 +90,46 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
   private byte[] crsID;
   private final byte[] certificateExpiry;
 
+  // Used by KDF function named deriveKey().
+  private MessageDigest hashDigest;
+
+  // Used for signing nonces/verifying certificates.
+  private Signature ecdsaSignature;
+
+  // We define (and allocate/initialize, in constructor) these variables (which
+  // are used during the OPACITY-FS protocol) early, to reduce authetication time.
+  private ECPublicKey doorPermanentPublicKey;
+  private ECPublicKey doorEphemeralPublicKey;
+  private KeyPair cardEphemeralKeyPair;
+  private KeyAgreement ecDiffieHellman;
+  private AESKey certificateEncryptionKey;
+  private Cipher aesCipher;
+  private byte[] certificateData;
+  private byte[] encryptedCertificate;
+
   private OpacityForwardSecrecyImplementationApplet() {
     terminalPublicKey = null;
     cardKeyPair = null;
     // This needs to be persistently stored.
     cardSignature = new byte[SIGNATURE_LENGTH];
     certificateExpiry = new byte[CERTIFICATE_EXPIRY_LENGTH];
+
+    hashDigest = MessageDigest.getInstance(KDF_HASH_ALGORITHM, false);
+
+    ecdsaSignature = Signature.getInstance(SIGNATURE_ALGORITHM, false);
+
+    doorPermanentPublicKey = (ECPublicKey)KeyBuilder.buildKey(DOOR_KEY_TYPE,
+        DOOR_KEY_LENGTH, false);
+    Prime192v1.setKeyParameters((ECKey)doorPermanentPublicKey);
+    doorEphemeralPublicKey = (ECPublicKey)KeyBuilder.buildKey(DOOR_KEY_TYPE,
+        DOOR_KEY_LENGTH, false);
+    Prime192v1.setKeyParameters((ECKey)doorEphemeralPublicKey);
+    cardEphemeralKeyPair = new KeyPair(KEY_PAIR_ALGORITHM, KEY_LENGTH);
+    Prime192v1.setKeyPairParameters(cardEphemeralKeyPair);
+    ecDiffieHellman = KeyAgreement.getInstance(ECDH_ALGORITHM, false);
+    certificateEncryptionKey = (AESKey)KeyBuilder.buildKey(AES_KEY_TYPE,
+        AES_KEY_SIZE, false);
+    aesCipher = Cipher.getInstance(AES_BLOCK_CIPHER, false);
 
     register();
   }
@@ -99,6 +151,9 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
           break;
         case CHECK_STORED_DATA:
           processCheckStoredData(apdu);
+          break;
+        case BASIC_AUTH:
+          processBasicAuth(apdu);
           break;
         case INITIATE_AUTH:
           processInitiateAuthentication(apdu);
@@ -169,6 +224,60 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
     // Certificate Expiry
     Util.arrayCopyNonAtomic(buffer, bOff, certificateExpiry, (short)0,
         CERTIFICATE_EXPIRY_LENGTH);
+
+    // We create this array early to speed up OPACITY-FS protocol execution time.
+    // This is the certificate data that will be encrypted to produce what the
+    // OPACITY spec calls OpaqueData_{ICC}.
+    // The length of this array needs to be a multiple of the cipher block size.
+    // Padding is just zeros (set implicitly when the array is initialized in
+    // memory), since we know the length of the plaintext, so no need to encode
+    // length of pad.
+    // Will include:
+    //  - card signature
+    //  - card public key
+    //  - CRSID
+    //  - group ID
+    //  - certificate expiry
+    short certDataLen = (short)(SIGNATURE_LENGTH
+      +UNCOMPRESSED_W_ENCODED_LENGTH+KEY_PARAM_LENGTH_TAG
+      +crsID.length+KEY_PARAM_LENGTH_TAG
+      +groupID.length+KEY_PARAM_LENGTH_TAG
+      +CERTIFICATE_EXPIRY_LENGTH);
+    certificateData = new byte[(short)(certDataLen+(AES_BLOCK_SIZE-(certDataLen
+            % AES_BLOCK_SIZE)))];
+    // Initialize the array to hold the encrypted certificate here as well.
+    encryptedCertificate = new byte[(short)(certDataLen+(AES_BLOCK_SIZE-(certDataLen
+            % AES_BLOCK_SIZE)))];
+
+    // Reset bOff.
+    bOff = 0;
+
+    // Card signature
+    Util.arrayCopyNonAtomic(cardSignature, (short)0, certificateData, bOff,
+        SIGNATURE_LENGTH);
+    bOff += SIGNATURE_LENGTH;
+
+    // Card public key
+    bOff += Utils.encodeECPublicKey((ECPublicKey)cardKeyPair.getPublic(),
+        buffer, bOff);
+
+    // CRSID
+    Util.setShort(certificateData, bOff, (short)crsID.length);
+    bOff += 2;
+    Util.arrayCopyNonAtomic(crsID, (short)0, certificateData, bOff,
+        (short)crsID.length);
+    bOff += crsID.length;
+
+    // Group ID
+    Util.setShort(certificateData, bOff, (short)groupID.length);
+    bOff += 2;
+    Util.arrayCopyNonAtomic(groupID, (short)0, certificateData, bOff,
+        (short)groupID.length);
+    bOff += groupID.length;
+
+    // Certificate expiry
+    Util.arrayCopyNonAtomic(certificateExpiry, (short)0, certificateData, bOff,
+        CERTIFICATE_EXPIRY_LENGTH);
   }
 
   private void processCheckStoredData(APDU apdu) {
@@ -213,6 +322,188 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
     apdu.sendBytes((short)0, dataLength);
   }
 
+  /**
+   * This is the basic auth protocol that I had to implement in order to satisfy
+   * the "will authenticate in under 1 second" part of the project's success
+   * criteria.
+   *
+   * This simple protocol works as follows:
+   *  - The door sends a BASIC_AUTH command, with a nonce in the data field.
+   *  - The card signs the nonce using its private key.
+   *  - The card returns this signature, along with its public key, CRSID, group
+   *  ID and certificate expiry and the signature of all this data.
+   *  - The door checks the card's public key signature to ensure public key is
+   *  valid, as well as checking it's not expired. Then door checks nonce signature,
+   *  to ensure card has matching private key. Finally, door checks that the
+   *  group ID has the correct bit set to access this specific door.
+   */
+  private void processBasicAuth(APDU apdu) {
+    // In the basic authentication protocol, the data in the buffer is simply
+    // a nonce that the card must sign using its EC private key (ECDSA).
+    byte[] buffer = apdu.getBuffer();
+
+    // The first 2 bytes in the buffer encode the byte length of the nonce.
+    short nonceLength = Util.getShort(buffer, ISO7816.OFFSET_CDATA);
+
+    ecdsaSignature.init(cardKeyPair.getPrivate(), Signature.MODE_SIGN);
+
+    // Create array to hold signature.
+    byte[] nonceSignature = new byte[SIGNATURE_LENGTH];
+
+    // We add 2 to the offset here to skip over the 2-byte length parameter.
+    ecdsaSignature.sign(buffer, (short)(ISO7816.OFFSET_CDATA+2), nonceLength,
+        nonceSignature, (short)0);
+
+    apdu.setOutgoing();
+
+    short outgoingLength = (short)(nonceSignature.length+KEY_PARAM_LENGTH_TAG // signed nonce
+        +SIGNATURE_LENGTH // card signature
+        +UNCOMPRESSED_W_ENCODED_LENGTH+KEY_PARAM_LENGTH_TAG // card public key
+        +crsID.length+KEY_PARAM_LENGTH_TAG // CRSID
+        +groupID.length+KEY_PARAM_LENGTH_TAG // group ID
+        +CERTIFICATE_EXPIRY_LENGTH);  // certificate expiry
+    apdu.setOutgoingLength(outgoingLength);
+
+    // We must return the following:
+    // - signed nonce
+    // - card signature
+    // - card public key
+    // - crsid
+    // - group id
+    // - certificate expiry
+    short bOff = 0;
+
+    Util.setShort(buffer, bOff, (short)nonceSignature.length);
+    bOff += 2;
+    Util.arrayCopyNonAtomic(nonceSignature, (short)0, buffer, bOff,
+        SIGNATURE_LENGTH);
+    bOff += SIGNATURE_LENGTH;
+
+    Util.arrayCopyNonAtomic(cardSignature, (short)0, buffer, bOff,
+        SIGNATURE_LENGTH);
+    bOff += SIGNATURE_LENGTH;
+
+    bOff += Utils.encodeECPublicKey((ECPublicKey) cardKeyPair.getPublic(),
+        buffer, bOff);
+
+    Util.setShort(buffer, bOff, (short)crsID.length);
+    bOff += 2;
+    Util.arrayCopyNonAtomic(crsID, (short)0, buffer, bOff,
+        (short)crsID.length);
+    bOff += crsID.length;
+
+    Util.setShort(buffer, bOff, (short)groupID.length);
+    bOff += 2;
+    Util.arrayCopyNonAtomic(groupID, (short)0, buffer, bOff,
+        (short)groupID.length);
+    bOff += groupID.length;
+
+    Util.arrayCopyNonAtomic(certificateExpiry, (short)0, buffer, bOff,
+        (short)certificateExpiry.length);
+    bOff += certificateExpiry.length;
+
+    apdu.sendBytes((short)0, outgoingLength);
+  }
+
+  /**
+   * Convenience method for returning the AUTHENTICATION_DENIED byte.
+   */
+  private void denyAuth(APDU apdu, byte[] buffer) {
+    buffer[0] = AUTHENTICATION_DENIED;
+    apdu.setOutgoingAndSend((short)0, (short)1);
+  }
+
+  /**
+   * Derives a key of length ceil(length/h) where h is the length of the output
+   * hash function that's used to build the key derivation function (KDF).
+   * See https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-56ar.pdf
+   * §5.8.1 for details of the concatenation key derivation function.
+   *
+   * @param keyDerivationKey the key to be used as part of the input message of
+   *                         every hash that's computed
+   * @param otherInfo        see https://www.securetechalliance.org/resources/pdf/OPACITY_Protocol_3.7.pdf
+   *                         §7.0 Annex A (KDF Specifications) for details of what
+   *                         "otherInfo" consists.
+   * @param length           the desired length of the derived key
+   * @param derivedKey       the buffer in which the derived key will be stored
+   *                         - it's the job of the caller to ensure this buffer
+   *                         is big enough (at least ceil(length/KDF_HASH_OUTPUT_SIZE
+   *                         bytes).
+   */
+  private void deriveKey(byte[] keyDerivationKey, byte[] otherInfo, short length,
+      byte[] derivedKey) {
+    // SP 800-56A says counter needs to be 32-bit, so we'll just default the
+    // first two bytes to 0x00.
+    final short COUNTER_LENGTH = (short)4;
+
+    // This is effectively calculating ceil(length / KDF_HASH_OUTPUT_SIZE).
+    short remainder = (short)(length % KDF_HASH_OUTPUT_SIZE);
+    short numBlocksToGenerate = (short)(length / KDF_HASH_OUTPUT_SIZE);
+    if (remainder > 0) numBlocksToGenerate++;
+
+    short offset = (short)0;
+    byte[] msg = new byte[(short)(COUNTER_LENGTH+keyDerivationKey.length
+        +otherInfo.length)];
+    Util.arrayCopyNonAtomic(keyDerivationKey, (short)0, msg, COUNTER_LENGTH,
+        (short)keyDerivationKey.length);
+    Util.arrayCopyNonAtomic(otherInfo, (short)0, msg,
+        (short)(COUNTER_LENGTH+keyDerivationKey.length), (short)otherInfo.length);
+    for (short counter = (short)1; i <= numBlocksToGenerate; counter++) {
+      // Change the counter value in the hash input.
+      Util.setShort(msg, (short)(COUNTER_LENGTH-2), counter);
+      hashDigest.doFinal(msg, (short)0, (short)msg.length, derivedKey, offset);
+      offset += KDF_HASH_OUTPUT_SIZE;
+    }
+  }
+
+  /**
+   * Implementation of HMAC using MD5 as the hash function.
+   *
+   * @param key    the key used by HMAC
+   * @param msg    the data to be HMAC'd
+   * @param result the buffer in which the HMAC result will be stored
+   * @param resultOff the offset into the result buffer where the resulting HMAC
+   * value begins
+   */
+  private void hmac(byte[] key, byte[] msg, byte[] result, short resultOff) {
+    final byte OPAD = (byte)0x5c;
+    final byte IPAD = (byte)0x36;
+
+    // We're assuming that the key is smaller than the blocksize (because ECDH
+    // outputs a 20-byte value).
+    /*
+     *byte[] paddedKey = new byte[HMAC_HASH_BLOCK_SIZE];
+     *Util.arrayCopyNonAtomic(key, (short)0, paddedKey, (short)0, (short)key.length);
+     */
+
+    byte[] oKeyPad = new byte[HMAC_HASH_BLOCK_SIZE+HMAC_HASH_OUTPUT_SIZE];
+    byte[] iKeyPad = new byte[(short)(HMAC_HASH_BLOCK_SIZE+msg.length)];
+
+    // Compute XOR of OPAD and IPAD with padded key.
+    // Using paddedKeyVal as below is quicker than creating a new paddedKey array.
+    byte paddedKeyVal;
+    for (short i = (short)0; i < HMAC_HASH_BLOCK_SIZE; i++) {
+      if (i < key.length)
+        paddedKeyVal = key[i];
+      else
+        paddedKeyVal = (byte)0x0;
+      oKeyPad[i] = (byte)(paddedKeyVal ^ OPAD);
+      iKeyPad[i] = (byte)(paddedKeyVal ^ IPAD);
+    }
+
+    // Concatenate iKeyPad with msg
+    Util.arrayCopyNonAtomic(msg, (short)0, iKeyPad, HMAC_HASH_BLOCK_SIZE,
+        (short)msg.length);
+
+    // Compute hash(iKeyPad || msg) and place result at end of oKeyPad byte array.
+    hmacDigest.doFinal(iKeyPad, (short)0, (short)iKeyPad.length, oKeyPad,
+        HMAC_HASH_BLOCK_SIZE);
+
+    // Now compute hash(oKeyPad || hash(iKeyPad || msg)) and place digest in
+    // result buffer.
+    hmacDigest.doFinal(oKeyPad, (short)0, (short)oKeyPad.length, result, resultOff);
+  }
+
   private void processInitiateAuthentication(APDU apdu) {
     // Buffer will contain:
     //  - signature of door's pub key
@@ -222,20 +513,17 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
     short bOff = ISO7816.OFFSET_CDATA + SIGNATURE_LENGTH;
 
     // Next is the door's permanent public key
-    ECPublicKey doorPermanentPublicKey = (ECPublicKey)KeyBuilder.buildKey(
-        DOOR_KEY_TYPE, DOOR_KEY_LENGTH, false);
-    Prime192v1.setKeyParameters((ECKey)doorPermanentPublicKey);
-
-    // Now initialize the parameters.
     bOff += Utils.decodeECPublicKey(doorPermanentPublicKey, buffer, bOff);
 
     // Finally, the door's ephemeral public key
-    ECPublicKey doorEphemeralPublicKey = (ECPublicKey)KeyBuilder.buildKey(
-        DOOR_KEY_TYPE, DOOR_KEY_LENGTH, false);
-    Prime192v1.setKeyParameters((ECKey)doorEphemeralPublicKey);
-
-    // Now initialize the parameters.
-    Utils.decodeECPublicKey(doorEphemeralPublicKey, buffer, bOff);
+    try {
+      Utils.decodeECPublicKey(doorEphemeralPublicKey, buffer, bOff);
+    } catch (CryptoException e) {
+      // This may well be because the provided point doesn't belong to the EC
+      // domain, so we'll return AUTHENTICATION_DENIED.
+      denyAuth(apdu, buffer);
+      return;
+    }
 
     /*
      * First major step is to verify the door's permanent public key/signature.
@@ -244,8 +532,7 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
     // Initialize the signature object.
     // TODO: Could potentially make this an instance variable an initialize it
     // during install if authentication time is an issue.
-    Signature verifyDoorKey = Signature.getInstance(Signature.ALG_ECDSA_SHA, false);
-    verifyDoorKey.init(terminalPublicKey, Signature.MODE_VERIFY);
+    ecdsaSignature.init(terminalPublicKey, Signature.MODE_VERIFY);
 
     // Get the encoding of the door's permanent public key.
     byte[] signatureData = new byte[UNCOMPRESSED_W_ENCODED_LENGTH];
@@ -253,12 +540,83 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
 
     // Rather than copy the door signature into a new byte array, we just get it
     // directly from the buffer - avoids wasting memory.
-    boolean verified = verifyDoorKey.verify(signatureData, (short)0,
+    boolean verified = ecdsaSignature.verify(signatureData, (short)0,
         (short)signatureData.length, buffer, ISO7816.OFFSET_CDATA,
         SIGNATURE_LENGTH);
 
+    // Return AUTHENTICATION_DENIED byte if the signature failed verification.
     if (!verified) {
-      ISOException.throwIt((short)0xf);
+      denyAuth(apdu, buffer);
+      return;
     }
+
+    // Generate card key pair.
+    cardEphemeralKeyPair.genKeyPair();
+
+    // Derive Z1.
+    byte[] secretZ1 = new byte[ECDH_SECRET_LENGTH];
+    ecDiffieHellman.init(cardEphemeralKeyPair.getPrivate());
+    ecDiffieHellman.generateSecret(buffer, (short)(ISO7816.OFFSET_CDATA
+        +SIGNATURE_LENGTH+KEY_PARAM_LENGTH_TAG), UNCOMPRESSED_W_ENCODED_LENGTH,
+        secretZ1, (short)0);
+
+    byte[] k1k2OtherInfo = new byte[(short)(2+UNCOMPRESSED_W_ENCODED_LENGTH)];
+    k1k2OtherInfo[0] = (byte)0x09;
+    k1k2OtherInfo[1] = (byte)0x09;
+    ((ECPublicKey)cardEphemeralKeyPair.getPublic).getW(k1k2OtherInfo, (short)2);
+    byte[] keysK1K2 = new byte[(short)(2*AES_KEY_SIZE)];
+    deriveKey(secretZ1, k1k2OtherInfo, (short)keysK1K2.length, keysK1K2);
+
+    // We're using 128-bit AES keys, so we're fine to use just the first 16 bytes
+    // of the ECDH negotiation.
+    certificateEncryptionKey.setKey(keysK1K2, (short)0);
+
+    aesCipher.init(certificateEncryptionKey, Cipher.MODE_ENCRYPT);
+
+    aesCipher.doFinal(certificateData, (short)0, (short)certificateData.length,
+        encryptedCertificate, (short)0);
+
+    byte[] secretZ = new byte[ECDH_SECRET_LENGTH];
+    ecDiffieHellman.init(cardKeyPair.getPrivate());
+    ecDiffieHellman.generateSecret(buffer, (short)(ISO7816.OFFSET_CDATA
+          +SIGNATURE_LENGTH+KEY_PARAM_LENGTH_TAG+UNCOMPRESSED_W_ENCODED_LENGTH
+          +KEY_PARAM_LENGTH_TAG), UNCOMPRESSED_W_ENCODED_LENGTH, secretZ, (short)0);
+
+    buffer[0] = (byte)0xab;
+    buffer[1] = (byte)0xcd;
+    apdu.setOutgoingAndSend((short)0, (short)2);
   }
 }
+
+/*
+    apdu.setOutgoing();
+    apdu.setOutgoingLength((short)2);
+
+    } catch (CryptoException e) {
+			buffer[0] = (byte) 0xE7;
+			buffer[1] = (byte) e.getReason();
+		} catch (SystemException se) {
+			buffer[0] = (byte) 0xEF;
+			buffer[1] = (byte) se.getReason();
+		} catch (NullPointerException ne) {
+			buffer[0] = (byte) 0xEE;
+		} catch (CardRuntimeException cre) {
+			buffer[0] = (byte) 0xED;
+			buffer[1] = (byte) cre.getReason();
+		} catch (ArithmeticException ae) {
+			buffer[0] = (byte) 0xEC;
+		} catch (ArrayIndexOutOfBoundsException aie) {
+			buffer[0] = (byte) 0xEB;
+		} catch (ArrayStoreException ase) {
+			buffer[0] = (byte) 0xEA;
+		} catch (ClassCastException cce) {
+			buffer[0] = (byte) 0xEA;
+		} catch (RuntimeException re) {
+			buffer[0] = (byte) 0xE9;
+		} catch (Exception ex) {
+			buffer[0] = (byte) 0xE8;
+		} finally {
+			apdu.sendBytesLong(buffer, (short)0, (short)2);
+      if (true) return;
+		}
+*/

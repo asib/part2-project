@@ -13,7 +13,8 @@ import static org.bitbucket.jfent.opacity_fs_impl.OpacityForwardSecrecyImplement
 
 public class CardTerminalAPI {
   public enum Command {
-    SELECT, GENERATE_KEY_PAIR, STORE_SIGNATURE, CHECK_STORED_DATA, INITIATE_AUTH
+    SELECT, GENERATE_KEY_PAIR, STORE_SIGNATURE, CHECK_STORED_DATA, BASIC_AUTH,
+    INITIATE_AUTH
   }
 
   private static final byte[] AUTHENTICATION_APPLET_AID = {(byte)0xf2, (byte)0x34,
@@ -105,6 +106,27 @@ public class CardTerminalAPI {
     short sw = (short)resp.getSW();
     if (sw != ISO7816.SW_NO_ERROR)
       throw new CardCommunicationException(sw, Command.CHECK_STORED_DATA);
+
+    return resp.getData();
+  }
+
+  /**
+   *  @param data the nonce to be signed by the card
+   */
+  public byte[] sendBasicAuthenticationCommand(byte[] data) throws CardException,
+         CardCommunicationException {
+    ResponseAPDU resp = channel.transmit(new CommandAPDU(CLA_PROPRIETARY,
+          BASIC_AUTH, 0x00, 0x00, data,(short)(
+          SIGNATURE_LENGTH // nonce signature
+          +SIGNATURE_LENGTH // card signature
+          +UNCOMPRESSED_W_ENCODED_LENGTH+KEY_PARAM_LENGTH_TAG // card public key
+          +CERTIFICATE_EXPIRY_LENGTH // Certificate expiry
+          +20 // Estimate for max possible CRSID length in bytes
+          +10))); // Estimate for max group ID length in bytes
+
+    short sw = (short)resp.getSW();
+    if (sw != ISO7816.SW_NO_ERROR)
+      throw new CardCommunicationException(sw, Command.BASIC_AUTH);
 
     return resp.getData();
   }

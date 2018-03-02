@@ -8,3 +8,5 @@ An explanation about all the files with "ecdsa" in their name:
  MORE. This file exists only for the purpose of generating a signature.
  - "ecdsa_sig" contains the ECDSA signature of the uncompressed encoding of the
  public point.
+ - "terminal_ecdsa_pub" contains the provisioning terminal's X509-encoded public
+ key. We need this to verify card certificates.

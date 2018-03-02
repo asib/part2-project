@@ -295,6 +295,8 @@ public class CardTerminal {
       offset += certificateExpiry.length;
       System.arraycopy(cardPublicKeyBytes, 0, dataToBeSigned, offset, cardPublicKeyBytes.length);
 
+      System.out.println(Hex.encodeHexString(dataToBeSigned));
+
       KeyPair kp = loadTerminalKeyPair();
       if (kp == null)
         throw new NoKeyPairException();
