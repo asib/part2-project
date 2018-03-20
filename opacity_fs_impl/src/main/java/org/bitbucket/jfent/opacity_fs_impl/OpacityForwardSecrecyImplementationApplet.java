@@ -67,6 +67,8 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
   public static final short AES_KEY_SIZE = KeyBuilder.LENGTH_AES_128;
   public static final byte ECDH_ALGORITHM = KeyAgreement.ALG_EC_SVDP_DH;
   public static final byte SIGNATURE_ALGORITHM = Signature.ALG_ECDSA_SHA;
+  // The signature algorithm used to generate the AuthCryptogram_ICC.
+  public static final byte CMAC_ALGORITHM = Signature.ALG_AES_MAC_128_NOPAD;
   // The output of KeyAgreement.generateSecret() is always 20 bytes, since it's
   // a SHA-1 hash.
   public static final short ECDH_SECRET_LENGTH = (short)20;
@@ -76,6 +78,8 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
   public static final short KDF_HASH_BLOCK_SIZE = (short)64;
   // MD5 digest (output) size is 128 bits, a.k.a. 16 bytes.
   public static final short KDF_HASH_OUTPUT_SIZE = MessageDigest.LENGTH_MD5;
+
+  public static final short AES_CMAC_OUTPUT_SIZE = (short)16;
 
   /*
    *
@@ -98,14 +102,27 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
 
   // We define (and allocate/initialize, in constructor) these variables (which
   // are used during the OPACITY-FS protocol) early, to reduce authetication time.
+  // For more information about their use, please read the processIniateAuthentication()
+  // method.
   private ECPublicKey doorPermanentPublicKey;
   private ECPublicKey doorEphemeralPublicKey;
   private KeyPair cardEphemeralKeyPair;
   private KeyAgreement ecDiffieHellman;
   private AESKey certificateEncryptionKey;
   private Cipher aesCipher;
+  private AESKey authCryptogramCMACKey;
+  private Signature aesCMACSignature;
   private byte[] certificateData;
   private byte[] encryptedCertificate;
+  private byte[] signatureData;
+  private byte[] secretZ1;
+  private byte[] k1k2OtherInfo;
+  private byte[] keysK1K2;
+  private byte[] secretZ;
+  private byte[] keySKCFRM;
+  private byte[] skcfrmOtherInfo;
+  private byte[] otidICC;
+  private byte[] authCryptogramInputData;
 
   private OpacityForwardSecrecyImplementationApplet() {
     terminalPublicKey = null;
@@ -121,15 +138,61 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
     doorPermanentPublicKey = (ECPublicKey)KeyBuilder.buildKey(DOOR_KEY_TYPE,
         DOOR_KEY_LENGTH, false);
     Prime192v1.setKeyParameters((ECKey)doorPermanentPublicKey);
+
     doorEphemeralPublicKey = (ECPublicKey)KeyBuilder.buildKey(DOOR_KEY_TYPE,
         DOOR_KEY_LENGTH, false);
     Prime192v1.setKeyParameters((ECKey)doorEphemeralPublicKey);
+
     cardEphemeralKeyPair = new KeyPair(KEY_PAIR_ALGORITHM, KEY_LENGTH);
     Prime192v1.setKeyPairParameters(cardEphemeralKeyPair);
+
     ecDiffieHellman = KeyAgreement.getInstance(ECDH_ALGORITHM, false);
+
     certificateEncryptionKey = (AESKey)KeyBuilder.buildKey(AES_KEY_TYPE,
         AES_KEY_SIZE, false);
     aesCipher = Cipher.getInstance(AES_BLOCK_CIPHER, false);
+
+    authCryptogramCMACKey = (AESKey)KeyBuilder.buildKey(AES_KEY_TYPE,
+        AES_KEY_SIZE, false);
+    aesCMACSignature = Signature.getInstance(CMAC_ALGORITHM, false);
+
+    signatureData = new byte[UNCOMPRESSED_W_ENCODED_LENGTH];
+    secretZ1 = new byte[ECDH_SECRET_LENGTH];
+
+    // See https://www.securetechalliance.org/resources/pdf/OPACITY_Protocol_3.7.pdf,
+    // Annex A for details of otherInfo.
+    // NOTE: we've omitted ID_sH.
+    k1k2OtherInfo = new byte[(short)(2+UNCOMPRESSED_W_ENCODED_LENGTH)];
+    k1k2OtherInfo[0] = (byte)0x09;
+    k1k2OtherInfo[1] = (byte)0x09;
+
+    keysK1K2 = new byte[(short)(2*AES_KEY_SIZE)];
+    secretZ = new byte[ECDH_SECRET_LENGTH];
+    keySKCFRM = new byte[AES_KEY_SIZE];
+    // NOTE: We've omitted ID_sH.
+    // For further details on otherInfo, see
+    // https://www.securetechalliance.org/resources/pdf/OPACITY_Protocol_3.7.pdf,
+    // Annex A. Briefly:
+    //  - 1 is for the algorithm ID of the derived key, SK_CFRM.
+    //  - 8 is for the top 8 bits of OTID_ICC (which is just the card's ephemeral
+    //  public key).
+    //  - 16 is for the top 16 bits of the card terminal's public key.
+    //  - AES_KEY_SIZE is for K2.
+    skcfrmOtherInfo = new byte[(short)(1+8+16+AES_KEY_SIZE)];
+    skcfrmOtherInfo[0] = 0x09;
+
+    otidICC = new byte[UNCOMPRESSED_W_ENCODED_LENGTH];
+
+    // This will hold:
+    //  - Top 8 bytes of OTID_ICC
+    //  - Top 16 bytes of card terminal's ephemeral public key.
+    // However, it's length must also be divisible by AES_BLOCK_SIZE, to avoid
+    // the AES CMAC signature object from throwing an error.
+    short authCryptogramInputDataSize = (short)(8+16);
+    if (authCryptogramInputDataSize % AES_BLOCK_SIZE != 0)
+      authCryptogramInputDataSize +=
+        AES_BLOCK_SIZE-(authCryptogramInputDataSize % AES_BLOCK_SIZE);
+    authCryptogramInputData = new byte[authCryptogramInputDataSize];
 
     register();
   }
@@ -243,11 +306,12 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
       +crsID.length+KEY_PARAM_LENGTH_TAG
       +groupID.length+KEY_PARAM_LENGTH_TAG
       +CERTIFICATE_EXPIRY_LENGTH);
-    certificateData = new byte[(short)(certDataLen+(AES_BLOCK_SIZE-(certDataLen
-            % AES_BLOCK_SIZE)))];
+    short encryptedCertificateLength = certDataLen;
+    if (certDataLen % AES_BLOCK_SIZE != 0)
+      encryptedCertificateLength += AES_BLOCK_SIZE-(certDataLen % AES_BLOCK_SIZE);
+    certificateData = new byte[encryptedCertificateLength];
     // Initialize the array to hold the encrypted certificate here as well.
-    encryptedCertificate = new byte[(short)(certDataLen+(AES_BLOCK_SIZE-(certDataLen
-            % AES_BLOCK_SIZE)))];
+    encryptedCertificate = new byte[encryptedCertificateLength];
 
     // Reset bOff.
     bOff = 0;
@@ -448,60 +512,12 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
         (short)keyDerivationKey.length);
     Util.arrayCopyNonAtomic(otherInfo, (short)0, msg,
         (short)(COUNTER_LENGTH+keyDerivationKey.length), (short)otherInfo.length);
-    for (short counter = (short)1; i <= numBlocksToGenerate; counter++) {
+    for (short counter = (short)1; counter <= numBlocksToGenerate; counter++) {
       // Change the counter value in the hash input.
       Util.setShort(msg, (short)(COUNTER_LENGTH-2), counter);
       hashDigest.doFinal(msg, (short)0, (short)msg.length, derivedKey, offset);
       offset += KDF_HASH_OUTPUT_SIZE;
     }
-  }
-
-  /**
-   * Implementation of HMAC using MD5 as the hash function.
-   *
-   * @param key    the key used by HMAC
-   * @param msg    the data to be HMAC'd
-   * @param result the buffer in which the HMAC result will be stored
-   * @param resultOff the offset into the result buffer where the resulting HMAC
-   * value begins
-   */
-  private void hmac(byte[] key, byte[] msg, byte[] result, short resultOff) {
-    final byte OPAD = (byte)0x5c;
-    final byte IPAD = (byte)0x36;
-
-    // We're assuming that the key is smaller than the blocksize (because ECDH
-    // outputs a 20-byte value).
-    /*
-     *byte[] paddedKey = new byte[HMAC_HASH_BLOCK_SIZE];
-     *Util.arrayCopyNonAtomic(key, (short)0, paddedKey, (short)0, (short)key.length);
-     */
-
-    byte[] oKeyPad = new byte[HMAC_HASH_BLOCK_SIZE+HMAC_HASH_OUTPUT_SIZE];
-    byte[] iKeyPad = new byte[(short)(HMAC_HASH_BLOCK_SIZE+msg.length)];
-
-    // Compute XOR of OPAD and IPAD with padded key.
-    // Using paddedKeyVal as below is quicker than creating a new paddedKey array.
-    byte paddedKeyVal;
-    for (short i = (short)0; i < HMAC_HASH_BLOCK_SIZE; i++) {
-      if (i < key.length)
-        paddedKeyVal = key[i];
-      else
-        paddedKeyVal = (byte)0x0;
-      oKeyPad[i] = (byte)(paddedKeyVal ^ OPAD);
-      iKeyPad[i] = (byte)(paddedKeyVal ^ IPAD);
-    }
-
-    // Concatenate iKeyPad with msg
-    Util.arrayCopyNonAtomic(msg, (short)0, iKeyPad, HMAC_HASH_BLOCK_SIZE,
-        (short)msg.length);
-
-    // Compute hash(iKeyPad || msg) and place result at end of oKeyPad byte array.
-    hmacDigest.doFinal(iKeyPad, (short)0, (short)iKeyPad.length, oKeyPad,
-        HMAC_HASH_BLOCK_SIZE);
-
-    // Now compute hash(oKeyPad || hash(iKeyPad || msg)) and place digest in
-    // result buffer.
-    hmacDigest.doFinal(oKeyPad, (short)0, (short)oKeyPad.length, result, resultOff);
   }
 
   private void processInitiateAuthentication(APDU apdu) {
@@ -512,10 +528,10 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
     byte[] buffer = apdu.getBuffer();
     short bOff = ISO7816.OFFSET_CDATA + SIGNATURE_LENGTH;
 
-    // Next is the door's permanent public key
+    // First is the door's permanent public key
     bOff += Utils.decodeECPublicKey(doorPermanentPublicKey, buffer, bOff);
 
-    // Finally, the door's ephemeral public key
+    // Lastly, the door's ephemeral public key
     try {
       Utils.decodeECPublicKey(doorEphemeralPublicKey, buffer, bOff);
     } catch (CryptoException e) {
@@ -535,7 +551,6 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
     ecdsaSignature.init(terminalPublicKey, Signature.MODE_VERIFY);
 
     // Get the encoding of the door's permanent public key.
-    byte[] signatureData = new byte[UNCOMPRESSED_W_ENCODED_LENGTH];
     doorPermanentPublicKey.getW(signatureData, (short)0);
 
     // Rather than copy the door signature into a new byte array, we just get it
@@ -550,41 +565,143 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
       return;
     }
 
-    // Generate card key pair.
+    /*
+     * Generate card key pair.
+     */
+
     cardEphemeralKeyPair.genKeyPair();
 
-    // Derive Z1.
-    byte[] secretZ1 = new byte[ECDH_SECRET_LENGTH];
+    // Put card ephemeral public key into byte array for later use.
+    ((ECPublicKey)cardEphemeralKeyPair.getPublic()).getW(otidICC, (short)0);
+
+    /*
+     * Derive Z1.
+     */
+
     ecDiffieHellman.init(cardEphemeralKeyPair.getPrivate());
     ecDiffieHellman.generateSecret(buffer, (short)(ISO7816.OFFSET_CDATA
         +SIGNATURE_LENGTH+KEY_PARAM_LENGTH_TAG), UNCOMPRESSED_W_ENCODED_LENGTH,
         secretZ1, (short)0);
 
-    byte[] k1k2OtherInfo = new byte[(short)(2+UNCOMPRESSED_W_ENCODED_LENGTH)];
-    k1k2OtherInfo[0] = (byte)0x09;
-    k1k2OtherInfo[1] = (byte)0x09;
-    ((ECPublicKey)cardEphemeralKeyPair.getPublic).getW(k1k2OtherInfo, (short)2);
-    byte[] keysK1K2 = new byte[(short)(2*AES_KEY_SIZE)];
+    /*
+     * Derive K1, K2.
+     */
+
+    // See https://www.securetechalliance.org/resources/pdf/OPACITY_Protocol_3.7.pdf
+    // Annex A for details of what otherInfo is. Briefly, it's the "algorithm ID"
+    // of all the secret keys (this is 0x09 for AES 128-bit keys) concatenated
+    // with the values passed to the info() method in the specification.
+    // NOTE: we've omitted ID_sH.
+    ((ECPublicKey)cardEphemeralKeyPair.getPublic()).getW(k1k2OtherInfo, (short)2);
     deriveKey(secretZ1, k1k2OtherInfo, (short)keysK1K2.length, keysK1K2);
 
-    // We're using 128-bit AES keys, so we're fine to use just the first 16 bytes
-    // of the ECDH negotiation.
+    /*
+     * Encrypt OpaqueData_ICC.
+     */
+
+    // Use K1 as the encryption key for encrypting OpaqueData_ICC (which is just
+    // the card's certificate).
     certificateEncryptionKey.setKey(keysK1K2, (short)0);
-
     aesCipher.init(certificateEncryptionKey, Cipher.MODE_ENCRYPT);
-
     aesCipher.doFinal(certificateData, (short)0, (short)certificateData.length,
         encryptedCertificate, (short)0);
 
-    byte[] secretZ = new byte[ECDH_SECRET_LENGTH];
+    /*
+     * Derive Z.
+     */
+
     ecDiffieHellman.init(cardKeyPair.getPrivate());
     ecDiffieHellman.generateSecret(buffer, (short)(ISO7816.OFFSET_CDATA
           +SIGNATURE_LENGTH+KEY_PARAM_LENGTH_TAG+UNCOMPRESSED_W_ENCODED_LENGTH
           +KEY_PARAM_LENGTH_TAG), UNCOMPRESSED_W_ENCODED_LENGTH, secretZ, (short)0);
 
-    buffer[0] = (byte)0xab;
-    buffer[1] = (byte)0xcd;
-    apdu.setOutgoingAndSend((short)0, (short)2);
+    // Zeroize Z1,K1
+    Util.arrayFillNonAtomic(secretZ1, (short)0, (short)secretZ1.length, (byte)0x00);
+    Util.arrayFillNonAtomic(keysK1K2, (short)0, (short)(keysK1K2.length / 2), (byte)0x00);
+
+    /*
+     * Derive SK_CFRM.
+     */
+
+    // First, let's setup the "otherInfo" byte array.
+    short skcfrmInfoOffset = 1;
+    Util.arrayCopyNonAtomic(otidICC, (short)0, skcfrmOtherInfo, skcfrmInfoOffset,
+        (short)8);
+    skcfrmInfoOffset += 8;
+    // We take directly from the buffer to avoid any unnecessary copying.
+    // We've skipped over (in the buffer):
+    //  - signature of door's public key
+    //  - door's permanent public key + 2 byte length tag
+    //  - 2 byte length tag for door's ephemeral public key
+    // This leaves us right at the start of the door's ephemeral public key.
+    Util.arrayCopyNonAtomic(buffer, (short)(ISO7816.OFFSET_CDATA
+        + SIGNATURE_LENGTH
+        + 2 + UNCOMPRESSED_W_ENCODED_LENGTH
+        + 2),
+        skcfrmOtherInfo, skcfrmInfoOffset, (short)16);
+    skcfrmInfoOffset += 16;
+    // K1 is from offsets 0 to (AES_KEY_SIZE - 1), so we need to skip over K1
+    // to get to K2.
+    Util.arrayCopyNonAtomic(keysK1K2, AES_KEY_SIZE, skcfrmOtherInfo, skcfrmInfoOffset,
+        AES_KEY_SIZE);
+
+    // Now actually derive the key.
+    deriveKey(secretZ, skcfrmOtherInfo, (short)keySKCFRM.length, keySKCFRM);
+
+    /*
+     * Generate AuthCryptogram_ICC.
+     */
+
+    // Initialize the CMAC key.
+    authCryptogramCMACKey.setKey(keySKCFRM, (short)0);
+
+    // Setup the input data byte array.
+    Util.arrayCopyNonAtomic(otidICC, (short)0, authCryptogramInputData, (short)0,
+        (short)8);
+    // We take directly from the buffer to avoid any unnecessary copying.
+    // We've skipped over (in the buffer):
+    //  - signature of door's public key
+    //  - door's permanent public key + 2 byte length tag
+    //  - 2 byte length tag for door's ephemeral public key
+    // This leaves us right at the start of the door's ephemeral public key.
+    Util.arrayCopyNonAtomic(buffer, (short)(ISO7816.OFFSET_CDATA
+        + SIGNATURE_LENGTH
+        + 2 + UNCOMPRESSED_W_ENCODED_LENGTH
+        + 2),
+        authCryptogramInputData, (short)8, (short)16);
+
+    // We set the APDU to outgoing at this point, so that we can write the signature
+    // directly to the outgoing buffer, in order to avoid an unnecessary copy.
+    // The outgoing buffer contains:
+    //  - OpaqueData_ICC
+    //  - AuthCryptogram_ICC
+    //  - OTID_ICC
+    apdu.setOutgoing();
+    apdu.setOutgoingLength((short)(encryptedCertificate.length
+          + AES_CMAC_OUTPUT_SIZE
+          + UNCOMPRESSED_W_ENCODED_LENGTH));
+    Util.arrayCopyNonAtomic(encryptedCertificate, (short)0, buffer, (short)0,
+        (short)encryptedCertificate.length);
+
+    // Initiate CMAC signature object.
+    aesCMACSignature.init(authCryptogramCMACKey, Signature.MODE_SIGN);
+    aesCMACSignature.sign(authCryptogramInputData, (short)0,
+        (short)authCryptogramInputData.length, buffer,
+        (short)encryptedCertificate.length);
+
+    ((ECPublicKey)cardEphemeralKeyPair.getPublic()).getW(buffer,
+      (short)(encryptedCertificate.length + AES_CMAC_OUTPUT_SIZE));
+
+
+    apdu.sendBytes((short)0, (short)(encryptedCertificate.length
+          + AES_CMAC_OUTPUT_SIZE
+          + UNCOMPRESSED_W_ENCODED_LENGTH));
+
+    /*
+     *buffer[0] = (byte)0xab;
+     *buffer[1] = (byte)0xcd;
+     *apdu.setOutgoingAndSend((short)0, (short)2);
+     */
   }
 }
 
