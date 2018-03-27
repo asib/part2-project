@@ -328,6 +328,7 @@ public class CardTerminal {
       byte[] cardStoredData = cardStoredDataOS.toByteArray();
 
       if (MODE_TEST) {
+        System.out.println(Hex.encodeHexString(cardStoredData));
         System.out.println(Hex.encodeHexString(signature));
         System.out.println(Hex.encodeHexString(terminalPublicKey));
       }
@@ -340,6 +341,8 @@ public class CardTerminal {
       if (!Arrays.equals(cardStoredData, queriedStoredData)) {
         System.out.println("An error occured whilst attempting to provision the "
             + "card, please try again.");
+      } else {
+        System.out.println("Provisioning successful!");
       }
     } catch (CardException e) {
       System.out.println("Error during communication with card:");

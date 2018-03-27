@@ -1,6 +1,7 @@
 package org.bitbucket.jfent.door_opacity_fs_impl;
 
 import static org.bitbucket.jfent.opacity_fs_impl.OpacityForwardSecrecyImplementationApplet.*;
+import java.util.Arrays;
 import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.nio.file.Files;
@@ -10,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
 import java.security.Provider;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.security.KeyPairGenerator;
 import java.security.KeyPair;
@@ -17,10 +19,22 @@ import java.security.PublicKey;
 import java.security.PrivateKey;
 import java.security.KeyFactory;
 import java.security.Signature;
+import java.security.SignatureException;
 import java.security.NoSuchAlgorithmException;
+import java.security.DigestException;
+import java.security.interfaces.ECPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
+import java.security.InvalidKeyException;
+import java.security.DigestException;
+import java.security.InvalidAlgorithmParameterException;
+import javax.crypto.KeyAgreement;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.BadPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.spec.IvParameterSpec;
 import javacard.framework.Util;
 import org.apache.commons.codec.binary.Hex;
 import org.bitbucket.jfent.card_terminal_api.CardTerminalAPI;
@@ -31,6 +45,11 @@ import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.BlockCipher;
+import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.params.KeyParameter;
 
 public class DoorTerminal {
   private static final String DOOR_PRIVATE_KEY_FILENAME = "ecdsa";
@@ -40,6 +59,9 @@ public class DoorTerminal {
   private static final String KEY_GENERATION_ALGORITHM = "ECDSA";
   private static final String CURVE_NAME = "prime192v1";
   private static final String DOOR_SIGNATURE_ALGORITHM = "SHA1withECDSA";
+  private static final String EC_DIFFIE_HELLMAN_ALGORITHM = "ECDH";
+  private static final String CIPHER_ALGORITHM = "AES/CBC/NoPadding";
+  private static final String CIPHER_KEY_TYPE = "AES";
 
   private static final Provider BOUNCY_CASTLE_PROVIDER = new BouncyCastleProvider();
 
@@ -252,6 +274,273 @@ public class DoorTerminal {
     return kf.generatePublic(pubKeySpec);
   }
 
+  private static boolean validateCardCertificate(byte[] crsID, byte[] groupID,
+      byte[] certificateExpiry, byte[] cardPublicKey, PublicKey signingKey,
+      byte[] cardSignature) throws InvalidKeyException,
+      SignatureException, NoSuchAlgorithmException {
+    int dOff = 0;
+    byte[] cardSignatureData = new byte[crsID.length+groupID.length
+      +CERTIFICATE_EXPIRY_LENGTH
+      +UNCOMPRESSED_W_ENCODED_LENGTH+KEY_PARAM_LENGTH_TAG];
+    System.arraycopy(crsID, 0, cardSignatureData, dOff, crsID.length);
+    dOff += crsID.length;
+    System.arraycopy(groupID, 0, cardSignatureData, dOff, groupID.length);
+    dOff += groupID.length;
+    System.arraycopy(certificateExpiry, 0, cardSignatureData, dOff,
+        CERTIFICATE_EXPIRY_LENGTH);
+    dOff += CERTIFICATE_EXPIRY_LENGTH;
+    cardSignatureData[dOff] = (byte)(cardPublicKey.length >> 8);
+    cardSignatureData[dOff+1] = (byte)cardPublicKey.length;
+    dOff += 2;
+    System.arraycopy(cardPublicKey, 0, cardSignatureData, dOff,
+        cardPublicKey.length);
+
+    // Do verification of card signature.
+    Signature ecdsaObj = Signature.getInstance(DOOR_SIGNATURE_ALGORITHM,
+        BOUNCY_CASTLE_PROVIDER);
+    ecdsaObj.initVerify(signingKey);
+    ecdsaObj.update(cardSignatureData);
+    return ecdsaObj.verify(cardSignature);
+  }
+
+  /**
+   * This method checks that we can derive the same data that the card has derived
+   * (and returned to us), and therefore that the card is authenticated.
+   *
+   * We take all cryptographic objects as arguments, so that they can be created
+   * before the protocol begins, saving protocol execution time.
+   *
+   * @param responseBuffer the byte array containing all the data returned by the
+   * card
+   * @param ecDiffieHellman the premade key agreement object for deriving the
+   * secrets Z1 and Z
+   * @param doorPermanentKeyPair the card reader's permanent key pair
+   * @param doorEphemeralKeyPair the card reader's ephemeral key pair (a new one
+   * is generated for each protocol execution)
+   * @return a boolean indicating whether the card is authenticated
+   * or not
+   */
+  private static boolean authenticateCardResponse(byte[] responseBuffer,
+      KeyAgreement ecDiffieHellman, KeyPair doorPermanentKeyPair,
+      KeyPair doorEphemeralKeyPair, ConcatenationKDF kdf, Cipher aesCipher,
+      MessageDigest sha1Digest, Signature ecdsa, PublicKey terminalPublicKey) throws
+      NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException,
+      DigestException, IllegalBlockSizeException, BadPaddingException,
+      InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+      SignatureException {
+    // Get data from the response buffer.
+    int opaqueDataLength = Util.getShort(responseBuffer, (short)0);
+    byte[] opaqueData = new byte[opaqueDataLength];
+    byte[] authCryptogram = new byte[AES_CMAC_OUTPUT_SIZE];
+    byte[] otidICC = new byte[UNCOMPRESSED_W_ENCODED_LENGTH];
+
+    System.arraycopy(responseBuffer, 2, opaqueData, 0, opaqueDataLength);
+    System.arraycopy(responseBuffer, 2+opaqueDataLength, authCryptogram, 0,
+        AES_CMAC_OUTPUT_SIZE);
+    System.arraycopy(responseBuffer, 2+opaqueDataLength+AES_CMAC_OUTPUT_SIZE,
+        otidICC, 0, UNCOMPRESSED_W_ENCODED_LENGTH);
+
+    /*
+     * Validate that OTID_ICC (=Q_eICC) belongs to EC domain. The call to
+     * createECPublicKey() below will fail if this is not the case.
+     */
+    BCECPublicKey cardEphemeralPublicKey = (BCECPublicKey)createECPublicKey(otidICC);
+
+    /*
+     * Derive Z1.
+     */
+
+    ecDiffieHellman.init(doorPermanentKeyPair.getPrivate());
+    ecDiffieHellman.doPhase(cardEphemeralPublicKey, true);
+    byte[] ecDHSecret = ecDiffieHellman.generateSecret();
+
+    // Must now perform SHA-1 on the generated secret, to match the operation of
+    // Javacard.
+    sha1Digest.reset();
+    byte[] secretZ1 = sha1Digest.digest(ecDHSecret);
+
+    /*
+     * Derive K1, K2.
+     */
+
+    // First, setup the otherInfo array.
+    byte[] k1k2OtherInfo = new byte[2+UNCOMPRESSED_W_ENCODED_LENGTH];
+    k1k2OtherInfo[0] = 0x09;
+    k1k2OtherInfo[1] = 0x09;
+    System.arraycopy(cardEphemeralPublicKey.getQ().getEncoded(false), 0,
+        k1k2OtherInfo, 2, UNCOMPRESSED_W_ENCODED_LENGTH);
+
+    byte[] keysK1K2 = kdf.deriveKey(secretZ1, k1k2OtherInfo, 2*AES_KEY_SIZE);
+    byte[] k1 = new byte[AES_KEY_SIZE];
+    byte[] k2 = new byte[AES_KEY_SIZE];
+    System.arraycopy(keysK1K2, 0, k1, 0, AES_KEY_SIZE);
+    System.arraycopy(keysK1K2, AES_KEY_SIZE, k2, 0, AES_KEY_SIZE);
+
+    /*
+     * Decrypt OpaqueData_ICC to get card's certificate.
+     */
+
+    // First, create the key object.
+    SecretKeySpec k1KeySpec = new SecretKeySpec(k1, CIPHER_KEY_TYPE);
+
+    // Now decrypt.
+    aesCipher.init(Cipher.DECRYPT_MODE, k1KeySpec,
+        new IvParameterSpec(new byte[AES_BLOCK_SIZE]));
+    byte[] certificateData = aesCipher.doFinal(opaqueData);
+
+    /*
+     * Validate card's certificate.
+     */
+
+    short dOff = 0;
+
+    byte[] cardSignature = new byte[SIGNATURE_LENGTH];
+    System.arraycopy(certificateData, dOff, cardSignature, 0, SIGNATURE_LENGTH);
+    dOff += SIGNATURE_LENGTH;
+
+    short cardPubKeyLength = Util.getShort(certificateData, dOff);
+    dOff += 2; // Skip over length tag
+    byte[] cardPublicKey = new byte[cardPubKeyLength];
+    System.arraycopy(certificateData, dOff, cardPublicKey, 0, cardPubKeyLength);
+    dOff += cardPubKeyLength;
+
+    short crsIDLength = Util.getShort(certificateData, dOff);
+    dOff += 2;
+    byte[] crsID = new byte[crsIDLength];
+    System.arraycopy(certificateData, dOff, crsID, 0, crsIDLength);
+    dOff += crsIDLength;
+
+    short groupIDLength = Util.getShort(certificateData, dOff);
+    dOff += 2;
+    byte[] groupID = new byte[groupIDLength];
+    System.arraycopy(certificateData, dOff, groupID, 0, groupIDLength);
+    dOff += groupIDLength;
+
+    byte[] certificateExpiry = new byte[CERTIFICATE_EXPIRY_LENGTH];
+    System.arraycopy(certificateData, dOff, certificateExpiry, 0,
+        CERTIFICATE_EXPIRY_LENGTH);
+
+    // If the card's certificate isn't valid, then don't authenticate.
+    if(!validateCardCertificate(crsID, groupID, certificateExpiry, cardPublicKey,
+          terminalPublicKey, cardSignature)) {
+      return false;
+    }
+
+    // Turn card's encoded permanent public key into a PublicKey object.
+    BCECPublicKey cardPermanentPublicKey = (BCECPublicKey)createECPublicKey(cardPublicKey);
+
+    /*
+     * Derive Z.
+     */
+
+    ecDiffieHellman.init(doorEphemeralKeyPair.getPrivate());
+    ecDiffieHellman.doPhase(cardPermanentPublicKey, true);
+    ecDHSecret = ecDiffieHellman.generateSecret();
+
+    // Must now perform SHA-1 on the generated secret, to match the operation of
+    // Javacard.
+    sha1Digest.reset();
+    byte[] secretZ = sha1Digest.digest(ecDHSecret);
+
+    /*
+     * Derive SK_CFRM.
+     */
+
+    // Setup other info byte array.
+    // NOTE: We've omitted ID_sH.
+    // For further details on otherInfo, see
+    // https://www.securetechalliance.org/resources/pdf/OPACITY_Protocol_3.7.pdf,
+    // Annex A. Briefly:
+    //  - 1 is for the algorithm ID of the derived key, SK_CFRM.
+    //  - 8 is for the top 8 bits of OTID_ICC (which is just the card's ephemeral
+    //  public key).
+    //  - 16 is for the top 16 bits of the door terminal's ephemeral public key.
+    //  - AES_KEY_SIZE is for K2.
+    byte[] skcfrmOtherInfo = new byte[1+8+16+AES_KEY_SIZE];
+    short skcfrmInfoOffset = 1;
+    skcfrmOtherInfo[0] = (byte)0x09;
+
+    // Top 8 of OTID_ICC
+    System.arraycopy(otidICC, 0, skcfrmOtherInfo, skcfrmInfoOffset, 8);
+    skcfrmInfoOffset += 8;
+
+    // Top 16 of door's ephemeral public key.
+    byte[] doorEphemeralPubKeyBytes =
+      ((BCECPublicKey)doorEphemeralKeyPair.getPublic()).getQ().getEncoded(false);
+    System.arraycopy(doorEphemeralPubKeyBytes, 0, skcfrmOtherInfo, skcfrmInfoOffset,
+        16);
+    skcfrmInfoOffset += 16;
+
+    // K2
+    System.arraycopy(k2, 0, skcfrmOtherInfo, skcfrmInfoOffset, AES_KEY_SIZE);
+
+    // Now actually derive the key.
+    byte[] keySKCFRM = kdf.deriveKey(secretZ, skcfrmOtherInfo, AES_KEY_SIZE);
+
+    /*
+     * Zeroize Z, Z1, K1, K2.
+     */
+
+    Arrays.fill(secretZ1, (byte)0x00);
+    Arrays.fill(keysK1K2, (byte)0x00);
+    Arrays.fill(k1, (byte)0x00);
+    Arrays.fill(k2, (byte)0x00);
+    Arrays.fill(secretZ, (byte)0x00);
+    Arrays.fill(ecDHSecret, (byte)0x00);
+
+    /*
+     * Check AuthCryptogram_ICC.
+     */
+
+    // First need to generate the MAC.
+    // Setup input data array.
+
+    // This will hold:
+    //  - Top 8 bytes of OTID_ICC
+    //  - Top 16 bytes of door's ephemeral public key.
+    // However, it's length must also be divisible by AES_BLOCK_SIZE, to avoid
+    // the AES CMAC signature object from throwing an error.
+    int authCryptogramInputDataSize = 8+16;
+    /*
+     *if (authCryptogramInputDataSize % AES_BLOCK_SIZE != 0)
+     *  authCryptogramInputDataSize +=
+     *    AES_BLOCK_SIZE-(authCryptogramInputDataSize % AES_BLOCK_SIZE);
+     */
+    byte[] authCryptogramInputData = new byte[authCryptogramInputDataSize];
+
+    // Top 8 OTID_ICC
+    System.arraycopy(otidICC, 0, authCryptogramInputData, 0, 8);
+
+    // Top 16 of door's ephemeral public key.
+    System.arraycopy(doorEphemeralPubKeyBytes, 0, authCryptogramInputData, 8, 16);
+
+    // Declare array to hold CMAC result.
+    byte[] authCryptogramRegenerated = new byte[AES_BLOCK_SIZE];
+    CipherParameters key = new KeyParameter(keySKCFRM);
+    BlockCipher aes = new AESEngine();
+    CBCBlockCipherMac aesCMAC = new CBCBlockCipherMac(aes, 128);
+    aesCMAC.init(key);
+    aesCMAC.update(authCryptogramInputData, 0, authCryptogramInputData.length);
+    aesCMAC.doFinal(authCryptogramRegenerated, 0);
+
+    System.out.println(Hex.encodeHexString(authCryptogram));
+    System.out.println(Hex.encodeHexString(authCryptogramRegenerated));
+
+    // Compare the two MACs.
+    if (!Arrays.equals(authCryptogram, authCryptogramRegenerated)) {
+      System.out.println("AuthCryptogram's didn't match.");
+      return false;
+    }
+
+    /*
+     * Zeroize SK_CFRM.
+     */
+
+    Arrays.fill(keySKCFRM, (byte)0x00);
+
+    return true;
+  }
+
   public static void main (String[] args) {
     CardTerminalAPI api = null;
 
@@ -283,6 +572,25 @@ public class DoorTerminal {
     System.arraycopy(doorEncodedPermanentKey, 0, initiateAuthData, bOff,
         doorEncodedPermanentKey.length);
     bOff += doorEncodedPermanentKey.length;
+
+    // Pre-instantiate all crypto objects to be used in the mutual auth protocol.
+    KeyAgreement ecDH = null;
+    ConcatenationKDF kdf = null;
+    Cipher aesCipher = null;
+    MessageDigest sha1Digest = null;
+    Signature ecdsa = null;
+    try {
+      ecDH = KeyAgreement.getInstance(EC_DIFFIE_HELLMAN_ALGORITHM,
+          BOUNCY_CASTLE_PROVIDER);
+      kdf = new ConcatenationKDF(BOUNCY_CASTLE_PROVIDER);
+      aesCipher = Cipher.getInstance(CIPHER_ALGORITHM, BOUNCY_CASTLE_PROVIDER);
+      sha1Digest = MessageDigest.getInstance("SHA-1", BOUNCY_CASTLE_PROVIDER);
+      ecdsa = Signature.getInstance(DOOR_SIGNATURE_ALGORITHM, BOUNCY_CASTLE_PROVIDER);
+    } catch (Exception e) {
+      System.out.println("Failed to instantiate cryto objects.");
+      e.printStackTrace();
+      return;
+    }
 
     short loopInitialBOff = bOff;
     while (true) {
@@ -382,9 +690,13 @@ public class DoorTerminal {
           ecdsaObj.initVerify(terminalPublicKey);
           ecdsaObj.update(cardSignatureData);
           boolean verified = ecdsaObj.verify(cardSignature);
-          System.out.println(verified);
+          /*
+           *boolean verified = validateCardCertificate(crsID, groupID, certificateExpiry,
+           *    cardPublicKey, ecdsa, terminalPublicKey, cardSignature);
+           *System.out.println(verified);
+           */
 
-          // Now check verify nonce signature.
+          // Now verify nonce signature.
           // First need to turn cardPublicKey byte array into actual PublicKey
           // object.
           PublicKey cardPublicKeyObj = createECPublicKey(cardPublicKey);
@@ -407,9 +719,13 @@ public class DoorTerminal {
          */
         long t1 = System.nanoTime();
         byte[] resp = api.sendInitiateAuthenticationCommand(initiateAuthData);
+        boolean authd = authenticateCardResponse(resp, ecDH, doorPermanentKeyPair,
+            doorEphemeralKeyPair, kdf, aesCipher, sha1Digest, ecdsa,
+            terminalPublicKey);
         long t2 = System.nanoTime();
+
+        System.out.println("Authenticated: " + authd);
         System.out.println((double)(t2-t1)/1000000000.0);
-        System.out.println(Hex.encodeHexString(resp));
       } catch (Exception e) {
         e.printStackTrace();
         return;
@@ -417,7 +733,7 @@ public class DoorTerminal {
 
       try {
         System.out.println("Run complete");
-        Thread.sleep(1000);
+        Thread.sleep(2000);
       } catch (InterruptedException e) {}
     }
   }
