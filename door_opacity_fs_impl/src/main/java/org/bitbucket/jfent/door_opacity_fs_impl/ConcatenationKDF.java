@@ -6,6 +6,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.DigestException;
 import java.nio.ByteBuffer;
+import org.apache.commons.codec.binary.Hex;
 
 public class ConcatenationKDF {
   final int COUNTER_LENGTH = 4;
@@ -46,13 +47,16 @@ public class ConcatenationKDF {
       writeInt(counter, msg, 0);
       hashDigest.reset();
       hashDigest.update(msg);
-      if (counter == numBlocksToGenerate) {
-        byte[] temp = new byte[KDF_HASH_OUTPUT_SIZE];
-        hashDigest.digest(temp, 0, KDF_HASH_OUTPUT_SIZE);
-        System.arraycopy(temp, 0, output, offset, remainder);
-      } else {
-        hashDigest.digest(output, offset, KDF_HASH_OUTPUT_SIZE);
-      }
+      /*
+       *if (counter == numBlocksToGenerate) {
+       *  byte[] temp = new byte[KDF_HASH_OUTPUT_SIZE];
+       *  hashDigest.digest(temp, 0, KDF_HASH_OUTPUT_SIZE);
+       *  System.out.println(Hex.encodeHexString(temp));
+       *  System.arraycopy(temp, 0, output, offset, remainder);
+       *} else {
+       */
+      hashDigest.digest(output, offset, KDF_HASH_OUTPUT_SIZE);
+      //}
       offset += KDF_HASH_OUTPUT_SIZE;
     }
 

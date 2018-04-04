@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.nio.file.Files;
+import java.nio.ByteBuffer;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,6 +34,8 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.BadPaddingException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 import javacard.framework.Util;
@@ -327,7 +330,7 @@ public class DoorTerminal {
       NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException,
       DigestException, IllegalBlockSizeException, BadPaddingException,
       InvalidAlgorithmParameterException, NoSuchAlgorithmException,
-      SignatureException {
+      SignatureException, NoSuchPaddingException, ShortBufferException {
     // Get data from the response buffer.
     int opaqueDataLength = Util.getShort(responseBuffer, (short)0);
     byte[] opaqueData = new byte[opaqueDataLength];
@@ -396,6 +399,8 @@ public class DoorTerminal {
 
     byte[] cardSignature = new byte[SIGNATURE_LENGTH];
     System.arraycopy(certificateData, dOff, cardSignature, 0, SIGNATURE_LENGTH);
+    // Remove any incorrect 0x00 pads on points.
+    cardSignature = checkSignature(cardSignature);
     dOff += SIGNATURE_LENGTH;
 
     short cardPubKeyLength = Util.getShort(certificateData, dOff);
@@ -478,6 +483,11 @@ public class DoorTerminal {
     byte[] keySKCFRM = kdf.deriveKey(secretZ, skcfrmOtherInfo, AES_KEY_SIZE);
 
     /*
+     *System.out.println("SKCFRM_DOOR: " + Hex.encodeHexString(keySKCFRM));
+     *System.out.println("SKCFRM_CARD: " + Hex.encodeHexString(authCryptogram));
+     */
+
+    /*
      * Zeroize Z, Z1, K1, K2.
      */
 
@@ -501,11 +511,9 @@ public class DoorTerminal {
     // However, it's length must also be divisible by AES_BLOCK_SIZE, to avoid
     // the AES CMAC signature object from throwing an error.
     int authCryptogramInputDataSize = 8+16;
-    /*
-     *if (authCryptogramInputDataSize % AES_BLOCK_SIZE != 0)
-     *  authCryptogramInputDataSize +=
-     *    AES_BLOCK_SIZE-(authCryptogramInputDataSize % AES_BLOCK_SIZE);
-     */
+    if (authCryptogramInputDataSize % AES_BLOCK_SIZE != 0)
+      authCryptogramInputDataSize +=
+        AES_BLOCK_SIZE-(authCryptogramInputDataSize % AES_BLOCK_SIZE);
     byte[] authCryptogramInputData = new byte[authCryptogramInputDataSize];
 
     // Top 8 OTID_ICC
@@ -516,15 +524,31 @@ public class DoorTerminal {
 
     // Declare array to hold CMAC result.
     byte[] authCryptogramRegenerated = new byte[AES_BLOCK_SIZE];
-    CipherParameters key = new KeyParameter(keySKCFRM);
     BlockCipher aes = new AESEngine();
+    // Length of MAC is given in bits - 128 bits = 16 bytes.
     CBCBlockCipherMac aesCMAC = new CBCBlockCipherMac(aes, 128);
+    KeyParameter key = new KeyParameter(keySKCFRM);
     aesCMAC.init(key);
     aesCMAC.update(authCryptogramInputData, 0, authCryptogramInputData.length);
     aesCMAC.doFinal(authCryptogramRegenerated, 0);
 
-    System.out.println(Hex.encodeHexString(authCryptogram));
-    System.out.println(Hex.encodeHexString(authCryptogramRegenerated));
+    //byte[] temp = new byte[AES_BLOCK_SIZE];
+    //SecretKeySpec specSKCFRM = new SecretKeySpec(keySKCFRM, "AES/CBC/NoPadding");
+    //Cipher aes = Cipher.getInstance("AES/CBC/NoPadding", BOUNCY_CASTLE_PROVIDER);
+    //aes.init(Cipher.ENCRYPT_MODE, specSKCFRM);
+    //// Encrypt first block.
+    //aes.doFinal(authCryptogramInputData, 0, AES_BLOCK_SIZE, temp, 0);
+    //// XOR second block with encrypted first block
+    //for (int i = AES_BLOCK_SIZE; i < 2*AES_BLOCK_SIZE; i++) {
+      //authCryptogramInputData[i] =
+        //(byte)(temp[i-AES_BLOCK_SIZE] ^ authCryptogramInputData[i]);
+    //}
+    //// Encrypt second block, to get MAC.
+    //aesCipher.doFinal(authCryptogramInputData, AES_BLOCK_SIZE, AES_BLOCK_SIZE,
+        //authCryptogramRegenerated, 0);
+
+    System.out.println("DOOR: " + Hex.encodeHexString(authCryptogramRegenerated));
+    System.out.println("CARD: " + Hex.encodeHexString(authCryptogram));
 
     // Compare the two MACs.
     if (!Arrays.equals(authCryptogram, authCryptogramRegenerated)) {
@@ -627,7 +651,7 @@ public class DoorTerminal {
           // Send BASIC_AUTH command.
           byte[] response = api.sendBasicAuthenticationCommand(nonce);
 
-          System.out.println(Hex.encodeHexString(response));
+          //System.out.println(Hex.encodeHexString(response));
 
           // Put all response data into separate arrays.
           int rOff = 0;
@@ -642,6 +666,7 @@ public class DoorTerminal {
           System.arraycopy(response, rOff, cardSignature, 0, SIGNATURE_LENGTH);
           // Remove any incorrect 0x00 pads on points.
           cardSignature = checkSignature(cardSignature);
+          System.out.println("SIG: " + Hex.encodeHexString(cardSignature));
           rOff += SIGNATURE_LENGTH;
 
           rOff += 2; // Skip over length tag.

@@ -111,6 +111,7 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
   private KeyAgreement ecDiffieHellman;
   private AESKey certificateEncryptionKey;
   private Cipher aesCipher;
+  private Cipher aesCipherCBC;
   private AESKey authCryptogramCMACKey;
   private Signature aesCMACSignature;
   private byte[] certificateData;
@@ -124,6 +125,7 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
   private byte[] skcfrmOtherInfo;
   private byte[] otidICC;
   private byte[] authCryptogramInputData;
+  private byte[] temp;
 
   private OpacityForwardSecrecyImplementationApplet() {
     terminalPublicKey = (ECPublicKey)KeyBuilder.buildKey(TERMINAL_KEY_TYPE,
@@ -155,6 +157,7 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
     certificateEncryptionKey = (AESKey)KeyBuilder.buildKey(AES_KEY_TYPE,
         AES_KEY_BIT_SIZE, false);
     aesCipher = Cipher.getInstance(AES_BLOCK_CIPHER, false);
+    aesCipherCBC = Cipher.getInstance(AES_BLOCK_CIPHER, false);
 
     authCryptogramCMACKey = (AESKey)KeyBuilder.buildKey(AES_KEY_TYPE,
         AES_KEY_BIT_SIZE, false);
@@ -202,6 +205,8 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
         AES_BLOCK_SIZE-(authCryptogramInputDataSize % AES_BLOCK_SIZE);
     authCryptogramInputData = JCSystem.makeTransientByteArray(authCryptogramInputDataSize,
         JCSystem.CLEAR_ON_DESELECT);
+
+    temp = JCSystem.makeTransientByteArray(AES_BLOCK_SIZE, JCSystem.CLEAR_ON_DESELECT);
 
     register();
   }
@@ -690,6 +695,24 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
     Util.setShort(buffer, (short)0, (short)encryptedCertificate.length);
     Util.arrayCopyNonAtomic(encryptedCertificate, (short)0, buffer, (short)2,
         (short)encryptedCertificate.length);
+
+    //aesCipherCBC.init(authCryptogramCMACKey, Cipher.MODE_ENCRYPT);
+
+    //// Encrypt first block.
+    //aesCipherCBC.doFinal(authCryptogramInputData, (short)0, AES_BLOCK_SIZE, temp,
+        //(short)0);
+    //// XOR second block with encrypted first block
+    //for (short i = AES_BLOCK_SIZE; i < 2*AES_BLOCK_SIZE; i++) {
+      //temp[(short)(i-AES_BLOCK_SIZE)] =
+        //(byte)(temp[(short)(i-AES_BLOCK_SIZE)] ^ authCryptogramInputData[i]);
+    //}
+    //// Encrypt second block, to get MAC.
+    //aesCipherCBC.doFinal(temp, (short)0, AES_BLOCK_SIZE,
+        //buffer, (short)(encryptedCertificate.length+KEY_PARAM_LENGTH_TAG));
+
+    // TODO: REMOVE
+    Util.arrayCopyNonAtomic(temp, (short)0, buffer,
+        (short)(encryptedCertificate.length+KEY_PARAM_LENGTH_TAG), AES_CMAC_OUTPUT_SIZE);
 
     // Initiate CMAC signature object.
     aesCMACSignature.init(authCryptogramCMACKey, Signature.MODE_SIGN);
