@@ -1,0 +1,39 @@
+\begin{thebibliography}{1}
+
+\bibitem{jcalgtest}
+{JCAlgTest}.
+\newblock \url{https://github.com/crocs-muni/JCAlgTest}.
+
+\bibitem{ISO14443}
+ISO/IEC 14443.
+\newblock Identification cards --- {Contactless} integrated --- circuit(s)
+  cards --- {Proximity} cards.
+\newblock Standard, International Organization for Standardization, April 2000.
+
+\bibitem{ISO7816}
+ISO/IEC 7816-4.
+\newblock Identification cards --- {Integrated} circuit cards --- {Part} 4:
+  {Organization}, security and commands for interchange.
+\newblock Standard, International Organization for Standardization, January
+  2005.
+
+\bibitem{OPACITY}
+ActivIdentity.
+\newblock Open protocol for access control identification and ticketing with
+  privacy, July 2011.
+\newblock
+  \url{https://www.securetechalliance.org/resources/pdf/OPACITY_Protocol_3.7.pdf}.
+
+\bibitem{darkside}
+Nicolas~T. Courtois.
+\newblock The dark side of security by obscurity, March 2009.
+\newblock \url{https://eprint.iacr.org/2009/137.pdf}.
+
+\bibitem{mifarebruteforce}
+Cihangir Tezcan.
+\newblock Brute force cryptanalysis of {MIFARE} classic cards on {GPU}, January
+  2017.
+\newblock
+  \url{https://www.researchgate.net/publication/315848177_Brute_Force_Cryptanalysis_of_MIFARE_Classic_Cards_on_GPU}.
+
+\end{thebibliography}

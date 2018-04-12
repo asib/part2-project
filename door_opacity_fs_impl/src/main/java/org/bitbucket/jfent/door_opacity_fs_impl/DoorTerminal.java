@@ -532,24 +532,6 @@ public class DoorTerminal {
     aesCMAC.update(authCryptogramInputData, 0, authCryptogramInputData.length);
     aesCMAC.doFinal(authCryptogramRegenerated, 0);
 
-    //byte[] temp = new byte[AES_BLOCK_SIZE];
-    //SecretKeySpec specSKCFRM = new SecretKeySpec(keySKCFRM, "AES/CBC/NoPadding");
-    //Cipher aes = Cipher.getInstance("AES/CBC/NoPadding", BOUNCY_CASTLE_PROVIDER);
-    //aes.init(Cipher.ENCRYPT_MODE, specSKCFRM);
-    //// Encrypt first block.
-    //aes.doFinal(authCryptogramInputData, 0, AES_BLOCK_SIZE, temp, 0);
-    //// XOR second block with encrypted first block
-    //for (int i = AES_BLOCK_SIZE; i < 2*AES_BLOCK_SIZE; i++) {
-      //authCryptogramInputData[i] =
-        //(byte)(temp[i-AES_BLOCK_SIZE] ^ authCryptogramInputData[i]);
-    //}
-    //// Encrypt second block, to get MAC.
-    //aesCipher.doFinal(authCryptogramInputData, AES_BLOCK_SIZE, AES_BLOCK_SIZE,
-        //authCryptogramRegenerated, 0);
-
-    System.out.println("DOOR: " + Hex.encodeHexString(authCryptogramRegenerated));
-    System.out.println("CARD: " + Hex.encodeHexString(authCryptogram));
-
     // Compare the two MACs.
     if (!Arrays.equals(authCryptogram, authCryptogramRegenerated)) {
       System.out.println("AuthCryptogram's didn't match.");
