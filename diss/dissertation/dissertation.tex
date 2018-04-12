@@ -97,7 +97,7 @@ extent for a comparable purpose.
 
 \section{Smart-cards}
 
-In recent years, contactless smart-cards (also known as integrated circuit cards, or ICCs) have become extremely popular for a great number of applications. Perhaps one of the first major applications was by Transport for London, whereby contactless ``Oyster cards'' could be used in place of paper tickets for travel on buses and the underground railway system. As they've become more affordable and the development ecosystem has expanded, their use has become even more widespread. In the UK, contactless bank cards are commonplace\footnote{Strictly speaking, these are dual interface cards, as they have an electrical contact located on the outside of the card which can be used for a hard connection, as well as the internal antenna which allows for contactless communication.}, and the University of Cambridge distributes contactless university cards to students, which can be used to gain access to colleges/departments. Some colleges even allow students to pay for food and drink with these cards.
+In recent years, contactless smart-cards (also known as integrated circuit cards, or ICCs) have become extremely popular for a great number of applications. Perhaps one of the first major applications was by Transport for London, whereby contactless ``Oyster cards'' could be used in place of paper tickets for travel on buses and the underground railway system. As they've become more affordable and the development ecosystem has expanded, their use has become even more widespread. In the UK, contactless bank cards\footnote{Strictly speaking, these are dual interface cards, as they have an electrical contact located on the outside of the card which can be used for a hard connection, as well as the internal antenna which allows for contactless communication.} are commonplace, and the University of Cambridge distributes contactless university cards to students, which can be used to gain access to colleges/departments. Some colleges even allow students to pay for food and drink with these cards.
 
 Contactless smart-cards come in two kinds: memory cards and microprocessor cards. Both types have an antenna and some form of memory, with microprocessor cards also having a CPU. Thus, memory cards have no ability to process data on-card. Neither type of card has a battery. Instead, the card is powered by the card reader through radio-frequency induction. As a result, smart-cards are very low power and complex computations take significantly longer than they would on an inexpensive laptop or phone. Communication between the card and card reader also occurs over radio frequency.
 
@@ -168,7 +168,7 @@ The combination of the nested authentication and Dark-Side attacks allows an adv
 
 \subsubsection{Cloning cards}
 
-Once all the keys have been recovered from a card, all the data can be read from it and written to another card, producing a clone. There's one slight issue here, however. As mentioned earlier, the first block of the first sector of a MIFARE Classic card contains a special piece of \textbf{read-only} data --- the UID. On legitimate MIFARE Classic cards, this value is burned onto the card during manufacturing, and is indeed unchangeable. However, there exist unofficial cards which emulate the MIFARE Classic system and have a programmable UID\footnote{Such as the Fundan Microelectronics FM11RF08.}. With one of these cards, an adversary is able to create an exact clone of any legitimate card.
+Once all the keys have been recovered from a card, all the data can be read from it and written to another card, producing a clone. There's one slight issue here, however. As mentioned earlier, the first block of the first sector of a MIFARE Classic card contains a special piece of \textbf{read-only} data --- the UID. On legitimate MIFARE Classic cards, this value is burned onto the card during manufacturing, and is indeed unchangeable. However, there exist unofficial cards which emulate the MIFARE Classic system and have a programmable UID.\footnote{Such as the Fundan Microelectronics FM11RF08.} With one of these cards, an adversary is able to create an exact clone of any legitimate card.
 
 \chapter{Preparation}
 
@@ -179,7 +179,7 @@ This project makes significant use of the material from Security I and Security 
 
 \section{Communication between card and reader}
 
-The format for communication between a card and a reader is defined by ISO 7816-4 \cite{ISO7816}. It states that the basic unit of communication is the application protocol data unit (APDU). There are two categories of APDUs: commands APDUs and response APDUs. The reader is always the party that initiates communications and thus only ever sends command APDUs. Correspondingly, the card always waits for commands from the reader and thus only ever sends response APDUs.
+The format for communication between a card and a reader is defined by ISO 7816-4 \cite{ISO78164}. It states that the basic unit of communication is the application protocol data unit (APDU). There are two categories of APDUs: commands APDUs and response APDUs. The reader is always the party that initiates communications and thus only ever sends command APDUs. Correspondingly, the card always waits for commands from the reader and thus only ever sends response APDUs.
 
 \subsection{Command APDU}
 
@@ -221,7 +221,53 @@ Response APDUs consist of an optional body and a required 2-byte trailer. The op
 
 \section{JavaCard}
 
-The JavaCard platform allows Java-based applets to be run securely on smart-cards. The choice to use a smart-card that implemented JavaCard was made for a few reasons. Firstly, the development ecosystem is very mature --- Oracle make available extensive documentation and resources, perhaps most importantly of which are detailed API references. 
+The JavaCard platform allows Java-based applets to be run securely on smart-cards with limited memory and processing capabilities. The choice to use a smart-card that implemented JavaCard was made for a few reasons. Firstly, the development ecosystem is very mature --- Oracle make available extensive documentation and resources, perhaps most importantly of which are detailed API references. One article in particular was an excellent introduction to writing JavaCard applets \cite{writingapplets}. There's also an active development community, and I was able to find solutions to many of the problems that arose during the implementation stage by searching forums.\footnote{E.g. https://www.javacardos.com/javacardforum and Stack Overflow.} Because of the fact that JavaCard uses a subset of the Java language, there's no chance for security vulnerabilities resulting from pointer arithmetic. JavaCard also makes extending a card's functionality very simple, as multiple applets can be deployed on a card and new applets can be installed even after a card has been issued.
+
+\subsection{Language}
+
+The JavaCard Virtual Machine (JCVM) specification defines an allowed subset of the Java programming language. Perhaps one of the biggest differences is that only the \texttt{boolean}, \texttt{byte} and \texttt{short} types are permitted --- support for \texttt{int} is optional, and the card I used for this project didn't support it. Further, JavaCard does not require a garbage collector and so one may not assume that objects which are allocated are ever deallocated. A further discussion of memory occurs in \autoref{javacardmemory}. Multi-threading is not supported; although multiple applets can reside on a card, only one can be active at any one time.
+
+\subsection{JavaCard Virtual Machine}
+
+The VM for the JavaCard platform is implemented in two parts, with one part external to the card and the other running on the card itself. The on-card VM interprets bytecode, manages classes and objects, and so on. The external part, referred to as the \emph{converter tool}, loads, verifies, and further prepares the Java classes in a card applet for on-card execution. The output of the converter tool is a Converted Applet (CAP) file, a file that contains all the classes in a Java package in a loadable, executable binary representation. The converter verifies that the classes conform to the Java Card specification. The CAP file can then be installed onto a card.
+
+\begin{figure}[tbh]
+\centerline{\includegraphics{figures/capconverter.eps}}
+\caption{CAP Converter Tool}
+\label{capconverter}
+\end{figure}
+
+\subsection{Applets}
+
+Applications that run on the card are called applets. Each applet on the card must be uniquely identified by an Application ID (AID). An AID, as defined in ISO 7816-5 \cite{ISO78165}, is a sequence of between 5 and 15 bytes. All applets must extend the \texttt{javacard.framework.Applet} abstract base class.
+
+\subsubsection{Applet life-cycle}
+
+The applet life-cycle begins when the applet is downloaded to the card and the JavaCard Runtime Environment (JCRE) invokes the applet's static \texttt{Applet.install()} method, and the applet registers itself with the JCRE by invoking \texttt{Applet.register()}. Once the applet is installed and registered, it is in the unselected state, available for selection and APDU processing. While in the unselected state, the applet is inactive. An applet gets selected for APDU processing when the host application asks the JCRE to select a specific applet in the card (by instructing the card reader to send a \texttt{SELECT} APDU). To notify the applet that a host application has selected it, the JCRE calls its \texttt{select()} method; the applet typically performs appropriate initialization in preparation for APDU processing.
+
+Once selection is done, the JCRE passes incoming APDU commands to the applet for processing by invoking its \texttt{process()} method.
+
+Applet deselection occurs when the host application tells the JCRE to select another applet. The JCRE notifies the active applet that it has been deselected by calling its \texttt{deselect()} method, which typically performs any clean-up logic and returns the applet to the inactive, unselected state. If power is lost, the applet is reset to the inactive state without the \texttt{deselect()} method being called. \autoref{appletlifecycle} summarises the applet life-cycle.
+
+\begin{figure}[tbh]
+\centerline{\includegraphics{figures/appletlifecycle.eps}}
+\caption{Applet Life-Cycle}
+\label{appletlifecycle}
+\end{figure}
+
+\subsection{Memory organisation} \label{javacardmemory}
+
+JavaCard smart-cards offer two types of memory: transient Random Access Memory (RAM) and persistent Electronically Erasable Programmable Read-Only Memory (EEPROM). Typically, much more EEPROM than RAM memory is available --- the J3A040 has 40KB of EEPROM but roughly 6KB of RAM. However, RAM read/write speeds are faster by an approximate factor of $10^3$.
+
+\subsubsection{Transient RAM}
+
+Transient memory is erased on power down and is thus only suitable for storing temporary data. As an example, during execution of my OPACITY-FS inspired protocol, several encryption keys must be derived using a key derivation function (KDF). These keys are only needed for the duration of the protocol execution, and thus do not need to persist when the card loses power. Therefore, it would be perfectly suitable to use transient buffers to hold them. Transient objects can only be created via the JavaCard API, e.g. to create a transient byte array, one must call \texttt{JCSystem.makeTransientByteArray()}.
+
+Note that, although the actual memory is transient, the reference that points to the memory is persistent. Thus a transient object should only ever be created once, and the ideal place to do this is in the applet's constructor (which should be called by the \texttt{install()} method).
+
+\subsubsection{Persistent EEPROM}
+
+Any time the \texttt{new} keyword is used, a persistent object will be created. As stated earlier, certain cards do not actually have a garbage collector. Thus it's very important to ensure careful use of EEPROM, since once created, an object may never be erased and memory leaks can easily occur. Writes to EEPROM are atomic, meaning that there's no need for concern over data inconsistencies. Unfortunately, writes also wear out the physical memory circuit, and thus frequent writes will reduce the lifetime of the card.
 
 \section{Resources}
 

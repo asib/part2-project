@@ -4,18 +4,30 @@
 {JCAlgTest}.
 \newblock \url{https://github.com/crocs-muni/JCAlgTest}.
 
+\bibitem{writingapplets}
+Writing a {JavaCard} applet.
+\newblock
+  \url{http://www.oracle.com/technetwork/java/javacard/intro-139322.html}.
+
 \bibitem{ISO14443}
 ISO/IEC 14443.
 \newblock Identification cards --- {Contactless} integrated --- circuit(s)
   cards --- {Proximity} cards.
 \newblock Standard, International Organization for Standardization, April 2000.
 
-\bibitem{ISO7816}
+\bibitem{ISO78164}
 ISO/IEC 7816-4.
 \newblock Identification cards --- {Integrated} circuit cards --- {Part} 4:
   {Organization}, security and commands for interchange.
 \newblock Standard, International Organization for Standardization, January
   2005.
+
+\bibitem{ISO78165}
+ISO/IEC 7816-5.
+\newblock Identification cards --- {Integrated} circuit cards --- {Part} 5:
+  {Registration} of application providers.
+\newblock Standard, International Organization for Standardization, December
+  2004.
 
 \bibitem{OPACITY}
 ActivIdentity.

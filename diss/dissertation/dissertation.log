@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.11.6)  12 APR 2018 19:32
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.11.6)  12 APR 2018 23:17
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -359,38 +359,38 @@ LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 120.
  [12]
 Package epstopdf Info: Source file: <figures/mifarememory1.eps>
-(epstopdf)                    date: 2018-04-11 21:28:16
-(epstopdf)                    size: 183611 bytes
+(epstopdf)                    date: 2018-04-12 22:02:43
+(epstopdf)                    size: 264805 bytes
 (epstopdf)             Output file: <figures/mifarememory1-eps-converted-to.pdf
 >
-(epstopdf)                    date: 2018-04-11 21:30:57
-(epstopdf)                    size: 74124 bytes
+(epstopdf)                    date: 2018-04-12 22:02:47
+(epstopdf)                    size: 81948 bytes
 (epstopdf)             Command: <repstopdf --outfile=figures/mifarememory1-eps-
 converted-to.pdf figures/mifarememory1.eps>
 (epstopdf)             \includegraphics on input line 131.
 Package epstopdf Info: Output file is already uptodate.
 
-<figures/mifarememory1-eps-converted-to.pdf, id=207, 408.52625pt x 313.17pt>
+<figures/mifarememory1-eps-converted-to.pdf, id=231, 411.5375pt x 322.20375pt>
 File: figures/mifarememory1-eps-converted-to.pdf Graphic file (type pdf)
 
 <use figures/mifarememory1-eps-converted-to.pdf>
 Package pdftex.def Info: figures/mifarememory1-eps-converted-to.pdf used on inp
 ut line 131.
-(pdftex.def)             Requested size: 408.52525pt x 313.16922pt.
+(pdftex.def)             Requested size: 411.5365pt x 322.20296pt.
  [13 <./figures/mifarememory1-eps-converted-to.pdf>]
 Package epstopdf Info: Source file: <figures/mifarememory2.eps>
-(epstopdf)                    date: 2018-04-11 21:32:16
-(epstopdf)                    size: 182792 bytes
+(epstopdf)                    date: 2018-04-12 22:03:25
+(epstopdf)                    size: 212904 bytes
 (epstopdf)             Output file: <figures/mifarememory2-eps-converted-to.pdf
 >
-(epstopdf)                    date: 2018-04-11 21:32:21
-(epstopdf)                    size: 83700 bytes
+(epstopdf)                    date: 2018-04-12 22:03:31
+(epstopdf)                    size: 83778 bytes
 (epstopdf)             Command: <repstopdf --outfile=figures/mifarememory2-eps-
 converted-to.pdf figures/mifarememory2.eps>
 (epstopdf)             \includegraphics on input line 139.
 Package epstopdf Info: Output file is already uptodate.
 
-<figures/mifarememory2-eps-converted-to.pdf, id=217, 374.39874pt x 155.58125pt>
+<figures/mifarememory2-eps-converted-to.pdf, id=241, 374.39874pt x 155.58125pt>
 File: figures/mifarememory2-eps-converted-to.pdf Graphic file (type pdf)
 <use figures/mifarememory2-eps-converted-to.pdf>
 Package pdftex.def Info: figures/mifarememory2-eps-converted-to.pdf used on inp
@@ -402,17 +402,17 @@ Chapter 2.
 
 ]
 Package epstopdf Info: Source file: <figures/commandapdu.eps>
-(epstopdf)                    date: 2018-04-12 18:48:49
-(epstopdf)                    size: 40083 bytes
+(epstopdf)                    date: 2018-04-12 22:00:38
+(epstopdf)                    size: 53130 bytes
 (epstopdf)             Output file: <figures/commandapdu-eps-converted-to.pdf>
-(epstopdf)                    date: 2018-04-12 18:48:53
-(epstopdf)                    size: 17532 bytes
+(epstopdf)                    date: 2018-04-12 22:00:42
+(epstopdf)                    size: 17570 bytes
 (epstopdf)             Command: <repstopdf --outfile=figures/commandapdu-eps-co
 nverted-to.pdf figures/commandapdu.eps>
 (epstopdf)             \includegraphics on input line 209.
 Package epstopdf Info: Output file is already uptodate.
 
-<figures/commandapdu-eps-converted-to.pdf, id=256, 358.33875pt x 93.34875pt>
+<figures/commandapdu-eps-converted-to.pdf, id=280, 358.33875pt x 93.34875pt>
 File: figures/commandapdu-eps-converted-to.pdf Graphic file (type pdf)
 
 <use figures/commandapdu-eps-converted-to.pdf>
@@ -420,18 +420,18 @@ Package pdftex.def Info: figures/commandapdu-eps-converted-to.pdf used on input
  line 209.
 (pdftex.def)             Requested size: 358.33788pt x 93.34851pt.
 Package epstopdf Info: Source file: <figures/responseapdu.eps>
-(epstopdf)                    date: 2018-04-12 19:02:27
-(epstopdf)                    size: 35997 bytes
+(epstopdf)                    date: 2018-04-12 22:01:05
+(epstopdf)                    size: 45318 bytes
 (epstopdf)             Output file: <figures/responseapdu-eps-converted-to.pdf>
 
-(epstopdf)                    date: 2018-04-12 19:02:32
-(epstopdf)                    size: 16779 bytes
+(epstopdf)                    date: 2018-04-12 22:01:14
+(epstopdf)                    size: 16812 bytes
 (epstopdf)             Command: <repstopdf --outfile=figures/responseapdu-eps-c
 onverted-to.pdf figures/responseapdu.eps>
 (epstopdf)             \includegraphics on input line 219.
 Package epstopdf Info: Output file is already uptodate.
 
-<figures/responseapdu-eps-converted-to.pdf, id=258, 202.7575pt x 93.34875pt>
+<figures/responseapdu-eps-converted-to.pdf, id=282, 202.7575pt x 93.34875pt>
 File: figures/responseapdu-eps-converted-to.pdf Graphic file (type pdf)
 
 <use figures/responseapdu-eps-converted-to.pdf>
@@ -439,43 +439,83 @@ Package pdftex.def Info: figures/responseapdu-eps-converted-to.pdf used on inpu
 t line 219.
 (pdftex.def)             Requested size: 202.757pt x 93.34851pt.
  [18 <./figures/commandapdu-eps-converted-to.pdf> <./figures/responseapdu-eps-c
-onverted-to.pdf>] [19] [20
+onverted-to.pdf>]
+Package epstopdf Info: Source file: <figures/capconverter.eps>
+(epstopdf)                    date: 2018-04-12 22:00:08
+(epstopdf)                    size: 46987 bytes
+(epstopdf)             Output file: <figures/capconverter-eps-converted-to.pdf>
 
-]
+(epstopdf)                    date: 2018-04-12 22:00:14
+(epstopdf)                    size: 10629 bytes
+(epstopdf)             Command: <repstopdf --outfile=figures/capconverter-eps-c
+onverted-to.pdf figures/capconverter.eps>
+(epstopdf)             \includegraphics on input line 237.
+Package epstopdf Info: Output file is already uptodate.
+
+<figures/capconverter-eps-converted-to.pdf, id=295, 466.74374pt x 82.3075pt>
+File: figures/capconverter-eps-converted-to.pdf Graphic file (type pdf)
+
+<use figures/capconverter-eps-converted-to.pdf>
+Package pdftex.def Info: figures/capconverter-eps-converted-to.pdf used on inpu
+t line 237.
+(pdftex.def)             Requested size: 466.7426pt x 82.30728pt.
+ [19 <./figures/capconverter-eps-converted-to.pdf>]
+Package epstopdf Info: Source file: <figures/appletlifecycle.eps>
+(epstopdf)                    date: 2018-04-12 22:33:50
+(epstopdf)                    size: 161540 bytes
+(epstopdf)             Output file: <figures/appletlifecycle-eps-converted-to.p
+df>
+(epstopdf)                    date: 2018-04-12 22:35:46
+(epstopdf)                    size: 38186 bytes
+(epstopdf)             Command: <repstopdf --outfile=figures/appletlifecycle-ep
+s-converted-to.pdf figures/appletlifecycle.eps>
+(epstopdf)             \includegraphics on input line 255.
+Package epstopdf Info: Output file is already uptodate.
+
+<figures/appletlifecycle-eps-converted-to.pdf, id=308, 483.8075pt x 255.95625pt
+>
+File: figures/appletlifecycle-eps-converted-to.pdf Graphic file (type pdf)
+ <use figures/appletlifecycle-eps-converted-to.pdf>
+Package pdftex.def Info: figures/appletlifecycle-eps-converted-to.pdf used on i
+nput line 255.
+(pdftex.def)             Requested size: 483.80632pt x 255.95561pt.
+ [20 <./figures/appletlifecycle-eps-converted-to.pdf>] [21] [22]
 Chapter 3.
-[21] [22
+[23
+
+] [24
 
 ]
 Chapter 4.
-[23] [24
+[25] [26
 
 ]
 Chapter 5.
-(./dissertation.bbl [25] [26
+(./dissertation.bbl [27] [28
 
-]) [27] [28
+]) [29] [30
 
 ]
 Appendix A.
-(../proposal/proposal.tex [29] [30] [31] [32])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 272.
- [33]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 272.
+(../proposal/proposal.tex [31] [32] [33] [34])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 318.
+ [35]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 318.
  (./dissertation.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 272.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 272.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 318.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 318.
 Package rerunfilecheck Info: File `dissertation.out' has not changed.
-(rerunfilecheck)             Checksum: 0502355F9A6A197E57C7BB6EAF2977CF;1450.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 272.
+(rerunfilecheck)             Checksum: 53539157E87DAAAEC0487BC20F5DEDD7;1724.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 318.
  ) 
 Here is how much of TeX's memory you used:
- 5855 strings out of 492995
- 87101 string characters out of 6132704
- 178799 words of memory out of 5000000
- 9257 multiletter control sequences out of 15000+600000
+ 5888 strings out of 492995
+ 87835 string characters out of 6132704
+ 179012 words of memory out of 5000000
+ 9274 multiletter control sequences out of 15000+600000
  10589 words of font info for 37 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 29i,8n,32p,1868b,377s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 29i,8n,32p,1868b,385s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
 ></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb>
 </usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></
@@ -487,10 +527,10 @@ texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmsl12.pfb></usr/local/t
 exlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/te
 xlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/local/tex
 live/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on dissertation.pdf (33 pages, 363264 bytes).
+Output written on dissertation.pdf (35 pages, 425436 bytes).
 PDF statistics:
- 421 PDF objects out of 1000 (max. 8388607)
- 367 compressed objects within 4 object streams
- 103 named destinations out of 1000 (max. 500000)
- 213 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 476 PDF objects out of 1000 (max. 8388607)
+ 417 compressed objects within 5 object streams
+ 117 named destinations out of 1000 (max. 500000)
+ 255 words of extra memory for PDF output out of 10000 (max. 10000000)
 
