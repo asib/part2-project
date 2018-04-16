@@ -290,7 +290,7 @@ Before I was able to begin the implementation stage, I ordered the following ite
 \begin{itemize}
 \item Identiv SCL3711 --- A USB smart-card reader. I had originally intended to use this reader, but discovered that, despite the claims of the manufacturer, it was not compatible with my operating system (OSX 10.11, El Capitan).
 \item ACS ACR122T --- alternative USB smart-card reader that was compatible.
-\item NXP J3A040 CL --- a programmable contactless-only smart-card with 40K of EEPROM memory, implementing JavaCard 2.2.2 and Global Platform 2.1.1, and conforming to ISO 14443-A. I chose this card because it is relatively cheap and it supports many of the cryptographic algorithms that I needed in order to implement an authentication protocol based on asymmetric cryptography\footnote{E.g. support for ECDSA (and AES, which is used in the advanced protocol that I implemented).}. Note that cards may support some algorithms but only for certain key sizes. For example, the J3A040 only supports ECDSA keys of up to 192 bits. Details of what algorithms and key sizes a card supports can be found by using JCAlgTest \cite{jcalgtest}.
+\item NXP J3A040 CL --- a programmable contactless-only smart-card with 40K of EEPROM memory, implementing JavaCard 2.2.2 and Global Platform 2.1.1, and conforming to ISO 14443-A. I chose this card because it is relatively cheap and it supports many of the cryptographic algorithms that I needed in order to implement an authentication protocol based on asymmetric cryptography\footnote{E.g. support for ECDSA (and AES, which is used in the mutual authentication protocol that I implemented).}. Note that cards may support some algorithms but only for certain key sizes. For example, the J3A040 only supports ECDSA keys of up to 192 bits. Details of what algorithms and key sizes a card supports can be found by using JCAlgTest \cite{jcalgtest}.
 \end{itemize}
 
 \subsection{GlobalPlatform and GPShell}
@@ -416,9 +416,26 @@ The basic authentication protocol is relatively simple. The reader begins by gen
 \section{Mutual authentication protocol}
 \label{mutualauth}
 
-\blindtext
+The mutual authentication protocol is based on the OPACITY \cite{OPACITY} Full Secrecy (FS) protocol, the main difference being the omission of persistent binding (PB). The reason for this is explained in \autoref{opacityomissions}.
+
+This protocol is quite different from the basic protocol, in that it uses EC Diffie-Hellman (ECDH) as the main asymmetric key algorithm, instead of ECDSA. Further, ephemeral EC key pairs play the role of nonces --- that is, to protect against replay attacks. Regarding notation, $d_{xy}$ refers to a private EC key, where $x$ is either $e$, meaning ephemeral, or $s$, meaning permanent\footnote{The permanent keys are the ones given to the reader and card during provisioning.}, and $y$ is either $H$, the reader (host), or $ICC$, the card (integrated circuit card). For example, $d_{eICC}$ refers to the card's ephemeral private key. In a similar way, $Q_{xy}$ refers to a public key. $C_{H}$ refers to the reader's \emph{certificate}, which is simply its permanent public key and the matching signature. $C_{ICC}$ refers to the card's certificate, which includes all the data used to generate the card signature, as well as the signature itself. $T_x(y)$ means the top $x$ bits of $y$. Finally, $SK$ refers to a symmetric key.
+
+The protocol begins with the reader generating an ephemeral key pair, ($d_{eH}$; $Q_{eH}$). The reader then sends the card its certificate, $C_H$, and the public ephemeral key, $Q_{eH}$. The card validates $C_H$ using the provisioning terminal's public key, which it stored during provisioning, and extracts $Q_{sH}$. Before proceeding, it ensures that $Q_{eH}$ is a valid EC key.\footnote{Further, it checks that the key belongs to the EC domain. For this project, the Prime192v1 curve was used.} It then generates its own ephemeral key pair, ($d_{eICC}$; $Q_{eICC}$). Now, it derives a secret, $Z1$, by performing ECDH with ($d_{eICC}$; $Q_{sH}$). By passing this secret to a key derivation function (KDF), it derives two secret keys, $K1$ and $K2$. The card encrypts its own certificate, $C_{ICC}$, using AES-128 with $K1$, to get $OpaqueData_{ICC}$. A second secret, $Z$, is derived using ECDH with ($d_{sICC}$; $Q_{eH}$). Now a third secret key, $SK_{CFRM}$ is derived by passing $Z$ to a KDF. $K2$ is also used by the KDF in deriving $SK_{CFRM}$. The final card-side step is to generate a message authentication code (MAC). The card generates this MAC using CBC-MAC, with AES-128 as the underlying block cipher and $SK_{CFRM}$ as the key. The data passed to CBC-MAC is $T_8(Q_{eICC})$ concatenated with $T_{16}(Q_{eH})$. The MAC is referred to as $AuthCryptogram_{ICC}$. Once all this has been done, the card responds to the reader with ($OpaqueData_{ICC} \vert AuthCryptogram_{ICC} \vert Q_{eICC}$). The reader then essentially mirrors this exact sequence of computations with two key differences. Firstly, the ECDH calls use different keys, since private keys may never leave their owner. For example, to derive $Z1$, the reader calls ECDH with ($d_{sH}$; $Q_{eICC}$) instead of ($d_{eICC}$; $Q_{sH}$). Notice that because we used $d_{eICC}$ on the card-side, we use $Q_{eICC}$ on the reader-side, and similarly for the other two keys used. The nature of ECDH is that if this is the case, the derived secret is the same for both calls. Thus the two sides can derive the same secret without revealing their private keys. The other difference is that instead of encrypting the card certificate, the reader will decrypt $OpaqueData_{ICC}$ to \emph{retrieve} $C_{ICC}$. Also, after checking that $AuthCryptogram_{ICC}$ matches the MAC that the reader produced, the reader will check the card's expiry date and group ID to ensure access is allowed. If all these checks pass, the reader grants access. A diagram of the protocol is shown in \autoref{fig:mutualauth}.
+
+\begin{figure}[tbh]
+\centerline{\includegraphics[scale=0.8]{figures/mutualauth.eps}}
+\caption{Mutual authentication protocol}
+\label{fig:mutualauth}
+\end{figure}
 
 \subsection{Concatenation KDF}
+
+The KDF used in the protocol is the concatenation KDF as specified in NIST SP800-56A \cite{nistsp80056a} (\S5.8.1). It takes as arguments a key, the desired length of the derived keying material and some ``other information''. In the case of this protocol, the other information is defined as in Annex A of \cite{OPACITY}. Briefly, if $SK_1, ..., SK_p =  KDF(Z, len, info(A_1, ..., A_m)$, then $info(A_1, ..., A_m) = AlgoID(SK_1)~\vert~...~\vert~AlgoID(SK_p)~\vert~A_1~\vert~...~\vert~A_m$, where AlgoID for this protocol is always 0x09, the ID for an AES-128 key, as defined in Annex A of \cite{OPACITY}.
+
+\subsection{Omitted features of OPACITY-FS}
+\label{opacityomissions}
+
+\subsection{Mutual authentication and user untraceability}
 
 \blindtext
 

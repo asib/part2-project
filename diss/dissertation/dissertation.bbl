@@ -60,6 +60,13 @@ ActivIdentity.
 \newblock
   \url{https://www.securetechalliance.org/resources/pdf/OPACITY_Protocol_3.7.pdf}.
 
+\bibitem{nistsp80056a}
+Elaine Barker, Don Johnson, and Miles Smid.
+\newblock Recommendation for pair-wise key establishment schemes using discrete
+  logarithm cryptography, March 2007.
+\newblock
+  \url{https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-56ar.pdf}.
+
 \bibitem{darkside}
 Nicolas~T. Courtois.
 \newblock The dark side of security by obscurity, March 2009.

@@ -38,9 +38,11 @@
 \contentsline {subsubsection}{ECDSA signature format}{29}{section*.20}
 \contentsline {section}{\numberline {3.2}Basic authentication protocol}{30}{section.3.2}
 \contentsline {section}{\numberline {3.3}Mutual authentication protocol}{30}{section.3.3}
-\contentsline {subsection}{\numberline {3.3.1}Concatenation KDF}{31}{subsection.3.3.1}
-\contentsline {chapter}{\numberline {4}Evaluation}{33}{chapter.4}
-\contentsline {chapter}{\numberline {5}Conclusion}{35}{chapter.5}
-\contentsline {chapter}{Bibliography}{35}{chapter.5}
-\contentsline {chapter}{\numberline {A}Project Proposal}{39}{appendix.A}
-\contentsline {chapter}{\numberline {B}Card Application Build File}{45}{appendix.B}
+\contentsline {subsection}{\numberline {3.3.1}Concatenation KDF}{32}{subsection.3.3.1}
+\contentsline {subsection}{\numberline {3.3.2}Omitted features of OPACITY-FS}{32}{subsection.3.3.2}
+\contentsline {subsection}{\numberline {3.3.3}Mutual authentication and user untraceability}{32}{subsection.3.3.3}
+\contentsline {chapter}{\numberline {4}Evaluation}{35}{chapter.4}
+\contentsline {chapter}{\numberline {5}Conclusion}{37}{chapter.5}
+\contentsline {chapter}{Bibliography}{37}{chapter.5}
+\contentsline {chapter}{\numberline {A}Project Proposal}{41}{appendix.A}
+\contentsline {chapter}{\numberline {B}Card Application Build File}{47}{appendix.B}

@@ -26,8 +26,10 @@
 \BOOKMARK [1][-]{section.3.2}{Basic authentication protocol}{chapter.3}% 26
 \BOOKMARK [1][-]{section.3.3}{Mutual authentication protocol}{chapter.3}% 27
 \BOOKMARK [2][-]{subsection.3.3.1}{Concatenation KDF}{section.3.3}% 28
-\BOOKMARK [0][-]{chapter.4}{Evaluation}{}% 29
-\BOOKMARK [0][-]{chapter.5}{Conclusion}{}% 30
-\BOOKMARK [0][-]{chapter.5}{Bibliography}{}% 31
-\BOOKMARK [0][-]{appendix.A}{Project Proposal}{}% 32
-\BOOKMARK [0][-]{appendix.B}{Card Application Build File}{}% 33
+\BOOKMARK [2][-]{subsection.3.3.2}{Omitted features of OPACITY-FS}{section.3.3}% 29
+\BOOKMARK [2][-]{subsection.3.3.3}{Mutual authentication and user untraceability}{section.3.3}% 30
+\BOOKMARK [0][-]{chapter.4}{Evaluation}{}% 31
+\BOOKMARK [0][-]{chapter.5}{Conclusion}{}% 32
+\BOOKMARK [0][-]{chapter.5}{Bibliography}{}% 33
+\BOOKMARK [0][-]{appendix.A}{Project Proposal}{}% 34
+\BOOKMARK [0][-]{appendix.B}{Card Application Build File}{}% 35
