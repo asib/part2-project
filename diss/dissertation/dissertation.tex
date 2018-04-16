@@ -6,6 +6,14 @@
 \usepackage{verbatim}
 \usepackage{docmute}   % only needed to allow inclusion of proposal.tex
 \usepackage{tabularx}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage[english]{babel}
+\usepackage{blindtext}
+\lstset{
+basicstyle=\small\ttfamily,
+breaklines=true
+}
 
 \raggedbottom                           % try to avoid widows and orphans
 \sloppy
@@ -85,6 +93,8 @@ extent for a comparable purpose.
 \tableofcontents
 
 \listoffigures
+
+\listoflistings
 
 \newpage
 
@@ -211,7 +221,7 @@ If the body is included, parts can be left out depending on the requirements, e.
 
 \subsection{Response APDU}
 
-Response APDUs consist of an optional body and a required 2-byte trailer. The optional body contains any response data the card wishes to send to the reader, and should not exceed N\textsubscript{e} bytes in length. The trailer contains two status bytes, SW1 and SW2, which indicate the command processing status (e.g. 0x9000 indicates no error, command success, whereas 0x6A80 indicates wrong data). A diagram of the structure of a response APDU is shown in \autoref{responseapdu}.
+Response APDUs consist of an optional body and a required 2-byte trailer. The optional body contains any response data the card wishes to send to the reader, and should not exceed N\textsubscript{e} bytes in length. The trailer contains two \emph{status word} bytes, SW1 and SW2, which indicate the command processing status (e.g. 0x9000 indicates no error, command success, whereas 0x6A80 indicates wrong data). A diagram of the structure of a response APDU is shown in \autoref{responseapdu}.
 
 \begin{figure}[tbh]
 \centerline{\includegraphics{figures/responseapdu.eps}}
@@ -257,7 +267,7 @@ Applet deselection occurs when the host application tells the JCRE to select ano
 
 \subsection{Memory organisation} \label{javacardmemory}
 
-JavaCard smart-cards offer two types of memory: transient Random Access Memory (RAM) and persistent Electronically Erasable Programmable Read-Only Memory (EEPROM). Typically, much more EEPROM than RAM memory is available --- the J3A040 has 40KB of EEPROM but roughly 6KB of RAM. However, RAM read/write speeds are faster by an approximate factor of $10^3$.
+JavaCard smart-cards offer two types of memory: transient Random Access Memory (RAM) and persistent Electronically Erasable Programmable Read-Only Memory (EEPROM). Typically, much more EEPROM than RAM memory is available --- the NXP J3A040 has 40KB of EEPROM but roughly 6KB of RAM. However, RAM read/write speeds are faster by an approximate factor of $10^3$.
 
 \subsubsection{Transient RAM}
 
@@ -267,33 +277,153 @@ Note that, although the actual memory is transient, the reference that points to
 
 \subsubsection{Persistent EEPROM}
 
-Any time the \texttt{new} keyword is used, a persistent object will be created. As stated earlier, certain cards do not actually have a garbage collector. Thus it's very important to ensure careful use of EEPROM, since once created, an object may never be erased and memory leaks can easily occur. Writes to EEPROM are atomic, meaning that there's no need for concern over data inconsistencies. Unfortunately, writes also wear out the physical memory circuit, and thus frequent writes will reduce the lifetime of the card.
+Anytime the \texttt{new} keyword is used, a persistent object will be created. As stated earlier, certain cards do not actually have a garbage collector. Thus it's very important to ensure careful use of EEPROM, since once created, an object may never be erased and memory leaks can easily occur. Writes to EEPROM are atomic, meaning that there's no need for concern over data inconsistencies. Unfortunately, writes also wear out the physical memory circuit, and thus frequent writes will reduce the lifetime of the card.
 
 \section{Resources}
+
+
+
+\subsection{Physical resources}
 
 Before I was able to begin the implementation stage, I ordered the following items:
 
 \begin{itemize}
 \item Identiv SCL3711 --- A USB smart-card reader. I had originally intended to use this reader, but discovered that, despite the claims of the manufacturer, it was not compatible with my operating system (OSX 10.11, El Capitan).
 \item ACS ACR122T --- alternative USB smart-card reader that was compatible.
-\item NXP J3A040 --- a programmable smart-card with 40K of EEPROM memory, implementing JavaCard 2.2.2 and Global Platform 2.1.1, and conforming to ISO 14443. I chose this card because it is relatively cheap and it implements many of the cryptographic algorithms that I needed in order to implement an authentication protocol based on asymmetric cryptography\footnote{E.g. support for ECDSA (and AES, which is used in the advanced protocol that I implemented).}. Note that cards may support some algorithms but only for certain key sizes. For example, the J3A040 only supports ECDSA keys of up to 192 bits. Details of what algorithms and key sizes a card supports can be found by using JCAlgTest \cite{jcalgtest}.
+\item NXP J3A040 CL --- a programmable contactless-only smart-card with 40K of EEPROM memory, implementing JavaCard 2.2.2 and Global Platform 2.1.1, and conforming to ISO 14443-A. I chose this card because it is relatively cheap and it supports many of the cryptographic algorithms that I needed in order to implement an authentication protocol based on asymmetric cryptography\footnote{E.g. support for ECDSA (and AES, which is used in the advanced protocol that I implemented).}. Note that cards may support some algorithms but only for certain key sizes. For example, the J3A040 only supports ECDSA keys of up to 192 bits. Details of what algorithms and key sizes a card supports can be found by using JCAlgTest \cite{jcalgtest}.
 \end{itemize}
+
+\subsection{GlobalPlatform and GPShell}
+
+The GlobalPlatform card specification is a standard for the management of the infrastructure of a smart-card, the most relevant tasks being installation and removal of applications on a card. GPShell \cite{gpshell} is a script interpreter used for talking to smart-cards that are compliant with the GlobalPlatform card specification. It can establish a secure channel with a smart-card in order to load, instantiate, delete and list applications on the card. \autoref{gpinstall} shows the script I use to install a CAP file called \texttt{opacity\_fs\_impl.cap} onto a card. The script commands are converted, by GPShell, to command APDUs which are sent to the card via the connected reader.
+
+\begin{lstlisting}[caption={Applet install script},captionpos=b,label={gpinstall}]
+enable_trace
+establish_context
+mode_211
+card_connect
+select -AID a0000000030000
+open_sc -security 1 -keyind 0 -keyver 0
+    -mac_key 404142434445464748494a4b4c4d4e4f
+    -enc_key 404142434445464748494a4b4c4d4e4f
+delete -AID f234123456101000
+install -file opacity_fs_impl.cap -sdAID a000000003000000 -priv 2
+    -nvDataLimit 5000
+card_disconnect
+release_context
+\end{lstlisting}
+
+\begin{itemize}
+\item \texttt{enable\_trace} --- writes a log of all command/response APDUs (hex encoded) to standard output.
+\item \texttt{establish\_context} --- before any communication can by done to any card this command must be executed.
+\item \texttt{mode\_211} --- sets the protocol mode to GlobalPlatform 2.1.1.
+\item \texttt{card\_connect} --- connect to card via reader.
+\item \texttt{select -AID a0000000030000} --- select the \emph{card manager} applet. The card manager understands command APDUs for installing/deleting applets. The AID of the card manager is card-specific and may be found in the datasheet.
+\item \texttt{open\_sc -security 1 -keyind 0 -keyver 0 -mac\_key 404142434445464748494a4b4c4d4e4f -enc\_key 404142434445464748494a4b4c4d4e4f} --- open a secure channel to the card with the standard JavaCard Open Platform (JCOP) keys; the J3A040 CL is a JCOP card.
+\item \texttt{delete -AID f234123456101000} --- delete the applet with the given AID. This was the AID I used for my applet, so this step is just to remove any old version of the applet before installing the new one.
+\item \texttt{install -file opacity\_fs\_impl.cap -sdAID a000000003000000 -priv 2 -nvDataLimit 5000} --- install the file named \texttt{opacity\_fs\_impl.cap} and limit its non-volatile (EEPROM) data allowance to 5KB. An option specifies the \emph{security domain} AID (sdAID), which in this case is the card manager.
+\item \texttt{card\_disconnect} --- disconnect the card.
+\item \texttt{release\_context} --- release the context that was established at the beginning of the script.
+\end{itemize}
+
+\subsection{Build tools}
+
+I used Apache Ant \cite{ant} to build all my applications. In combination with a useful Ant task\footnote{https://github.com/martinpaljak/ant-javacard}, I was able to build and convert the card application to a CAP file in one command. The build file I used for the card application can be found in \autoref{appendix:cardappbuildfile}.
+
+\subsection{External libraries}
+
+Four external libraries were used in this project. The first of these was the Apache Commons Codec \cite{apachecommonscodec} library, which was useful because of the \texttt{org.apache.commons.codec.binary.Hex} class, specifically the \texttt{encodeHexString()} method. This allowed me to analyse the card's responses in a readable format and was helpful for debugging. The second was the Bouncy Castle \cite{bouncycastle} library. As well as using it as a provider\footnote{In Java, a ``provider'' implements the Java security API, for instance by providing implementations of cryptographic algorithms (ECDSA, SHA-1) or classes for key generation and management.}, it offered a handful of useful methods that the standard Java API didn't, for example a method for obtaining a byte array of the encoding of a public ECDSA key. The third was the Apache Commons CLI \cite{apachecommonscli} library, which was helpful in parsing flags and arguments passed to the provisioning application. The final library was the JavaCard 2.2.2 SDK.
 
 \chapter{Implementation}
 
-\section{Verbatim text}
+The project consists of three applications: the card-provisioning application, described in \autoref{provisionapp}, and two separate applications that implement the authentication protocol, one that runs on the card, the other on the reader. Two authentication protocols were devised for the project --- the first protocol, described in \autoref{basicauth}, is very basic and only authenticates the card's identity. The second, described in \autoref{mutualauth}, performs mutual authentication and provides user untraceability.
 
-\section{Tables}
+\section{Card-provisioning application}
+\label{provisionapp}
 
-\section{Simple diagrams}
+Both authentication protocols are built around elliptic curve (EC) cryptography, and thus it was necessary to write a command-line application that provisions cards with a signed EC key pair. The application is also able to list the details stored on a card (CRSID, door access permissions and card expiry date), generate a key pair that it will use for signing card key pairs, and lastly, there's a command for signing a provided file (the reason for this is explained below). \autoref{provisionhelp} shows the help output of the application.
 
-\section{Adding more complicated graphics}
+\begin{figure}[tbh]
+\centerline{\includegraphics[scale=0.7]{figures/provisionhelp.png}}
+\caption{Card-provisioning application help output}
+\label{provisionhelp}
+\end{figure}
+
+Note that the provision command takes as input three items: CRSID, a \emph{group ID}, and a card expiry date. These items, along with the card's public key, are all included as part of the input data when generating the card's ECDSA signature.
+
+\subsubsection{Card-provisioning terminal key pair}
+
+In order to generate ECDSA signatures, the card terminal needs a key pair of its own. This can be generated using the \texttt{genkeypair} command. It's important that this key pair is kept safe, since all cards and readers contain a copy, in order to perform the mutual authentication protocol. Thus, if it has to be replaced (e.g. if it was accidentally deleted or overwritten), then all cards and readers will have to be re-provisioned.
+
+\subsubsection{Provisioning readers}
+
+In order to perform mutual authentication, readers must also have their own signed EC key pair. The \texttt{sign} command exists for this reason. Once a reader has generated its key pair, the \texttt{sign} command can be called, with the \texttt{<infile>} argument being the reader's public key. Readers also need a copy of the provisioning terminal's public key in order to be able to authenticate card signatures. Both the signature and terminal public key can then be loaded when the reader-side authentication application starts.
+
+\subsection{Format of group ID}
+
+The group ID specifies the access permissions of the card. It is variable-length, and thus no format has been hard-coded into the implementation. One possible option is to have each bit correspond to a certain location. If the bit is set, then the card has access to that location. For example, the sixth bit being set could correspond to permission to access a certain faculty.
+
+\subsection{Card provisioning protocol}
+
+The provisioning protocol is very straightforward. First, the provisioning terminal sends a command APDU to the card telling it to generate an ECDSA key pair. The card replies with a response APDU containing its public key, encoded according to SEC1 \cite{sec1} \S2.3.3. The reader then produces an ECDSA signature, using as input the following items concatenated together in a byte array: CRSID, group ID, card expiry date and card public key. It then sends a \texttt{STORE} command to the card, with the signature, CRSID, group ID, card expiry and its own public key\footnote{As mentioned earlier, the terminal's public key is needed in order for the card to be able to verify a reader's identity during the mutual authentication protocol.} in the body of the APDU. The card copies these items to persistent memory and responds with a ``command success'' status word (0x9000). The reader then sends a \texttt{CHECK} command, where the card returns all the data that it just stored --- this step is to ensure no data corruption occurred. If all the data is correct, the reader sends a final \texttt{LOCK} command, after which the card will not respond to any of the earlier commands until unlocked. A diagram of the provisioning protocol is shown in \autoref{provisioningprotocol}.
+
+\begin{figure}[tbh]
+\centerline{\includegraphics[scale=0.8]{figures/provisioningprotocol.eps}}
+\caption{Card-provisioning protocol}
+\label{provisioningprotocol}
+\end{figure}
+
+\subsubsection{ECDSA signature format}
+
+DER is the data format used to encode an ECDSA signature, which is defined by SEC1 as an ASN.1 sequence of two integers \texttt{r} and \texttt{s}.
+
+\begin{lstlisting}[caption={ASN.1 structure of an ECDSA signature},captionpos=b]
+ECDSASignature ::= SEQUENCE {
+    r    INTEGER,
+    s    INTEGER
+}
+\end{lstlisting}
+
+\noindent
+The following sequence of bytes shows the DER-encoding of an ECDSA signature: \texttt{0x30 b1 0x02 b2 (vr) 0x02 b3 (vs)}.
+
+\begin{itemize}
+\item \texttt{0x30} signifies the start of a sequence.
+\item \texttt{0x02} signifies the start of an integer.
+\item \texttt{b1} is a single byte value, equal to the length, in bytes, of the remaining list of bytes (from the first \texttt{0x02} to the end of the encoding).
+\item \texttt{b2} is a single byte value, equal to the length, in bytes, of (vr).
+\item \texttt{b3} is a single byte value, equal to the length, in bytes, of (vs).
+\item \texttt{(vr)} is the signed, big-endian encoding of the value \texttt{r}, of minimal length.
+\item \texttt{(vs)} is the signed, big-endian encoding of the value \texttt{s}, of minimal length.
+\end{itemize}
+
+\noindent
+\emph{Minimal length} means that the total length is the shortest possible to represent the value, and \emph{signed} means that the first bit of the first byte specifies the sign of the value. Since \texttt{r} and \texttt{s} are always positive, the first bit of the first byte of both \texttt{(vr)} and \texttt{(vs)} must be \texttt{0}, i.e. the first byte must have a value between \texttt{0x00} and \texttt{0x7F}. If the minimal, unsigned representation of either value has a first byte with value greater than \texttt{0x7F}, the encoded representation must be padded with an \texttt{0x00} byte.
+
+The relevance of this is that JavaCard and Bouncy Castle treat signatures slightly differently. JavaCard does not adhere to the ``minimal length'' criteria and always pads \texttt{(vr)} and \texttt{(vs)} with zeros until the signature is the maximum allowed length --- in fact, JavaCard will not be able to decode a signature \emph{unless} it has maximal length. Thus, before sending a signature generated by Bouncy Castle to a card, it must be padded to the maximum length. Equally, when we receive a signature generated by JavaCard, we must remove any incorrectly inserted pads (zeros), else Bouncy Castle will not be able to decode it. This particular issue was extremely difficult to debug.
+
+\section{Basic authentication protocol}
+\label{basicauth}
+
+The basic authentication protocol is relatively simple. The reader begins by generating a cryptographic nonce.\footnote{A nonce is a random number, normally used for the purpose of preventing a replay attack.} The reader sends this nonce to the card in the body of a \texttt{BASIC\_AUTH} command. The card generates an ECDSA signature, using the nonce as the input data. It then returns this nonce signature, along with its stored CRSID, group ID, expiry date, EC public key and card signature\footnote{This was the signature stored during provisioning.}, in the body of a response APDU. The reader first verifies the card signature to ensure the card's public key is valid, then checks the card expiry date. Having done that, it verifies the nonce signature to ensure that the card it's communicating with has the matching private key\footnote{Otherwise it's possible that an attacker could just be replaying an old communication; the nonce signature prevents this possibility.}. Finally, the reader checks that the group ID permits access to the location in question. A diagram of the protocol is shown in \autoref{fig:basicauth}.
+
+\begin{figure}[tbh]
+\centerline{\includegraphics[scale=0.8]{figures/basicauth.eps}}
+\caption{Basic authentication protocol}
+\label{fig:basicauth}
+\end{figure}
+
+\section{Mutual authentication protocol}
+\label{mutualauth}
+
+\blindtext
+
+\subsection{Concatenation KDF}
+
+\blindtext
 
 \chapter{Evaluation}
 
-\section{Printing and binding}
-
-\section{Further information}
 
 
 \chapter{Conclusion}
@@ -312,5 +442,44 @@ Before I was able to begin the implementation stage, I ordered the following ite
 \label{appendix:proposal}
 
 \input{../proposal/proposal}
+
+\chapter{Card Application Build File}
+\label{appendix:cardappbuildfile}
+
+\begin{minted}[breaklines=true]{xml}
+<?xml version="1.0"?>
+<project name="opacity_fs_impl">
+  <taskdef name="javacard" classname="pro.javacard.ant.JavaCard" classpath="ant-javacard.jar"/>
+
+  <target name="jc">
+    <javacard>
+      <cap jckit="/Users/jacobfenton/Desktop/piiproj/java_card_kit-2_2_2" version="1.0" aid="f234123456101000" output="opacity_fs_impl.cap" sources="/Users/jacobfenton/Desktop/piiproj/opacity_fs_impl/src/
+      main/java/org/bitbucket/jfent/opacity_fs_impl">
+        <applet class="org.bitbucket.jfent.opacity_fs_impl.OpacityForwardSecrecy ImplementationApplet" aid="f23412345610100001"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <target name="clean">
+      <delete dir="./build"/>
+  </target>
+
+  <target name="compile">
+      <mkdir dir="./build/classes"/>
+      <javac srcdir="./src/main/java" destdir="./build/classes">
+          <classpath>
+              <pathelement path="./lib/api.jar"/>
+          </classpath>
+      </javac>
+  </target>
+
+  <target name="jar">
+      <mkdir dir="./build/jar"/>
+      <jar destfile="./build/jar/opacity_fs_impl.jar" basedir="./build/classes">
+          <zipgroupfileset dir="./lib" includes="*.jar" />
+      </jar>
+  </target>
+</project>
+\end{minted}
 
 \end{document}

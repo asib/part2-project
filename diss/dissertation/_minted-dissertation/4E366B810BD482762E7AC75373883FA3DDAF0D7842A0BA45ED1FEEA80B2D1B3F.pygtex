@@ -1,0 +1,34 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYGZlt{}?xml \PYG{n+nv}{version}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}1.0\PYGZdq{}}?\PYGZgt{}
+\PYGZlt{}project \PYG{n+nv}{name}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}opacity\PYGZus{}fs\PYGZus{}impl\PYGZdq{}}\PYGZgt{}
+  \PYGZlt{}taskdef \PYG{n+nv}{name}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}javacard\PYGZdq{}} \PYG{n+nv}{classname}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}pro.javacard.ant.JavaCard\PYGZdq{}} \PYG{n+nv}{classpath}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}ant\PYGZhy{}javacard.jar\PYGZdq{}}/\PYGZgt{}
+
+  \PYGZlt{}target \PYG{n+nv}{name}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}jc\PYGZdq{}}\PYGZgt{}
+    \PYGZlt{}javacard\PYGZgt{}
+      \PYGZlt{}cap \PYG{n+nv}{jckit}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}/Users/jacobfenton/Desktop/piiproj/java\PYGZus{}card\PYGZus{}kit\PYGZhy{}2\PYGZus{}2\PYGZus{}2\PYGZdq{}} \PYG{n+nv}{version}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}1.0\PYGZdq{}} \PYG{n+nv}{aid}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}f234123456101000\PYGZdq{}} \PYG{n+nv}{output}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}opacity\PYGZus{}fs\PYGZus{}impl.cap\PYGZdq{}} \PYG{n+nv}{sources}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}/Users/jacobfenton/Desktop/piiproj/opacity\PYGZus{}fs\PYGZus{}impl/src/main/java/org/bitbucket/jfent/opacity\PYGZus{}fs\PYGZus{}impl\PYGZdq{}}\PYGZgt{}
+        \PYGZlt{}applet \PYG{n+nv}{class}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}org.bitbucket.jfent.opacity\PYGZus{}fs\PYGZus{}impl.OpacityForwardSecrecyImplementationApplet\PYGZdq{}} \PYG{n+nv}{aid}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}f23412345610100001\PYGZdq{}}/\PYGZgt{}
+      \PYGZlt{}/cap\PYGZgt{}
+    \PYGZlt{}/javacard\PYGZgt{}
+  \PYGZlt{}/target\PYGZgt{}
+
+  \PYGZlt{}target \PYG{n+nv}{name}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}clean\PYGZdq{}}\PYGZgt{}
+      \PYGZlt{}delete \PYG{n+nv}{dir}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}./build\PYGZdq{}}/\PYGZgt{}
+  \PYGZlt{}/target\PYGZgt{}
+
+  \PYGZlt{}target \PYG{n+nv}{name}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}compile\PYGZdq{}}\PYGZgt{}
+      \PYGZlt{}mkdir \PYG{n+nv}{dir}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}./build/classes\PYGZdq{}}/\PYGZgt{}
+      \PYGZlt{}javac \PYG{n+nv}{srcdir}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}./src/main/java\PYGZdq{}} \PYG{n+nv}{destdir}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}./build/classes\PYGZdq{}}\PYGZgt{}
+          \PYGZlt{}classpath\PYGZgt{}
+              \PYGZlt{}pathelement \PYG{n+nv}{path}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}./lib/api.jar\PYGZdq{}}/\PYGZgt{}
+          \PYGZlt{}/classpath\PYGZgt{}
+      \PYGZlt{}/javac\PYGZgt{}
+  \PYGZlt{}/target\PYGZgt{}
+
+  \PYGZlt{}target \PYG{n+nv}{name}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}jar\PYGZdq{}}\PYGZgt{}
+      \PYGZlt{}mkdir \PYG{n+nv}{dir}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}./build/jar\PYGZdq{}}/\PYGZgt{}
+      \PYGZlt{}jar \PYG{n+nv}{destfile}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}./build/jar/opacity\PYGZus{}fs\PYGZus{}impl.jar\PYGZdq{}} \PYG{n+nv}{basedir}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}./build/classes\PYGZdq{}}\PYGZgt{}
+          \PYGZlt{}zipgroupfileset \PYG{n+nv}{dir}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}./lib\PYGZdq{}} \PYG{n+nv}{includes}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}*.jar\PYGZdq{}} /\PYGZgt{}
+      \PYGZlt{}/jar\PYGZgt{}
+  \PYGZlt{}/target\PYGZgt{}
+\PYGZlt{}/project\PYGZgt{}
+\end{Verbatim}

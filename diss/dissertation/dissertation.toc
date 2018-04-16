@@ -1,37 +1,46 @@
-\contentsline {chapter}{\numberline {1}Introduction}{11}{chapter.1}
-\contentsline {section}{\numberline {1.1}Smart-cards}{11}{section.1.1}
-\contentsline {section}{\numberline {1.2}MIFARE Classic}{11}{section.1.2}
-\contentsline {subsection}{\numberline {1.2.1}Use of Symmetric Key Cryptography}{12}{subsection.1.2.1}
-\contentsline {subsection}{\numberline {1.2.2}Memory Structure}{13}{subsection.1.2.2}
-\contentsline {subsection}{\numberline {1.2.3}Vulnerabilities}{14}{subsection.1.2.3}
-\contentsline {subsubsection}{Brute-forcing the sector keys}{14}{section*.8}
-\contentsline {subsubsection}{Predicting the output of the card's PRNG}{14}{section*.9}
-\contentsline {subsubsection}{Nested authentication attack}{15}{section*.10}
-\contentsline {subsubsection}{Dark-Side attack}{15}{section*.11}
-\contentsline {subsubsection}{Combined attack}{15}{section*.12}
-\contentsline {subsubsection}{Cloning cards}{16}{section*.13}
-\contentsline {chapter}{\numberline {2}Preparation}{17}{chapter.2}
-\contentsline {section}{\numberline {2.1}Starting point}{17}{section.2.1}
-\contentsline {section}{\numberline {2.2}Communication between card and reader}{17}{section.2.2}
-\contentsline {subsection}{\numberline {2.2.1}Command APDU}{17}{subsection.2.2.1}
-\contentsline {subsection}{\numberline {2.2.2}Response APDU}{18}{subsection.2.2.2}
-\contentsline {section}{\numberline {2.3}JavaCard}{18}{section.2.3}
-\contentsline {subsection}{\numberline {2.3.1}Language}{19}{subsection.2.3.1}
-\contentsline {subsection}{\numberline {2.3.2}JavaCard Virtual Machine}{19}{subsection.2.3.2}
-\contentsline {subsection}{\numberline {2.3.3}Applets}{20}{subsection.2.3.3}
-\contentsline {subsubsection}{Applet life-cycle}{20}{section*.14}
-\contentsline {subsection}{\numberline {2.3.4}Memory organisation}{21}{subsection.2.3.4}
-\contentsline {subsubsection}{Transient RAM}{21}{section*.15}
-\contentsline {subsubsection}{Persistent EEPROM}{21}{section*.16}
-\contentsline {section}{\numberline {2.4}Resources}{21}{section.2.4}
-\contentsline {chapter}{\numberline {3}Implementation}{23}{chapter.3}
-\contentsline {section}{\numberline {3.1}Verbatim text}{23}{section.3.1}
-\contentsline {section}{\numberline {3.2}Tables}{23}{section.3.2}
-\contentsline {section}{\numberline {3.3}Simple diagrams}{23}{section.3.3}
-\contentsline {section}{\numberline {3.4}Adding more complicated graphics}{23}{section.3.4}
-\contentsline {chapter}{\numberline {4}Evaluation}{25}{chapter.4}
-\contentsline {section}{\numberline {4.1}Printing and binding}{25}{section.4.1}
-\contentsline {section}{\numberline {4.2}Further information}{25}{section.4.2}
-\contentsline {chapter}{\numberline {5}Conclusion}{27}{chapter.5}
-\contentsline {chapter}{Bibliography}{27}{chapter.5}
-\contentsline {chapter}{\numberline {A}Project Proposal}{31}{appendix.A}
+\select@language {english}
+\contentsline {chapter}{\numberline {1}Introduction}{13}{chapter.1}
+\contentsline {section}{\numberline {1.1}Smart-cards}{13}{section.1.1}
+\contentsline {section}{\numberline {1.2}MIFARE Classic}{13}{section.1.2}
+\contentsline {subsection}{\numberline {1.2.1}Use of Symmetric Key Cryptography}{14}{subsection.1.2.1}
+\contentsline {subsection}{\numberline {1.2.2}Memory Structure}{15}{subsection.1.2.2}
+\contentsline {subsection}{\numberline {1.2.3}Vulnerabilities}{16}{subsection.1.2.3}
+\contentsline {subsubsection}{Brute-forcing the sector keys}{16}{section*.9}
+\contentsline {subsubsection}{Predicting the output of the card's PRNG}{16}{section*.10}
+\contentsline {subsubsection}{Nested authentication attack}{17}{section*.11}
+\contentsline {subsubsection}{Dark-Side attack}{17}{section*.12}
+\contentsline {subsubsection}{Combined attack}{17}{section*.13}
+\contentsline {subsubsection}{Cloning cards}{18}{section*.14}
+\contentsline {chapter}{\numberline {2}Preparation}{19}{chapter.2}
+\contentsline {section}{\numberline {2.1}Starting point}{19}{section.2.1}
+\contentsline {section}{\numberline {2.2}Communication between card and reader}{19}{section.2.2}
+\contentsline {subsection}{\numberline {2.2.1}Command APDU}{19}{subsection.2.2.1}
+\contentsline {subsection}{\numberline {2.2.2}Response APDU}{20}{subsection.2.2.2}
+\contentsline {section}{\numberline {2.3}JavaCard}{20}{section.2.3}
+\contentsline {subsection}{\numberline {2.3.1}Language}{21}{subsection.2.3.1}
+\contentsline {subsection}{\numberline {2.3.2}JavaCard Virtual Machine}{21}{subsection.2.3.2}
+\contentsline {subsection}{\numberline {2.3.3}Applets}{22}{subsection.2.3.3}
+\contentsline {subsubsection}{Applet life-cycle}{22}{section*.15}
+\contentsline {subsection}{\numberline {2.3.4}Memory organisation}{23}{subsection.2.3.4}
+\contentsline {subsubsection}{Transient RAM}{23}{section*.16}
+\contentsline {subsubsection}{Persistent EEPROM}{23}{section*.17}
+\contentsline {section}{\numberline {2.4}Resources}{23}{section.2.4}
+\contentsline {subsection}{\numberline {2.4.1}Physical resources}{23}{subsection.2.4.1}
+\contentsline {subsection}{\numberline {2.4.2}GlobalPlatform and GPShell}{24}{subsection.2.4.2}
+\contentsline {subsection}{\numberline {2.4.3}Build tools}{25}{subsection.2.4.3}
+\contentsline {subsection}{\numberline {2.4.4}External libraries}{25}{subsection.2.4.4}
+\contentsline {chapter}{\numberline {3}Implementation}{27}{chapter.3}
+\contentsline {section}{\numberline {3.1}Card-provisioning application}{27}{section.3.1}
+\contentsline {subsubsection}{Card-provisioning terminal key pair}{28}{section*.18}
+\contentsline {subsubsection}{Provisioning readers}{28}{section*.19}
+\contentsline {subsection}{\numberline {3.1.1}Format of group ID}{28}{subsection.3.1.1}
+\contentsline {subsection}{\numberline {3.1.2}Card provisioning protocol}{28}{subsection.3.1.2}
+\contentsline {subsubsection}{ECDSA signature format}{29}{section*.20}
+\contentsline {section}{\numberline {3.2}Basic authentication protocol}{30}{section.3.2}
+\contentsline {section}{\numberline {3.3}Mutual authentication protocol}{30}{section.3.3}
+\contentsline {subsection}{\numberline {3.3.1}Concatenation KDF}{31}{subsection.3.3.1}
+\contentsline {chapter}{\numberline {4}Evaluation}{33}{chapter.4}
+\contentsline {chapter}{\numberline {5}Conclusion}{35}{chapter.5}
+\contentsline {chapter}{Bibliography}{35}{chapter.5}
+\contentsline {chapter}{\numberline {A}Project Proposal}{39}{appendix.A}
+\contentsline {chapter}{\numberline {B}Card Application Build File}{45}{appendix.B}

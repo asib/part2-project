@@ -1,11 +1,16 @@
+\select@language {english}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {1.1}{\ignorespaces MIFARE Classic memory organisation}}{13}{figure.1.1}
-\contentsline {figure}{\numberline {1.2}{\ignorespaces Sector trailer}}{14}{figure.1.2}
+\contentsline {figure}{\numberline {1.1}{\ignorespaces MIFARE Classic memory organisation}}{15}{figure.1.1}
+\contentsline {figure}{\numberline {1.2}{\ignorespaces Sector trailer}}{16}{figure.1.2}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces Command APDU}}{18}{figure.2.1}
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Response APDU}}{18}{figure.2.2}
-\contentsline {figure}{\numberline {2.3}{\ignorespaces CAP Converter Tool}}{19}{figure.2.3}
-\contentsline {figure}{\numberline {2.4}{\ignorespaces Applet Life-Cycle}}{20}{figure.2.4}
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Command APDU}}{20}{figure.2.1}
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Response APDU}}{20}{figure.2.2}
+\contentsline {figure}{\numberline {2.3}{\ignorespaces CAP Converter Tool}}{21}{figure.2.3}
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Applet Life-Cycle}}{22}{figure.2.4}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Card-provisioning application help output}}{27}{figure.3.1}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Card-provisioning protocol}}{29}{figure.3.2}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Basic authentication protocol}}{31}{figure.3.3}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }

@@ -15,14 +15,19 @@
 \BOOKMARK [2][-]{subsection.2.3.3}{Applets}{section.2.3}% 15
 \BOOKMARK [2][-]{subsection.2.3.4}{Memory organisation}{section.2.3}% 16
 \BOOKMARK [1][-]{section.2.4}{Resources}{chapter.2}% 17
-\BOOKMARK [0][-]{chapter.3}{Implementation}{}% 18
-\BOOKMARK [1][-]{section.3.1}{Verbatim text}{chapter.3}% 19
-\BOOKMARK [1][-]{section.3.2}{Tables}{chapter.3}% 20
-\BOOKMARK [1][-]{section.3.3}{Simple diagrams}{chapter.3}% 21
-\BOOKMARK [1][-]{section.3.4}{Adding more complicated graphics}{chapter.3}% 22
-\BOOKMARK [0][-]{chapter.4}{Evaluation}{}% 23
-\BOOKMARK [1][-]{section.4.1}{Printing and binding}{chapter.4}% 24
-\BOOKMARK [1][-]{section.4.2}{Further information}{chapter.4}% 25
-\BOOKMARK [0][-]{chapter.5}{Conclusion}{}% 26
-\BOOKMARK [0][-]{chapter.5}{Bibliography}{}% 27
-\BOOKMARK [0][-]{appendix.A}{Project Proposal}{}% 28
+\BOOKMARK [2][-]{subsection.2.4.1}{Physical resources}{section.2.4}% 18
+\BOOKMARK [2][-]{subsection.2.4.2}{GlobalPlatform and GPShell}{section.2.4}% 19
+\BOOKMARK [2][-]{subsection.2.4.3}{Build tools}{section.2.4}% 20
+\BOOKMARK [2][-]{subsection.2.4.4}{External libraries}{section.2.4}% 21
+\BOOKMARK [0][-]{chapter.3}{Implementation}{}% 22
+\BOOKMARK [1][-]{section.3.1}{Card-provisioning application}{chapter.3}% 23
+\BOOKMARK [2][-]{subsection.3.1.1}{Format of group ID}{section.3.1}% 24
+\BOOKMARK [2][-]{subsection.3.1.2}{Card provisioning protocol}{section.3.1}% 25
+\BOOKMARK [1][-]{section.3.2}{Basic authentication protocol}{chapter.3}% 26
+\BOOKMARK [1][-]{section.3.3}{Mutual authentication protocol}{chapter.3}% 27
+\BOOKMARK [2][-]{subsection.3.3.1}{Concatenation KDF}{section.3.3}% 28
+\BOOKMARK [0][-]{chapter.4}{Evaluation}{}% 29
+\BOOKMARK [0][-]{chapter.5}{Conclusion}{}% 30
+\BOOKMARK [0][-]{chapter.5}{Bibliography}{}% 31
+\BOOKMARK [0][-]{appendix.A}{Project Proposal}{}% 32
+\BOOKMARK [0][-]{appendix.B}{Card Application Build File}{}% 33

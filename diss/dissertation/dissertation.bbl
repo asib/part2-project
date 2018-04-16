@@ -1,4 +1,24 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
+
+\bibitem{ant}
+Apache {Ant}.
+\newblock \url{https://ant.apache.org/}.
+
+\bibitem{apachecommonscli}
+Apache {Commons} {CLI}.
+\newblock \url{https://commons.apache.org/proper/commons-cli/}.
+
+\bibitem{apachecommonscodec}
+Apache {Commons} {Codec}.
+\newblock \url{https://commons.apache.org/proper/commons-codec/}.
+
+\bibitem{bouncycastle}
+Bouncy {Castle}.
+\newblock \url{https://www.bouncycastle.org/}.
+
+\bibitem{gpshell}
+{GPShell}.
+\newblock \url{https://sourceforge.net/p/globalplatform/wiki/GPShell/}.
 
 \bibitem{jcalgtest}
 {JCAlgTest}.
@@ -8,6 +28,10 @@
 Writing a {JavaCard} applet.
 \newblock
   \url{http://www.oracle.com/technetwork/java/javacard/intro-139322.html}.
+
+\bibitem{sec1}
+Sec 1: {Elliptic} curve cryptography, September 2000.
+\newblock \url{http://www.secg.org/SEC1-Ver-1.0.pdf}.
 
 \bibitem{ISO14443}
 ISO/IEC 14443.
@@ -31,8 +55,8 @@ ISO/IEC 7816-5.
 
 \bibitem{OPACITY}
 ActivIdentity.
-\newblock Open protocol for access control identification and ticketing with
-  privacy, July 2011.
+\newblock Open {Protocol} for {Access} {Control} {Identification} and
+  {Ticketing} with {privacY}, July 2011.
 \newblock
   \url{https://www.securetechalliance.org/resources/pdf/OPACITY_Protocol_3.7.pdf}.
 
