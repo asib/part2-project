@@ -1,0 +1,5 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{public} \PYG{k+kd}{static} \PYG{k+kt}{void} \PYG{n+nf}{install}\PYG{o}{(}\PYG{k+kt}{byte}\PYG{o}{[]} \PYG{n}{bArray}\PYG{o}{,} \PYG{k+kt}{short} \PYG{n}{bOffset}\PYG{o}{,} \PYG{k+kt}{byte} \PYG{n}{bLength}\PYG{o}{)} \PYG{o}{\PYGZob{}}
+    \PYG{k}{new} \PYG{n}{OpacityForwardSecrecyImplementationApplet}\PYG{o}{();}
+\PYG{o}{\PYGZcb{}}
+\end{Verbatim}

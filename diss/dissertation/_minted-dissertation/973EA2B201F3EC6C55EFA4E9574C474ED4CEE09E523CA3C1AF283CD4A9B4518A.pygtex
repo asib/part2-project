@@ -1,0 +1,11 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{for} \PYG{o}{(}\PYG{k+kt}{short} \PYG{n}{counter} \PYG{o}{=} \PYG{o}{(}\PYG{k+kt}{short}\PYG{o}{)}\PYG{l+m+mi}{1}\PYG{o}{;} \PYG{n}{counter} \PYG{o}{\PYGZlt{}=} \PYG{n}{numBlocksToGenerate}\PYG{o}{;} \PYG{n}{counter}\PYG{o}{++)} \PYG{o}{\PYGZob{}}
+  \PYG{c+c1}{// Change the counter value in the hash input.}
+  \PYG{n}{Util}\PYG{o}{.}\PYG{n+na}{setShort}\PYG{o}{(}\PYG{n}{hashData}\PYG{o}{,} \PYG{o}{(}\PYG{k+kt}{short}\PYG{o}{)(}\PYG{n}{COUNTER\PYGZus{}LENGTH}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{2}\PYG{o}{),} \PYG{n}{counter}\PYG{o}{);}
+  \PYG{n}{hash}\PYG{o}{.}\PYG{n+na}{reset}\PYG{o}{();}
+  \PYG{c+c1}{// Compute the hash of hashData, and write the result to derivedKey,}
+  \PYG{c+c1}{// a byte array that holds the derived keying material.}
+  \PYG{n}{hash}\PYG{o}{.}\PYG{n+na}{doFinal}\PYG{o}{(}\PYG{n}{hashData}\PYG{o}{,} \PYG{o}{(}\PYG{k+kt}{short}\PYG{o}{)}\PYG{l+m+mi}{0}\PYG{o}{,} \PYG{o}{(}\PYG{k+kt}{short}\PYG{o}{)}\PYG{n}{hashData}\PYG{o}{.}\PYG{n+na}{length}\PYG{o}{,} \PYG{n}{derivedKey}\PYG{o}{,} \PYG{n}{offset}\PYG{o}{);}
+  \PYG{n}{offset} \PYG{o}{+=} \PYG{n}{KDF\PYGZus{}HASH\PYGZus{}OUTPUT\PYGZus{}SIZE}\PYG{o}{;}
+\PYG{o}{\PYGZcb{}}
+\end{Verbatim}

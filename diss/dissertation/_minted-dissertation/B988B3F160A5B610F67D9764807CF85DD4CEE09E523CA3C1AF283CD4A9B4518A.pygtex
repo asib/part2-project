@@ -1,0 +1,4 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{crsID} \PYG{o}{=} \PYG{k}{new} \PYG{k+kt}{byte}\PYG{o}{[}\PYG{n}{crsidLen}\PYG{o}{];}
+\PYG{n}{groupID} \PYG{o}{=} \PYG{k}{new} \PYG{k+kt}{byte}\PYG{o}{[}\PYG{n}{groupIDLen}\PYG{o}{];}
+\end{Verbatim}

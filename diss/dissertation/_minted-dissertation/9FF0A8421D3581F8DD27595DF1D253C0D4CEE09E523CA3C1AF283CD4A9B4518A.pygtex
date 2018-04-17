@@ -1,0 +1,16 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ *  Send the SELECT command APDU in order to select the authentication}
+\PYG{c+cm}{ *  applet.}
+\PYG{c+cm}{ */}
+\PYG{k+kd}{public} \PYG{k+kt}{void} \PYG{n+nf}{selectAuthenticationApplet}\PYG{o}{()} \PYG{k+kd}{throws} \PYG{n}{CardException}\PYG{o}{,}
+       \PYG{n}{CardCommunicationException} \PYG{o}{\PYGZob{}}
+  \PYG{n}{ResponseAPDU} \PYG{n}{resp} \PYG{o}{=} \PYG{n}{channel}\PYG{o}{.}\PYG{n+na}{transmit}\PYG{o}{(}\PYG{k}{new} \PYG{n}{CommandAPDU}\PYG{o}{(}\PYG{n}{ISO7816}\PYG{o}{.}\PYG{n+na}{CLA\PYGZus{}ISO7816}\PYG{o}{,}
+        \PYG{n}{ISO7816}\PYG{o}{.}\PYG{n+na}{INS\PYGZus{}SELECT}\PYG{o}{,} \PYG{l+m+mh}{0x04}\PYG{o}{,} \PYG{l+m+mh}{0x00}\PYG{o}{,}
+        \PYG{n}{AUTHENTICATION\PYGZus{}APPLET\PYGZus{}AID}\PYG{o}{));}
+
+  \PYG{k+kt}{short} \PYG{n}{sw} \PYG{o}{=} \PYG{o}{(}\PYG{k+kt}{short}\PYG{o}{)}\PYG{n}{resp}\PYG{o}{.}\PYG{n+na}{getSW}\PYG{o}{();}
+  \PYG{k}{if} \PYG{o}{(}\PYG{n}{sw} \PYG{o}{!=} \PYG{n}{ISO7816}\PYG{o}{.}\PYG{n+na}{SW\PYGZus{}NO\PYGZus{}ERROR}\PYG{o}{)}
+    \PYG{k}{throw} \PYG{k}{new} \PYG{n}{CardCommunicationException}\PYG{o}{(}\PYG{n}{sw}\PYG{o}{,} \PYG{n}{Command}\PYG{o}{.}\PYG{n+na}{SELECT}\PYG{o}{);}
+\PYG{o}{\PYGZcb{}}
+\end{Verbatim}

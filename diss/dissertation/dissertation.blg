@@ -11,45 +11,46 @@ Warning--to sort, need author or key in apachecommonscodec
 Warning--to sort, need author or key in bouncycastle
 Warning--to sort, need author or key in apachecommonscli
 Warning--to sort, need author or key in sec1
-You've used 15 entries,
+Warning--empty publisher in fips1802
+You've used 17 entries,
             2118 wiz_defined-function locations,
-            562 strings with 5900 characters,
-and the built_in function-call counts, 2777 in all, are:
-= -- 257
-> -- 68
-< -- 0
-+ -- 33
-- -- 18
-* -- 113
-:= -- 408
-add.period$ -- 37
-call.type$ -- 15
-change.case$ -- 57
+            576 strings with 6458 characters,
+and the built_in function-call counts, 3716 in all, are:
+= -- 344
+> -- 130
+< -- 1
++ -- 57
+- -- 39
+* -- 185
+:= -- 561
+add.period$ -- 45
+call.type$ -- 17
+change.case$ -- 71
 chr.to.int$ -- 0
-cite$ -- 23
-duplicate$ -- 108
-empty$ -- 318
-format.name$ -- 18
-if$ -- 623
+cite$ -- 26
+duplicate$ -- 143
+empty$ -- 380
+format.name$ -- 39
+if$ -- 821
 int.to.chr$ -- 0
-int.to.str$ -- 15
-missing$ -- 0
-newline$ -- 70
-num.names$ -- 14
-pop$ -- 133
+int.to.str$ -- 17
+missing$ -- 3
+newline$ -- 81
+num.names$ -- 20
+pop$ -- 154
 preamble$ -- 1
-purify$ -- 39
+purify$ -- 52
 quote$ -- 0
-skip$ -- 91
+skip$ -- 115
 stack$ -- 0
-substring$ -- 75
-swap$ -- 12
-text.length$ -- 0
+substring$ -- 118
+swap$ -- 23
+text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 60
-warning$ -- 8
-while$ -- 14
-width$ -- 17
-write$ -- 132
-(There were 8 warnings)
+type$ -- 66
+warning$ -- 9
+while$ -- 22
+width$ -- 19
+write$ -- 156
+(There were 9 warnings)

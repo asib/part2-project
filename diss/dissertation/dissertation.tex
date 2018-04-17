@@ -7,13 +7,18 @@
 \usepackage{docmute}   % only needed to allow inclusion of proposal.tex
 \usepackage{tabularx}
 \usepackage{listings}
-\usepackage{minted}
+\usepackage[chapter]{minted}
 \usepackage[english]{babel}
 \usepackage{blindtext}
+
 \lstset{
 basicstyle=\small\ttfamily,
 breaklines=true
 }
+
+% Ensures listing and lstlisting use the same counter.
+\AtBeginEnvironment{listing}{\setcounter{listing}{\value{lstlisting}}}
+\AtEndEnvironment{listing}{\stepcounter{lstlisting}}
 
 \raggedbottom                           % try to avoid widows and orphans
 \sloppy
@@ -248,6 +253,7 @@ The VM for the JavaCard platform is implemented in two parts, with one part exte
 \end{figure}
 
 \subsection{Applets}
+\label{sec:applets}
 
 Applications that run on the card are called applets. Each applet on the card must be uniquely identified by an Application ID (AID). An AID, as defined in ISO 7816-5 \cite{ISO78165}, is a sequence of between 5 and 15 bytes. All applets must extend the \texttt{javacard.framework.Applet} abstract base class.
 
@@ -277,7 +283,7 @@ Note that, although the actual memory is transient, the reference that points to
 
 \subsubsection{Persistent EEPROM}
 
-Anytime the \texttt{new} keyword is used, a persistent object will be created. As stated earlier, certain cards do not actually have a garbage collector. Thus it's very important to ensure careful use of EEPROM, since once created, an object may never be erased and memory leaks can easily occur. Writes to EEPROM are atomic, meaning that there's no need for concern over data inconsistencies. Unfortunately, writes also wear out the physical memory circuit, and thus frequent writes will reduce the lifetime of the card.
+Anytime the \texttt{new} keyword is used, a persistent object will be created. As stated earlier, certain cards do not actually have a garbage collector. Thus it's very important to ensure careful use of EEPROM, since once created, an object may never be erased and memory leaks can easily occur. Writes to EEPROM are atomic, meaning that there's no need for concern over data inconsistencies in the event that power is unexpected lost, e.g. because the card is removed from the reader. Unfortunately, writes also wear out the physical memory circuit, and thus frequent writes will reduce the lifetime of the card.
 
 \section{Resources}
 
@@ -359,9 +365,17 @@ In order to generate ECDSA signatures, the card terminal needs a key pair of its
 
 In order to perform mutual authentication, readers must also have their own signed EC key pair. The \texttt{sign} command exists for this reason. Once a reader has generated its key pair, the \texttt{sign} command can be called, with the \texttt{<infile>} argument being the reader's public key. Readers also need a copy of the provisioning terminal's public key in order to be able to authenticate card signatures. Both the signature and terminal public key can then be loaded when the reader-side authentication application starts.
 
+\subsection{Format of CRSID}
+
+The CRSID is stored on the card in a byte array. When the provisioning application retrieves the CRSID from the command-line arguments, it converts it to a byte array using the \texttt{getBytes()} method from Java's \texttt{String} class. This method encodes the CRSID using a character set, which is provided as an argument. For this project, the chosen character set was UTF-8, thus CRSIDs may only contain UTF-8 characters.
+
 \subsection{Format of group ID}
 
 The group ID specifies the access permissions of the card. It is variable-length, and thus no format has been hard-coded into the implementation. One possible option is to have each bit correspond to a certain location. If the bit is set, then the card has access to that location. For example, the sixth bit being set could correspond to permission to access a certain faculty.
+
+\subsection{Format of card expiry date}
+
+The card expiry date is stored as a 4-byte array, representing a 32-bit \emph{unsigned} integer. This integer corresponds to the number of seconds between the expiry date and 01/01/1970 00:00:00 (UTC). This is similar to Unix time, except for the fact that Unix time is stored as a \emph{signed} 32-bit integer.
 
 \subsection{Card provisioning protocol}
 
@@ -416,9 +430,9 @@ The basic authentication protocol is relatively simple. The reader begins by gen
 \section{Mutual authentication protocol}
 \label{mutualauth}
 
-The mutual authentication protocol is based on the OPACITY \cite{OPACITY} Full Secrecy (FS) protocol, the main difference being the omission of persistent binding (PB). The reason for this is explained in \autoref{opacityomissions}.
+The mutual authentication protocol is based on the OPACITY \cite{OPACITY} Full Secrecy (FS) protocol, the main difference being the omission of persistent binding. The reason for this is explained in \autoref{opacityomissions}.
 
-This protocol is quite different from the basic protocol, in that it uses EC Diffie-Hellman (ECDH) as the main asymmetric key algorithm, instead of ECDSA. Further, ephemeral EC key pairs play the role of nonces --- that is, to protect against replay attacks. Regarding notation, $d_{xy}$ refers to a private EC key, where $x$ is either $e$, meaning ephemeral, or $s$, meaning permanent\footnote{The permanent keys are the ones given to the reader and card during provisioning.}, and $y$ is either $H$, the reader (host), or $ICC$, the card (integrated circuit card). For example, $d_{eICC}$ refers to the card's ephemeral private key. In a similar way, $Q_{xy}$ refers to a public key. $C_{H}$ refers to the reader's \emph{certificate}, which is simply its permanent public key and the matching signature. $C_{ICC}$ refers to the card's certificate, which includes all the data used to generate the card signature, as well as the signature itself. $T_x(y)$ means the top $x$ bits of $y$. Finally, $SK$ refers to a symmetric key.
+This protocol is quite different from the basic protocol, in that it uses EC Diffie-Hellman (ECDH) as the main asymmetric key algorithm, instead of ECDSA. Further, ephemeral EC key pairs play the role of nonces --- that is, to protect against replay attacks. Regarding notation, $d_{xy}$ refers to a private EC key, where $x$ is either $e$, meaning ephemeral, or $s$, meaning permanent\footnote{The permanent keys are the ones given to the reader and card during provisioning.}, and $y$ is either $H$, the reader (host), or $ICC$, the card (integrated circuit card). For example, $d_{eICC}$ refers to the card's ephemeral private key. In a similar way, $Q_{xy}$ refers to a public key. $C_{H}$ refers to the reader's \emph{certificate}, which is simply its permanent public key and the matching signature. $C_{ICC}$ refers to the card's certificate, which includes all the data used to generate the card signature, as well as the signature itself. $T_x(y)$ means the top (most significant) $x$ bits of $y$. Finally, $SK$ refers to a symmetric key.
 
 The protocol begins with the reader generating an ephemeral key pair, ($d_{eH}$; $Q_{eH}$). The reader then sends the card its certificate, $C_H$, and the public ephemeral key, $Q_{eH}$. The card validates $C_H$ using the provisioning terminal's public key, which it stored during provisioning, and extracts $Q_{sH}$. Before proceeding, it ensures that $Q_{eH}$ is a valid EC key.\footnote{Further, it checks that the key belongs to the EC domain. For this project, the Prime192v1 curve was used.} It then generates its own ephemeral key pair, ($d_{eICC}$; $Q_{eICC}$). Now, it derives a secret, $Z1$, by performing ECDH with ($d_{eICC}$; $Q_{sH}$). By passing this secret to a key derivation function (KDF), it derives two secret keys, $K1$ and $K2$. The card encrypts its own certificate, $C_{ICC}$, using AES-128 with $K1$, to get $OpaqueData_{ICC}$. A second secret, $Z$, is derived using ECDH with ($d_{sICC}$; $Q_{eH}$). Now a third secret key, $SK_{CFRM}$ is derived by passing $Z$ to a KDF. $K2$ is also used by the KDF in deriving $SK_{CFRM}$. The final card-side step is to generate a message authentication code (MAC). The card generates this MAC using CBC-MAC, with AES-128 as the underlying block cipher and $SK_{CFRM}$ as the key. The data passed to CBC-MAC is $T_8(Q_{eICC})$ concatenated with $T_{16}(Q_{eH})$. The MAC is referred to as $AuthCryptogram_{ICC}$. Once all this has been done, the card responds to the reader with ($OpaqueData_{ICC} \vert AuthCryptogram_{ICC} \vert Q_{eICC}$). The reader then essentially mirrors this exact sequence of computations with two key differences. Firstly, the ECDH calls use different keys, since private keys may never leave their owner. For example, to derive $Z1$, the reader calls ECDH with ($d_{sH}$; $Q_{eICC}$) instead of ($d_{eICC}$; $Q_{sH}$). Notice that because we used $d_{eICC}$ on the card-side, we use $Q_{eICC}$ on the reader-side, and similarly for the other two keys used. The nature of ECDH is that if this is the case, the derived secret is the same for both calls. Thus the two sides can derive the same secret without revealing their private keys. The other difference is that instead of encrypting the card certificate, the reader will decrypt $OpaqueData_{ICC}$ to \emph{retrieve} $C_{ICC}$. Also, after checking that $AuthCryptogram_{ICC}$ matches the MAC that the reader produced, the reader will check the card's expiry date and group ID to ensure access is allowed. If all these checks pass, the reader grants access. A diagram of the protocol is shown in \autoref{fig:mutualauth}.
 
@@ -432,12 +446,199 @@ The protocol begins with the reader generating an ephemeral key pair, ($d_{eH}$;
 
 The KDF used in the protocol is the concatenation KDF as specified in NIST SP800-56A \cite{nistsp80056a} (\S5.8.1). It takes as arguments a key, the desired length of the derived keying material and some ``other information''. In the case of this protocol, the other information is defined as in Annex A of \cite{OPACITY}. Briefly, if $SK_1, ..., SK_p =  KDF(Z, len, info(A_1, ..., A_m)$, then $info(A_1, ..., A_m) = AlgoID(SK_1)~\vert~...~\vert~AlgoID(SK_p)~\vert~A_1~\vert~...~\vert~A_m$, where AlgoID for this protocol is always 0x09, the ID for an AES-128 key, as defined in Annex A of \cite{OPACITY}.
 
+The concatenation KDF is built on an \emph{approved} hash function --- a list of such functions is given in FIPS 180-2 \cite{fips1802}. It works as follows:
+
+\begin{itemize}
+\item Compute the number of times the hash function must be called by calculating $reps = \lceil \frac{keydatalen}{hashen} \rceil$, where $keydatalen$ is the desired length of the derived keying material, and $hashlen$ is the length of the output of the chosen hash function.
+\item Initialize a 32-bit, big-endian bit string $counter$ as $00000001_{16}$.
+\item For $i = 1$ to $reps$ by $1$, do:
+	\begin{itemize}
+	\item Compute $Hash_i = H(counter \vert Z \vert info(...))$ where $H$ is the chosen hash function.
+	\item Increment $counter$ (modulo $2^{32}$), treating it as an unsigned integer.
+	\end{itemize}
+\item Let $Hhash ::= Hash_{reps}$ if $\frac{keydatalen}{hashlen}$ is an integer; otherwise, let $Hhash$ equal the ($keydatalen$ mod $hashlen$) leftmost bits of $Hash_{reps}$.
+\item Set $DerivedKeyingMaterial ::= Hash_1 \vert Hash_2 \vert ... \vert Hash_{reps-1} \vert Hhash$.
+\end{itemize}
+
+\noindent
+Listing \autoref{concatkdf} shows the JavaCard implementation of the concatenation KDF loop.
+
+\begin{listing}
+\begin{minted}[linenos]{java}
+for (short counter = (short)1; counter <= numBlocksToGenerate; counter++) {
+  // Change the counter value in the hash input.
+  Util.setShort(hashData, (short)(COUNTER_LENGTH-2), counter);
+  hash.reset();
+  // Compute the hash of hashData, and write the result to derivedKey,
+  // a byte array that holds the derived keying material.
+  hash.doFinal(hashData, (short)0, (short)hashData.length, derivedKey, offset);
+  offset += KDF_HASH_OUTPUT_SIZE;
+}
+\end{minted}
+\caption{The main loop of the concatenation KDF}
+\label{concatkdf}
+\end{listing}
+
+\subsection{Mutual authentication}
+
+The basic authentication protocol described in \autoref{basicauth} only authenticates the card, i.e. the card cannot tell whether the reader is real (e.g. a reader controlling access to a university door) or adversarial (e.g. someone holding a USB reader up to your pocket). Under such a protocol, the card may reveal sensitive information to an attacker. Even seemingly trivial data, such as a public key, can be used to track a card, and thus should not be divulged at will. The mutual authentication protocol solves this by doing the obvious thing --- authenticating both the card \emph{and} the reader. Strictly speaking, the protocol doesn't actually authenticate the reader. However, it works such that only a valid reader will be able to access sensitive information, which is the intention of mutual authentication, and so the distinction is semantic. This is achieved in a clever way. Notice that, in order to get any sensitive data from the card, the reader must be able to decrypt $OpaqueData_{ICC}$. Thus, it must be able to derive $K1$, which in turn means being able to derive $Z1$. Before continuing, recognise that an attacker could eavesdrop an exchange between a valid reader and card, and thus could know a valid certificate, $C_{H}$, and ephemeral public key, $Q_{eH}$. By replaying this information, the attacker could force a card to engage in the protocol. However, once the card responds with $OpaqueData_{ICC}$, since the attacker doesn't know $d_{sH}$, they cannot derive $Z1$, and therefore, ultimately, cannot decrypt the sensitive data. Notice also that an attacker cannot simply choose $C_{H}$ at random, since $Q_{sH}$ must be signed by the provisioning terminal. In this way, only valid readers are able to read a card's sensitive data.
+
+\subsection{Privacy properties}
+
+The mutual authentication protocol has strong privacy properties. In particular, it provides deniability, identity hiding and untraceability.
+
+\subsubsection{Deniability}
+
+Deniability is the inability to use transcripts of communications as proofs towards third parties, i.e. an outsider cannot prove that a specific card has communicated with a specific reader based on, for instance, transcripts of communications from the reader. The protocol ensures a very basic level of deniability, protecting only against abuse of transcripts between a real card and reader. This is referred to as \emph{outsider deniability}.
+
+\subsubsection{Untraceability}
+
+Untraceability is a very strong property which prevents an adversary from correlating any two protocol executions with the same card. This means that the adversary is not able to distinguish between two cards by eavesdropping, and thus prevents unauthorised tracking of cards.
+
+\subsubsection{Identity hiding}
+
+Identity hiding is a weaker property than untraceability, in that it allows multiple protocol executions to be recognised as having occurred with the same card or reader. However, it prevents an adversary from deducing a card's \emph{identity}, i.e. its certificate.
+
 \subsection{Omitted features of OPACITY-FS}
 \label{opacityomissions}
 
-\subsection{Mutual authentication and user untraceability}
+The OPACITY-FS protocol is designed such that, at the end of the protocol, the reader and card have established a pair\footnote{One for encrypting the message, the other for generating a MAC.} of shared keys, which they can use to securely exchange messages. These keys are usually derived at the same time that the $SK_{CFRM}$ key is derived. I opted not to implement this part of the protocol as further secure messaging wasn't required.
 
-\blindtext
+The OPACITY-FS protocol also offers a feature known as persistent binding. The idea behind this feature is that the protocol is slow due to the use of asymmetric cryptography on the card. So, once both parties have been mutually authenticated, it's unnecessary to repeat the slow protocol again, next time the card wants access. Instead, they can agree during the first authentication to remember one another. By storing certain pieces of data, they're able to perform a much faster authentication protocol the next time the card tries to authenticate. This protocol is faster because it doesn't use an asymmetric key algorithms. Unfortunately, a cryptographic analysis \cite{opacityanalysis} of OPACITY-FS revealed that the use of persistent binding violates user untraceability. However, without persistent binding, the protocol achieves untraceability. For this reason, I opted not to implement it.
+
+\section{Card communication API}
+
+In order to abstract away some of the low-level details of contactless communication (e.g. APDUs), I wrote a simple API for sending commands to the card. The API was written as a separate package, and was then compiled to a JAR file. The JAR file could then be added as an external library by any applications that required it, such as the provisioning application, by including it in the relevant build file. The API makes extensive use of the \texttt{javax.smartcardio} package, which is part of the Java standard library and provides classes that are useful for communicating with a contactless card.
+
+Listing \autoref{selectapplet} shows the Java implementation of a method used to select the authentication protocol applet on a card. The \texttt{javax.smartcardio.CommandAPDU} class makes creating command APDUs very easy. The \texttt{transmit()} method converts the \texttt{CommandAPDU} object into a byte array, according to ISO7816. Notice that all exceptions are declared rather than caught. This allows the calling application to deal with them in a targeted way.
+
+\begin{listing}
+\begin{minted}[linenos]{java}
+/**
+ *  Send the SELECT command APDU in order to select the authentication 
+ *  applet.
+ */
+public void selectAuthenticationApplet() throws CardException,
+       CardCommunicationException {
+  ResponseAPDU resp = channel.transmit(new CommandAPDU(ISO7816.CLA_ISO7816,
+        ISO7816.INS_SELECT, 0x04, 0x00,
+        AUTHENTICATION_APPLET_AID));
+
+  short sw = (short)resp.getSW();
+  if (sw != ISO7816.SW_NO_ERROR)
+    throw new CardCommunicationException(sw, Command.SELECT);
+}
+\end{minted}
+\caption{API method for selecting the authentication protocol applet on the card}
+\label{selectapplet}
+\end{listing}
+
+In order to assist with debugging, I wanted to be able to print out any status words returned by the card which indicated that a command had been unsuccessfully executed. For this reason, I created the \texttt{CardCommunicationException} class shown in Listing \autoref{commexception}.
+
+\begin{listing}
+\begin{minted}[linenos]{java}
+public class CardCommunicationException extends Exception {
+  public CardCommunicationException(int sw, CardTerminalAPI.Command c) {
+    super("Received status word '" + sw + "' during command " + c.name());
+  }
+}
+\end{minted}
+\caption{\texttt{CardCommunicationException.java}}
+\label{commexception}
+\end{listing}
+
+\section{JavaCard applet}
+
+\subsection{Instantiation}
+
+Instantiation of the applet occurs during the installation process. As mentioned in \autoref{sec:applets}, when an applet is loaded onto a card, the JCRE calls the applet's \texttt{install()} method. In this method, one should instantiate the applet as in Listing \autoref{appletinstall}. The arguments passed to the \texttt{install()} method provide access to certain install parameters that can be optionally provided. \texttt{bArray} is the byte array in which the arguments are held, \texttt{bOffset} is the offset into the array at which the parameters begin and \texttt{bLength} is the length, in bytes, of the parameters. These parameters can be passed as options to the \texttt{install} command in GPShell, for instance. This project had no need for such parameters and thus they're not passed to the applet's constructor.
+
+\begin{listing}
+\begin{minted}[linenos]{java}
+public static void install(byte[] bArray, short bOffset, byte bLength) {
+    new OpacityForwardSecrecyImplementationApplet();
+}
+\end{minted}
+\caption{Applet \texttt{install()} method}
+\label{appletinstall}
+\end{listing}
+
+\noindent
+As mentioned in \autoref{javacardmemory}, it's far and away best practice to do as much of the memory setup as is possible in the constructor. Thus any arrays for which the required size is known at compile-time, or any objects which can be instantiated ahead of time, should be created in the constructor. In the final line of the constructor, the applet should register itself with the JCRE. This is done by calling the \texttt{register()} method, which is inherited from the abstract \texttt{javacard.framework.Applet} base class.
+
+\subsection{Processing incoming APDUs}
+
+Once the applet has been selected, all incoming APDUs are directed by the JCRE to the applet's \texttt{process()} method. This method acts as a dispatch, directing the APDU to the relevant method within the applet class. Listing \autoref{appletprocess} shows the implementation of the \texttt{process()} method for the authentication protocol applet. The \texttt{ISO7816.OFFSET\_INS} constant is the offset into the APDU buffer at which the instruction code is located.
+
+\begin{listing}
+\begin{minted}[linenos]{java}
+public void process(APDU apdu) {
+  byte[] buffer = apdu.getBuffer();
+
+  if (!apdu.isISOInterindustryCLA()) {
+    switch (buffer[ISO7816.OFFSET_INS]) {
+      case GENERATE_KEY_PAIR:
+        processGenerateKeyPair(apdu);
+        break;
+      case STORE_SIGNATURE:
+        processStoreSignature(apdu);
+        break;
+      case CHECK_STORED_DATA:
+        processCheckStoredData(apdu);
+        break;
+      case BASIC_AUTH:
+        processBasicAuth(apdu);
+        break;
+      case INITIATE_AUTH:
+        processInitiateAuthentication(apdu);
+        break;
+    }
+  }
+}
+\end{minted}
+\caption{Applet \texttt{process()} method}
+\label{appletprocess}
+\end{listing}
+
+\subsection{Memory}
+
+As discussed in \autoref{javacardmemory}, the type of memory used for different data items is an important consideration.
+
+Transient memory (RAM) should be used for any data that doesn't need to persist between communication sessions with a reader. Recall that read/writes to RAM are much faster than to EEPROM, thus memory which is written to during protocol execution should most certainly be stored in RAM, where possible. A good example of transient data is the byte array that holds two of the keys derived during the mutual authentication protocol, $K1$ and $K2$. This array is created in the applet's constructor, as shown in Listing \autoref{k1k2array}.
+
+\begin{listing}
+\begin{minted}[linenos]{java}
+keysK1K2 = JCSystem.makeTransientByteArray((short)(2*AES_KEY_SIZE),
+    JCSystem.CLEAR_ON_DESELECT);
+\end{minted}
+\caption{Creation of byte array to hold derived keys $K1$ and $K2$}
+\label{k1k2array}
+\end{listing}
+
+\noindent
+The second argument, \texttt{JCSystem.CLEAR\_ON\_DESELECT}, is an event code that tells the JCRE that the contents of the transient byte array should be cleared to the default value in the event that the applet is deselected, or in the event of a card reset (or power on).
+
+Persistent memory (EEPROM) should only be used for data that must persist between sessions with a reader. Frequent writes to persistent memory should also be avoided, as these wear out the physical circuit within the card. One example of persistent data would be the card's permanent EC key pair. Again, this object is created in the applet's constructor, as shown in Listing \autoref{cardkeypair}.
+
+\begin{listing}
+\begin{minted}{java}
+cardKeyPair = new KeyPair(KEY_PAIR_ALGORITHM, KEY_LENGTH);
+\end{minted}
+\caption{Creation of the object that will store the card's permanent key pair}
+\label{cardkeypair}
+\end{listing}
+
+\noindent
+Two data items that are \emph{not} created in the constructor are the arrays that store the CRSID and the group ID. These are both variable-length and thus their size is unknown at the point that the applet is installed. Instead, they are created in the \texttt{processStoreSignature()} method, which is the earliest point at which their size is known to the card. Listing \autoref{crsidgroupcreation} shows the creation of these two byte arrays.
+
+\begin{listing}
+\begin{minted}{java}
+crsID = new byte[crsidLen];
+groupID = new byte[groupIDLen];
+\end{minted}
+\caption{Creation of the byte arrays that store the CRSID and group ID}
+\label{crsidgroupcreation}
+\end{listing}
 
 \chapter{Evaluation}
 

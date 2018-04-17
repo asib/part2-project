@@ -63,6 +63,7 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {2.3}{\ignorespaces CAP Converter Tool}}{21}{figure.2.3}}
 \newlabel{capconverter}{{2.3}{21}{CAP Converter Tool}{figure.2.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3.3}Applets}{22}{subsection.2.3.3}}
+\newlabel{sec:applets}{{2.3.3}{22}{Applets}{subsection.2.3.3}{}}
 \@writefile{toc}{\contentsline {subsubsection}{Applet life-cycle}{22}{section*.15}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2.4}{\ignorespaces Applet Life-Cycle}}{22}{figure.2.4}}
 \newlabel{appletlifecycle}{{2.4}{22}{Applet Life-Cycle}{figure.2.4}{}}
@@ -93,36 +94,65 @@
 \citation{sec1}
 \@writefile{toc}{\contentsline {subsubsection}{Card-provisioning terminal key pair}{28}{section*.18}}
 \@writefile{toc}{\contentsline {subsubsection}{Provisioning readers}{28}{section*.19}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.1}Format of group ID}{28}{subsection.3.1.1}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.2}Card provisioning protocol}{28}{subsection.3.1.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.1}Format of CRSID}{28}{subsection.3.1.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.2}Format of group ID}{28}{subsection.3.1.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.3}Format of card expiry date}{28}{subsection.3.1.3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.4}Card provisioning protocol}{28}{subsection.3.1.4}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces Card-provisioning protocol}}{29}{figure.3.2}}
 \newlabel{provisioningprotocol}{{3.2}{29}{Card-provisioning protocol}{figure.3.2}{}}
 \@writefile{toc}{\contentsline {subsubsection}{ECDSA signature format}{29}{section*.20}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.1}ASN.1 structure of an ECDSA signature}{29}{lstlisting.3.1}}
-\citation{OPACITY}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.1}ASN.1 structure of an ECDSA signature}{30}{lstlisting.3.1}}
 \@writefile{toc}{\contentsline {section}{\numberline {3.2}Basic authentication protocol}{30}{section.3.2}}
 \newlabel{basicauth}{{3.2}{30}{Basic authentication protocol}{section.3.2}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.3}Mutual authentication protocol}{30}{section.3.3}}
-\newlabel{mutualauth}{{3.3}{30}{Mutual authentication protocol}{section.3.3}{}}
+\citation{OPACITY}
 \@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces Basic authentication protocol}}{31}{figure.3.3}}
 \newlabel{fig:basicauth}{{3.3}{31}{Basic authentication protocol}{figure.3.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.3}Mutual authentication protocol}{31}{section.3.3}}
+\newlabel{mutualauth}{{3.3}{31}{Mutual authentication protocol}{section.3.3}{}}
 \citation{nistsp80056a}
 \citation{OPACITY}
 \citation{OPACITY}
+\citation{fips1802}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}Concatenation KDF}{32}{subsection.3.3.1}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}Omitted features of OPACITY-FS}{32}{subsection.3.3.2}}
-\newlabel{opacityomissions}{{3.3.2}{32}{Omitted features of OPACITY-FS}{subsection.3.3.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.3}Mutual authentication and user untraceability}{32}{subsection.3.3.3}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces Mutual authentication protocol}}{33}{figure.3.4}}
-\newlabel{fig:mutualauth}{{3.4}{33}{Mutual authentication protocol}{figure.3.4}{}}
-\@writefile{toc}{\contentsline {chapter}{\numberline {4}Evaluation}{35}{chapter.4}}
+\@writefile{lol}{\contentsline {listing}{\numberline {3.2}{\ignorespaces The main loop of the concatenation KDF}}{33}{listing.3.2}}
+\newlabel{concatkdf}{{3.2}{33}{Concatenation KDF}{listing.3.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}Mutual authentication}{33}{subsection.3.3.2}}
+\citation{opacityanalysis}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.3}Privacy properties}{34}{subsection.3.3.3}}
+\@writefile{toc}{\contentsline {subsubsection}{Deniability}{34}{section*.21}}
+\@writefile{toc}{\contentsline {subsubsection}{Untraceability}{34}{section*.22}}
+\@writefile{toc}{\contentsline {subsubsection}{Identity hiding}{34}{section*.23}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.4}Omitted features of OPACITY-FS}{34}{subsection.3.3.4}}
+\newlabel{opacityomissions}{{3.3.4}{34}{Omitted features of OPACITY-FS}{subsection.3.3.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.4}Card communication API}{35}{section.3.4}}
+\@writefile{lol}{\contentsline {listing}{\numberline {3.3}{\ignorespaces API method for selecting the authentication protocol applet on the card}}{35}{listing.3.3}}
+\newlabel{selectapplet}{{3.3}{35}{Card communication API}{listing.3.3}{}}
+\@writefile{lol}{\contentsline {listing}{\numberline {3.4}{\ignorespaces \texttt  {CardCommunicationException.java}}}{36}{listing.3.4}}
+\newlabel{commexception}{{3.4}{36}{Card communication API}{listing.3.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.5}JavaCard applet}{36}{section.3.5}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.1}Instantiation}{36}{subsection.3.5.1}}
+\@writefile{lol}{\contentsline {listing}{\numberline {3.5}{\ignorespaces Applet \texttt  {install()} method}}{36}{listing.3.5}}
+\newlabel{appletinstall}{{3.5}{36}{Instantiation}{listing.3.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.2}Processing incoming APDUs}{36}{subsection.3.5.2}}
+\@writefile{lol}{\contentsline {listing}{\numberline {3.6}{\ignorespaces Applet \texttt  {process()} method}}{37}{listing.3.6}}
+\newlabel{appletprocess}{{3.6}{37}{Processing incoming APDUs}{listing.3.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.3}Memory}{37}{subsection.3.5.3}}
+\@writefile{lol}{\contentsline {listing}{\numberline {3.7}{\ignorespaces Creation of byte array to hold derived keys $K1$ and $K2$}}{37}{listing.3.7}}
+\newlabel{k1k2array}{{3.7}{37}{Memory}{listing.3.7}{}}
+\@writefile{lol}{\contentsline {listing}{\numberline {3.8}{\ignorespaces Creation of the object that will store the card's permanent key pair}}{38}{listing.3.8}}
+\newlabel{cardkeypair}{{3.8}{38}{Memory}{listing.3.8}{}}
+\@writefile{lol}{\contentsline {listing}{\numberline {3.9}{\ignorespaces Creation of the byte arrays that store the CRSID and group ID}}{38}{listing.3.9}}
+\newlabel{crsidgroupcreation}{{3.9}{38}{Memory}{listing.3.9}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces Mutual authentication protocol}}{39}{figure.3.4}}
+\newlabel{fig:mutualauth}{{3.4}{39}{Mutual authentication protocol}{figure.3.4}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {4}Evaluation}{41}{chapter.4}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \bibdata{refs}
-\@writefile{toc}{\contentsline {chapter}{\numberline {5}Conclusion}{37}{chapter.5}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {5}Conclusion}{43}{chapter.5}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {chapter}{Bibliography}{37}{chapter.5}}
+\@writefile{toc}{\contentsline {chapter}{Bibliography}{43}{chapter.5}}
 \bibcite{ant}{1}
 \bibcite{apachecommonscli}{2}
 \bibcite{apachecommonscodec}{3}
@@ -134,19 +164,29 @@
 \bibcite{ISO14443}{9}
 \bibcite{ISO78164}{10}
 \bibcite{ISO78165}{11}
-\bibcite{OPACITY}{12}
-\bibcite{nistsp80056a}{13}
-\bibcite{darkside}{14}
-\bibcite{mifarebruteforce}{15}
-\@writefile{toc}{\contentsline {chapter}{\numberline {A}Project Proposal}{41}{appendix.A}}
+\bibcite{nistsp80056a}{12}
+\bibcite{darkside}{13}
+\bibcite{opacityanalysis}{14}
+\bibcite{fips1802}{15}
+\bibcite{OPACITY}{16}
+\bibcite{mifarebruteforce}{17}
+\@writefile{toc}{\contentsline {chapter}{\numberline {A}Project Proposal}{47}{appendix.A}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\newlabel{appendix:proposal}{{A}{41}{Project Proposal}{appendix.A}{}}
-\@writefile{toc}{\contentsline {chapter}{\numberline {B}Card Application Build File}{47}{appendix.B}}
+\newlabel{appendix:proposal}{{A}{47}{Project Proposal}{appendix.A}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {B}Card Application Build File}{53}{appendix.B}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\newlabel{appendix:cardappbuildfile}{{B}{47}{Card Application Build File}{appendix.B}{}}
+\newlabel{appendix:cardappbuildfile}{{B}{53}{Card Application Build File}{appendix.B}{}}
 \gdef\minted@oldcachelist{,
   default-pyg-prefix.pygstyle,
   default.pygstyle,
+  973EA2B201F3EC6C55EFA4E9574C474ED4CEE09E523CA3C1AF283CD4A9B4518A.pygtex,
+  9FF0A8421D3581F8DD27595DF1D253C0D4CEE09E523CA3C1AF283CD4A9B4518A.pygtex,
+  38A9828B4889F29F31AB2E98644B3022D4CEE09E523CA3C1AF283CD4A9B4518A.pygtex,
+  0FA66B84F28D73C95B5C876B2F587FCED4CEE09E523CA3C1AF283CD4A9B4518A.pygtex,
+  7D49C8CAFBA847130B8EBEDF16EB3EE0D4CEE09E523CA3C1AF283CD4A9B4518A.pygtex,
+  C1FDC7626B092D91E401542C3DB590DAD4CEE09E523CA3C1AF283CD4A9B4518A.pygtex,
+  B7D8C34045C83EF33497FAF0BF659424D4CEE09E523CA3C1AF283CD4A9B4518A.pygtex,
+  B988B3F160A5B610F67D9764807CF85DD4CEE09E523CA3C1AF283CD4A9B4518A.pygtex,
   4103B39439E4DDEE1BF1C9D0904A6BA71F50B4A7FFBE90BF50882A80E17A3E57.pygtex}

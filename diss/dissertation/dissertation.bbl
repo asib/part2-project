@@ -53,13 +53,6 @@ ISO/IEC 7816-5.
 \newblock Standard, International Organization for Standardization, December
   2004.
 
-\bibitem{OPACITY}
-ActivIdentity.
-\newblock Open {Protocol} for {Access} {Control} {Identification} and
-  {Ticketing} with {privacY}, July 2011.
-\newblock
-  \url{https://www.securetechalliance.org/resources/pdf/OPACITY_Protocol_3.7.pdf}.
-
 \bibitem{nistsp80056a}
 Elaine Barker, Don Johnson, and Miles Smid.
 \newblock Recommendation for pair-wise key establishment schemes using discrete
@@ -71,6 +64,28 @@ Elaine Barker, Don Johnson, and Miles Smid.
 Nicolas~T. Courtois.
 \newblock The dark side of security by obscurity, March 2009.
 \newblock \url{https://eprint.iacr.org/2009/137.pdf}.
+
+\bibitem{opacityanalysis}
+{\"O}zg{\"u}r Dagdelen, Marc Fischlin, Tommaso Gagliardoni, Giorgia~Azzurra
+  Marson, Arno Mittelbach, and Cristina Onete.
+\newblock A cryptographic analysis of opacity.
+\newblock In Jason Crampton, Sushil Jajodia, and Keith Mayes, editors, {\em
+  Computer Security -- ESORICS 2013}, pages 345--362, Berlin, Heidelberg, 2013.
+  Springer Berlin Heidelberg.
+
+\bibitem{fips1802}
+{National Institute of Standards and Technology}.
+\newblock {\em {FIPS 180-2}: Secure Hash Standard}.
+\newblock August 2002.
+\newblock
+  \url{https://csrc.nist.gov/csrc/media/publications/fips/180/2/archive/2002-08-01/documents/fips180-2.pdf}.
+
+\bibitem{OPACITY}
+Eric~Le Saint, Dom Fedronic, and Steven Liu.
+\newblock Open {Protocol} for {Access} {Control} {Identification} and
+  {Ticketing} with {privacY}, July 2011.
+\newblock
+  \url{https://www.securetechalliance.org/resources/pdf/OPACITY_Protocol_3.7.pdf}.
 
 \bibitem{mifarebruteforce}
 Cihangir Tezcan.

@@ -1,0 +1,4 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{keysK1K2} \PYG{o}{=} \PYG{n}{JCSystem}\PYG{o}{.}\PYG{n+na}{makeTransientByteArray}\PYG{o}{((}\PYG{k+kt}{short}\PYG{o}{)(}\PYG{l+m+mi}{2}\PYG{o}{*}\PYG{n}{AES\PYGZus{}KEY\PYGZus{}SIZE}\PYG{o}{),}
+    \PYG{n}{JCSystem}\PYG{o}{.}\PYG{n+na}{CLEAR\PYGZus{}ON\PYGZus{}DESELECT}\PYG{o}{);}
+\end{Verbatim}
