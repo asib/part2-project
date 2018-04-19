@@ -63,7 +63,7 @@ public class CardTerminal {
 
   private static final Provider BOUNCY_CASTLE_PROVIDER = new BouncyCastleProvider();
 
-  private static final boolean MODE_TEST = true;
+  private static final boolean MODE_TEST = false;
 
   public CardTerminal() {
 
@@ -295,7 +295,7 @@ public class CardTerminal {
       offset += certificateExpiry.length;
       System.arraycopy(cardPublicKeyBytes, 0, dataToBeSigned, offset, cardPublicKeyBytes.length);
 
-      System.out.println(Hex.encodeHexString(dataToBeSigned));
+      //System.out.println(Hex.encodeHexString(dataToBeSigned));
 
       KeyPair kp = loadTerminalKeyPair();
       if (kp == null)
@@ -341,9 +341,13 @@ public class CardTerminal {
       if (!Arrays.equals(cardStoredData, queriedStoredData)) {
         System.out.println("An error occured whilst attempting to provision the "
             + "card, please try again.");
-      } else {
-        System.out.println("Provisioning successful!");
       }
+
+      // Lock the card to prevent it from responding to any further provisioning
+      // commands.
+      api.sendLockCardCommand();
+
+      System.out.println("Provisioning successful!");
     } catch (CardException e) {
       System.out.println("Error during communication with card:");
       System.out.println(e.getMessage());

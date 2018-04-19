@@ -70,7 +70,8 @@ Supervisor:         & Dr Markus Kuhn                    \\
 }
 
 \section*{Original Aims of the Project}
-The objective of the project was to produce an access control system that implements an authentication protocol based on asymmetric key cryptography. As well as producing a card application and reader application that implement the authentication protocol, a card-provisioning application that can be used to issue new cards or reprogram existing cards was to be written. The system was required to be able to authenticate a card in less than one second.
+
+The objective of the project was to produce an access control system that implements an authentication protocol based on asymmetric key cryptography. As well as producing a card application and reader application that implement the authentication protocol, a card-provisioning application that can be used to issue new cards or reprogram existing cards was to be written. The system was required to be able to authenticate a card in less than one second.
 
 \section*{Work Completed}
 
@@ -156,6 +157,7 @@ The sector trailer itself has specific access conditions. Key A is never readabl
 \end{figure}
 
 \subsection{Vulnerabilities}
+\label{mifarevulnerabilities}
 
 A number of weakness and vulnerabilities have been discovered in the MIFARE Classic system, including brute-forcible keys, a predictable pseudo-random number generator (PRNG), a cloning attack, and two very powerful attacks named the nested authentication attack and the Dark-Side attack. We shall discuss these vulnerabilities in the following paragraphs.
 
@@ -190,7 +192,8 @@ Once all the keys have been recovered from a card, all the data can be read from
 \section{Starting point}
 
 This project makes significant use of the material from Security I and Security II. Further, material from Object-Oriented Programming and Further Java was utilised when writing the smart card application that runs on the JavaCard platform, which supports a subset of the Java language.
-A previous attempt was made at this project by Denys Natykan, and so his dissertation deserves mention. However, there're rather significant differences in our end products, as I opted to implement a different authentication protocol in order to complete certain extensions.
+
+A previous attempt was made at this project by Denys Natykan, and so his dissertation deserves mention. However, there're rather significant differences in our end products, as I opted to implement a different authentication protocol in order to complete certain extensions.
 
 \section{Communication between card and reader}
 
@@ -347,7 +350,7 @@ The project consists of three applications: the card-provisioning application, d
 \section{Card-provisioning application}
 \label{provisionapp}
 
-Both authentication protocols are built around elliptic curve (EC) cryptography, and thus it was necessary to write a command-line application that provisions cards with a signed EC key pair. The application is also able to list the details stored on a card (CRSID, door access permissions and card expiry date), generate a key pair that it will use for signing card key pairs, and lastly, there's a command for signing a provided file (the reason for this is explained below). \autoref{provisionhelp} shows the help output of the application.
+Both authentication protocols are built around elliptic curve (EC) cryptography, and thus it was necessary to write a command-line application that provisions cards with a signed EC key pair. The application is also able to generate a key pair that it will use for signing card key pairs, and lastly, there's a command for signing a provided file (the reason for this is explained below). \autoref{provisionhelp} shows the help output of the application.
 
 \begin{figure}[tbh]
 \centerline{\includegraphics[scale=0.7]{figures/provisionhelp.png}}
@@ -419,7 +422,7 @@ The relevance of this is that JavaCard and Bouncy Castle treat signatures slight
 \section{Basic authentication protocol}
 \label{basicauth}
 
-The basic authentication protocol is relatively simple. The reader begins by generating a cryptographic nonce.\footnote{A nonce is a random number, normally used for the purpose of preventing a replay attack.} The reader sends this nonce to the card in the body of a \texttt{BASIC\_AUTH} command. The card generates an ECDSA signature, using the nonce as the input data. It then returns this nonce signature, along with its stored CRSID, group ID, expiry date, EC public key and card signature\footnote{This was the signature stored during provisioning.}, in the body of a response APDU. The reader first verifies the card signature to ensure the card's public key is valid, then checks the card expiry date. Having done that, it verifies the nonce signature to ensure that the card it's communicating with has the matching private key\footnote{Otherwise it's possible that an attacker could just be replaying an old communication; the nonce signature prevents this possibility.}. Finally, the reader checks that the group ID permits access to the location in question. A diagram of the protocol is shown in \autoref{fig:basicauth}.
+The basic authentication protocol is relatively simple. The reader begins by generating a 100-byte cryptographic nonce.\footnote{A nonce is a random number, normally used for the purpose of preventing a replay attack.} The reader sends this nonce to the card in the body of a \texttt{BASIC\_AUTH} command. The card generates an ECDSA signature, using the nonce as the input data. It then returns this nonce signature, along with its stored CRSID, group ID, expiry date, EC public key and card signature\footnote{This was the signature stored during provisioning.}, in the body of a response APDU. The reader first verifies the card signature to ensure the card's public key is valid, then checks the card expiry date. Having done that, it verifies the nonce signature to ensure that the card it's communicating with has the matching private key\footnote{Otherwise it's possible that an attacker could just be replaying an old communication; the nonce signature prevents this possibility.}. Finally, the reader checks that the group ID permits access to the location in question. A diagram of the protocol is shown in \autoref{fig:basicauth}.
 
 \begin{figure}[tbh]
 \centerline{\includegraphics[scale=0.8]{figures/basicauth.eps}}
@@ -480,6 +483,7 @@ for (short counter = (short)1; counter <= numBlocksToGenerate; counter++) {
 \end{listing}
 
 \subsection{Mutual authentication}
+\label{sec:mutualauth}
 
 The basic authentication protocol described in \autoref{basicauth} only authenticates the card, i.e. the card cannot tell whether the reader is real (e.g. a reader controlling access to a university door) or adversarial (e.g. someone holding a USB reader up to your pocket). Under such a protocol, the card may reveal sensitive information to an attacker. Even seemingly trivial data, such as a public key, can be used to track a card, and thus should not be divulged at will. The mutual authentication protocol solves this by doing the obvious thing --- authenticating both the card \emph{and} the reader. Strictly speaking, the protocol doesn't actually authenticate the reader. However, it works such that only a valid reader will be able to access sensitive information, which is the intention of mutual authentication, and so the distinction is semantic. This is achieved in a clever way. Notice that, in order to get any sensitive data from the card, the reader must be able to decrypt $OpaqueData_{ICC}$. Thus, it must be able to derive $K1$, which in turn means being able to derive $Z1$. Before continuing, recognise that an attacker could eavesdrop an exchange between a valid reader and card, and thus could know a valid certificate, $C_{H}$, and ephemeral public key, $Q_{eH}$. By replaying this information, the attacker could force a card to engage in the protocol. However, once the card responds with $OpaqueData_{ICC}$, since the attacker doesn't know $d_{sH}$, they cannot derive $Z1$, and therefore, ultimately, cannot decrypt the sensitive data. Notice also that an attacker cannot simply choose $C_{H}$ at random, since $Q_{sH}$ must be signed by the provisioning terminal. In this way, only valid readers are able to read a card's sensitive data.
 
@@ -576,22 +580,40 @@ public void process(APDU apdu) {
   byte[] buffer = apdu.getBuffer();
 
   if (!apdu.isISOInterindustryCLA()) {
-    switch (buffer[ISO7816.OFFSET_INS]) {
-      case GENERATE_KEY_PAIR:
-        processGenerateKeyPair(apdu);
-        break;
-      case STORE_SIGNATURE:
-        processStoreSignature(apdu);
-        break;
-      case CHECK_STORED_DATA:
-        processCheckStoredData(apdu);
-        break;
-      case BASIC_AUTH:
-        processBasicAuth(apdu);
-        break;
-      case INITIATE_AUTH:
-        processInitiateAuthentication(apdu);
-        break;
+    if (!locked) {
+      switch (buffer[ISO7816.OFFSET_INS]) {
+        case GENERATE_KEY_PAIR:
+          processGenerateKeyPair(apdu);
+          break;
+        case STORE_SIGNATURE:
+          processStoreSignature(apdu);
+          break;
+        case CHECK_STORED_DATA:
+          processCheckStoredData(apdu);
+          break;
+        case LOCK_CARD:
+          processLockCard(apdu);
+          break;
+        case BASIC_AUTH:
+        case INITIATE_AUTH:
+          ISOException.throwIt(ISO7816.SW_COMMAND_NOT_ALLOWED);
+          break;
+      }
+    } else {
+      switch (buffer[ISO7816.OFFSET_INS]) {
+        case GENERATE_KEY_PAIR:
+        case STORE_SIGNATURE:
+        case CHECK_STORED_DATA:
+        case LOCK_CARD:
+          ISOException.throwIt(ISO7816.SW_COMMAND_NOT_ALLOWED);
+          break;
+        case BASIC_AUTH:
+          processBasicAuth(apdu);
+          break;
+        case INITIATE_AUTH:
+          processInitiateAuthentication(apdu);
+          break;
+      }
     }
   }
 }
@@ -642,7 +664,176 @@ groupID = new byte[groupIDLen];
 
 \chapter{Evaluation}
 
+\section{APDU logs}
 
+\subsection{Log of provisioning protocol}
+
+Listing \autoref{provisionlog} shows the sequence of APDUs exchanged during the provisioning process. The first command (line 2) is the interindustry command for selecting an applet. The data provided in the body of the APDU is the AID, which I chose to be \texttt{F2 34 12 34 56 10 10 00}. The next command (line 7) tells the card to generate a new EC key pair. Notice two things: the first two bytes are \texttt{80}, indicating the command class is proprietary, and the last byte is \texttt{33}, indicating the expected length of the response. The card responds with its public key (line 9), with the first two bytes, \texttt{00 31}, specifying the length of the data. The reader then sends the store command (line 14), passing the following items in the body of the APDU: card signature, provisioning terminal public key, CRSID, group ID and card expiry date. The next command from the reader tells the card to respond with all the data it was just asked to store (line 23). Once the reader is satisfied that all the data matches, the lock command is issued (line 33), after which the card will not respond to any further provisioning commands. Note that every response APDU ends with the two bytes, \texttt{90 00}. This is the ``no error'' status word, and thus indicates that every command executed successfully.
+
+\begin{listing}
+\begin{minted}[linenos]{text}
+COMMAND: Select authentication protocol applet:
+00 A4 04 00 08 F2 34 12 34 56 10 10 00
+RESPONSE: Command success:
+90 00
+
+COMMAND: Generate key pair:
+80 01 00 00 33
+RESPONSE: Card public key:
+00 31 04 7C 20 D8 42 4A F3 CE FC BC 1A 0C 63 5D F5 5A BA 90 F8 40 105C 25 9A 32
+38 6C 50 9A AC 4D E8 02 C4 58 BA C4 82 F3 4A 47 3A 02 A8 7F 77 1E 5B E6 90 00
+
+COMMAND: Store signature, provisioning terminal public key, CRSID, group ID,
+card expiry date:
+80 02 00 00 7C 30 36 02 19 00 64 CE 1F 24 84 5F 2B D6 33 19 12 BA 85 93 2F 04
+1D BE 60 EB DE 86 A2 5B 02 19 00 D7 D2 B2 0A ED B7 01 89 D8 5D 4E 6F 3C 42 FC
+CC 50 7F 9D BA B5 07 5F 1A 00 31 04 07 BB 76 3A C3 0E 36 8A 6E F1 E8 27 AF 67
+8B 89 05 32 AC 8D 73 3C 18 94 F7 80 13 CA 47 F1 5F E1 69 B9 FB B1 C9 F0 C7 1D
+63 25 A5 EA AA D3 2A 61 00 05 6A 66 35 37 34 00 04 01 02 03 04 01 01 01 01
+RESPONSE: Command success:
+90 00
+
+COMMAND: Check stored data:
+80 03 00 00 91
+RESPONSE: Signature, provisioning terminal public key, CRSID, group ID,
+card expiry date:
+30 36 02 19 00 64 CE 1F 24 84 5F 2B D6 33 19 12 BA 85 93 2F 04 1D BE 60 EB DE
+86 A2 5B 02 19 00 D7 D2 B2 0A ED B7 01 89 D8 5D 4E 6F 3C 42 FC CC 50 7F 9D BA
+B5 07 5F 1A 00 31 04 07 BB 76 3A C3 0E 36 8A 6E F1 E8 27 AF 67 8B 89 05 32 AC
+8D 73 3C 18 94 F7 80 13 CA 47 F1 5F E1 69 B9 FB B1 C9 F0 C7 1D 63 25 A5 EA AA
+D3 2A 61 00 05 6A 66 35 37 34 00 04 01 02 03 04 01 01 01 01 90 00
+
+COMMAND: Lock card:
+80 06 00 00
+RESPONSE: Command success:
+90 00
+\end{minted}
+\caption{Log showning APDUs sent and received by the provisioning terminal during the provisioning protocol}
+\label{provisionlog}
+\end{listing}
+
+\subsection{Log of basic authentication protocol}
+
+Listing \autoref{basicauthlog} shows the sequence of APDUs exchanged between the card and reader during the basic authentication protocol. Again, the first command selects the authentication protocol applet (line 2). The next command (line 7) instructs the card to generate a signature of the nonce provided in the body of the APDU. The card responds (line 14) with this signature, along with its certificate.
+
+\begin{listing}
+\begin{minted}[linenos]{text}
+COMMAND: Select authentication protocol applet:
+00 A4 04 00 08 F2 34 12 34 56 10 10 00
+RESPONSE: Command success:
+90 00
+
+COMMAND: Request signature of nonce:
+80 05 00 00 66 00 64 B3 C2 78 21 32 B6 D9 71 07 D1 3E 8C 43 AC 0A 92 33 1C 96
+0C 52 F9 36 1D A5 6D CF 1D 5A 16 EB 04 B2 78 0A F7 37 80 49 A7 AA 42 08 90 8D
+12 97 E3 0E 00 D4 D5 1D 1C 8E 59 03 65 C6 6F AB B2 32 EB 29 00 2E D8 9D B7 64
+E9 76 25 20 4E 4A D5 46 E5 26 B8 8A 40 76 90 1F CF 87 C2 32 07 FF 08 F4 0E 0F
+27 75 3D C5
+RESPONSE: Nonce signature, card signature, card public key, CRSID, group ID,
+card expiry date:
+00 38 30 35 02 18 07 BA 7E 4E 00 57 D2 2F 86 07 1C 95 A2 A9 A5 35 05 AA 3C AF
+F9 E7 56 5E 02 19 00 E7 AB 08 F2 78 8C B5 9D B0 5D 31 F7 FB C3 90 12 E5 11 7A
+4B AD 7C 01 7F 00 30 36 02 19 00 64 CE 1F 24 84 5F 2B D6 33 19 12 BA 85 93 2F
+04 1D BE 60 EB DE 86 A2 5B 02 19 00 D7 D2 B2 0A ED B7 01 89 D8 5D 4E 6F 3C 42
+FC CC 50 7F 9D BA B5 07 5F 1A 00 31 04 7C 20 D8 42 4A F3 CE FC BC 1A 0C 63 5D
+F5 5A BA 90 F8 40 10 5C 25 9A 32 38 6C 50 9A AC 4D E8 02 C4 58 BA C4 82 F3 4A
+47 3A 02 A8 7F 77 1E 5B E6 00 05 6A 66 35 37 34 00 04 01 02 03 04 01 01 01 01
+90 00
+\end{minted}
+\caption{Log showning APDUs sent and received by the reader during the basic authentication protocol}
+\label{basicauthlog}
+\end{listing}
+
+\subsection{Log of mutual authentication protocol}
+
+Listing \autoref{mutualauthlog} shows the sequence of APDUs exchanged during the mutual authentication protocol. The reader issues a command to initiate the protocol (line 7), providing its certificate and ephemeral public key in the body of the APDU. The card responds (line 15) with its encrypted certificate (opaque data), the authentication cryptogram and its ephemeral public key.
+
+\begin{listing}
+\begin{minted}[linenos]{text}
+COMMAND: Select authentication protocol applet:
+00 A4 04 00 08 F2 34 12 34 56 10 10 00
+RESPONSE: Command success:
+90 00
+
+COMMAND: Initiate mutual authentication protocol:
+80 04 00 00 9E 30 36 02 19 00 9E E0 32 EE 9B 46 74 71 2C 65 2B A0 CB 08 B2 0A
+17 36 0B 26 5B B0 F3 06 02 19 00 10 F3 A9 4B BE 49 22 B9 A8 B3 2E B3 DD DB 57
+E9 54 D5 AB 5E 33 B8 25 AE 00 31 04 CA 1B 5E 81 E1 29 4B E3 9C 9F 87 EB C8 0D
+B1 A6 95 3C FA 7B 1A 85 EF AD 68 33 FB 42 76 D8 31 57 5C 84 16 F6 B3 9B 75 8A
+1F E0 EC 20 52 95 D8 E8 00 31 04 91 3F 64 73 3D 16 B1 23 BD 5E 1A 3C B8 21 53
+00 6D 3A D1 81 D3 78 0F 5F 97 92 3A 51 6A E7 EF 38 A9 32 E4 5C 85 16 2D C3 CC
+99 72 64 80 25 BA BD A3
+RESPONSE: Opaque data, authentication cryptogram, card ephemeral public key:
+00 80 16 CC 75 55 E9 06 55 13 BC 66 09 0D E1 EE 91 8A BF C7 0C EF CE 56 19 67
+30 A1 0B F5 F4 48 5C 05 D2 30 C2 EB 2B F0 54 FD EE 80 12 92 90 59 35 56 8F A0
+DD CA D9 9B AA D2 90 E4 4E F7 C4 7D 74 F4 0F 6D 4E BF 12 58 0E C1 18 C1 3A 10
+5E 68 DF C7 54 36 A5 44 C0 09 49 FA 27 FE CA 35 A8 2B B5 EF 2A 82 4B 32 FE F8
+00 45 86 95 44 A4 B0 8D 3D F0 FC 97 A2 1E 74 6B B6 F2 0F 55 FB F7 5C 2F 47 9A
+7F 9D DA B1 79 A0 0E F3 A0 31 1E 3A 7C 8D C6 87 04 62 76 F8 35 03 20 22 AE 76
+6F DD 1A DC 7F B3 8A 67 A5 74 52 3B 0D 43 62 44 C9 0D 53 5C 12 B1 D0 0E 1C FC
+35 CE 0F 96 83 1C 7D 7E A9 A7 6A E6 D2 90 00
+\end{minted}
+\caption{Log showning APDUs sent and received by the reader during the mutual authentication protocol}
+\label{mutualauthlog}
+\end{listing}
+
+\section{Runtime of the authentication protocols}
+
+In order to gather data about the runtime of the two protocols, I recorded the time at the start and end of the execution by twice storing the result of \texttt{System.nanoTime()}. The difference between these values gave me the total execution time of the protocol.
+
+In order ensure a statistically significant estimate for the execution time of both protocols, I sampled the runtime of each protocol 400 times. According to the central limit theorem, these execution times are normally distributed. Thus, I used the \texttt{normfit()} method in MATLAB to calculate the sample mean and the square root of the unbiased estimate of the variance (standard deviation), and plotted two Gaussian curves.
+
+\subsection{Runtime of the basic authentication protocol}
+
+To three significant figures, the sample mean for the runtime of the basic authentication protocol was 269.0 ms, with a standard deviation of 4.8 ms. We can estimate the maximum runtime with a certain confidence level using a left-sided confidence interval. \autoref{basicauthplot} shows a 95\% left-sided confidence interval, allowing us to state that, with 95\% confidence, the runtime will not exceed 276.9 ms.
+
+\begin{figure}[tbh]
+\centerline{\includegraphics[scale=0.8]{figures/basicauthplot.eps}}
+\caption{Gaussian distribution of basic authentication protocol runtime}
+\label{basicauthplot}
+\end{figure}
+
+\subsection{Runtime of the mutual authentication protocol}
+
+To three significant figures, the sample mean for the runtime of the mutual authentication protocol was 1.090 s, with a standard deviation of 7.5 ms. Again, we can estimate the maximum runtime using a left-sided confidence interval. \autoref{mutualauthplot} shows a 95\% left-sided confidence interval, allowing us to state that, with 95\% confidence, the runtime will not exceed 1.103 s.
+
+We can see clearly that the mutual authentication protocol is significantly slower. This is likely due mostly to two reasons. For one, many more cryptographic operations are performed --- the basic protocol does ECDSA once, whilst the mutual protocol generates an EC key pair, does ECDH and the KDF twice, AES once and CBC-MAC once. Further, I had to implement the concatenation KDF myself, and thus it doesn't have the benefit of hardware acceleration.
+
+\subsection{Comparison to MIFARE Classic authentication protocol runtime}
+
+According to the datasheet of the MIFARE Classic EV1 4k (the card used by the university), authentication should take no longer than roughly 7 ms --- 2 ms to authenticate to a sector on the card, 5 ms to read data, e.g. to fetch CRSID. However, there are many readers around the university that can take up to 2 s to authenticate a card --- this is likely due to the fact that an external database is being queried for the card's access permissions. Therefore, I do not believe that the siystem described in this dissertation is unusable, by any means.
+
+\begin{figure}[tbh]
+\centerline{\includegraphics[scale=0.8]{figures/mutualauthplot.eps}}
+\caption{Gaussian distribution of mutual authentication protocol runtime}
+\label{mutualauthplot}
+\end{figure}
+
+\section{Security of the protocols}
+
+\subsection{Resistance to replay attacks}
+
+A replay attack is when an adversary eavesdrops on a valid exchange between a real card and reader, and then replays messages sent by, e.g. the reader, in order to trick a real card into believing it's communicating with a real reader, and thus extract sensitive information stored on the card. Alternatively, the attacker may try to replay the card's communications in order to gain access to a restricted location. In practice, this can be done relatively easily by installing some sort of RFID-capable device next to a real reader that stores all overheard communications. The attacker can retrieve this device after some time and analyse the stored exchanges in order to prepare an application capable of performing a replay attack. This application could run on an RFID-capable smartphone, for instance.
+
+A replay attack imitating the card's communications will not work on either of the protocols described in this dissertation. The reason for this is that both protocols utilise some form of cryptographic nonce. Taking the basic protocol as an example, if an attacker attempted to replay a card's response to a reader's request for a nonce signature, the chance that the nonce used in the recorded communication matches the nonce provided during the replay attack attempt are vanishingly small --- the nonce is 100 bytes in length, thus the chance of a nonce match is approximately $10^{-240}$. In a similar way, the mutual authentication protocol uses ephemeral key pairs to prevent replay attacks.
+
+On the other hand, if a replay attack imitates the reader's communications, the basic authentication protocol is vulnerable, in that the card will divulge sensitive information. This is because the card doesn't authenticate the reader, and responds to all requests for a nonce signature with its unencrypted certificate. On the other hand, because the mutual authentication protocol \emph{does} authenticate the reader, an adversary will not be able to decrypt the card's encrypted certificate (referred to as the opaque data). The detailed reasoning for this is described in \autoref{sec:mutualauth}.
+
+\subsection{Resistance to cloning attacks}
+
+As was discussed in \autoref{mifarevulnerabilities}, MIFARE Classic cards have been vulnerable to cloning attacks for nearly a decade. This weakness is the key motivating factor behind the University of Cambridge's desire to replace its current access control system. Thus, it's important that the system described in this dissertation be resistant to such attacks.
+
+Firstly, there's no chance for the card to accidentally divulge its permanent private key, since at no point in the applet's code is the private key used, other than to generate ECDSA signatures or perform ECDH. Therefore, the only attack that could potentially retrieve a card's private key is a side-channel attack. Side-channel attacks aim to take advantage of variations in the the execution time of an algorithm, or the power consumption during execution, as a result of changing stimuli, in order to learn sensitive data, like private keys. This attack would have to target the card's implementation of either ECDSA or ECDH, and thus cannot be avoided by any change to the protocols. The only way to prevent such attacks is to ensure that the chosen model of card implements these algorithms in a time- and power-neutral way.
+
+If we assume that an adversary has somehow managed to obtain a valid card's private key, then this does not immediately mean the system is compromised. Unless the attacker has access to the source code of the authentication protocol applet, they will have to reverse-engineer the operation of the true applet in order to be able to write a clone applet. This is certainly feasible --- consider, for example, the existing clone of CRYPTO-1. However, in order to obtain a card signature, the attacker will need access to a provisioning terminal. If the attacker manages to obtain the provisioning terminal's private key, then they're able to provision cards at will, with whatever access permissions they choose. Thus, in order to keep the system secure, the main concern should be securely storing the provisioning terminal's private key, and restricting access to the physical provisioning terminal.
+
+\subsection{Vulnerability to relay attacks}
+
+Both protocols are vulnerable to what is known as a \emph{relay} attack, a type of man-in-the-middle (MITM) attack. In order to perform such an attack, an adversary must be in possession of two devices that are RFID-capable. Further, these two devices must be able to communicate with one another. One device must be placed within range of a victim's card (device A), and the other must be within range of the target reader (device B). The attack is described in the following paragraph.
+
+By appearing to the target reader to be an RFID tag, B causes the reader to initiate the authentication protocol. B relays all communications sent by the reader to A. When A receives data from B, it relays the data to the victim's card, and thus the card believes it has been engaged in the protocol with a valid reader. When the card responds to the initial command, A relays this response to B, who then relays it to the reader. Because all the cryptographic processing occurred on valid devices, the reader will grant access. Recognise that in order for the attack to work, both relay devices must be within range of their targets at the same time, for the duration of the protocol execution. Thus the conditions for the attack are difficult to achieve.
+
+Relay attacks can be prevented by a distance-bounding protocol, which would allow the reader to establish an upper bound on the physical distance between itself and the card. Such a protocol is based on timing the delay between when the initial authentication command is issued and when the response is received. The delay time enables the reader to compute an upper bound on the distance, by dividing the round-trip delay by twice the speed of light. This computation is based on the fact that electromagnetic waves, such as radio waves that are involved in contactless communication, travel nearly at the speed of light in air, but cannot travel faster. 
 
 \chapter{Conclusion}
 

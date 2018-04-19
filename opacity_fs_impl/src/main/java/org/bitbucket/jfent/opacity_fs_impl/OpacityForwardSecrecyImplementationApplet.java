@@ -30,6 +30,7 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
   public static final byte GENERATE_KEY_PAIR = (byte)0x01; // INS byte for generating key pair.
   public static final byte STORE_SIGNATURE = (byte)0x02;   // INS byte for storing the terminal's signature.
   public static final byte CHECK_STORED_DATA = (byte)0x03; // INS byte for checking data was stored correctly after STORE_SIGNATURE instruction.
+  public static final byte LOCK_CARD = (byte)0x06; // INS byte for locking the card once provisioning is complete.
   public static final byte BASIC_AUTH = (byte)0x05; // INS byte for basic auth protocol. See details of protocol in documentation for method processBasicAuth().
   public static final byte INITIATE_AUTH = (byte)0x04; // INS byte for initiating the authentication protocol.
   public static final byte TERMINAL_KEY_TYPE = KeyBuilder.TYPE_EC_FP_PUBLIC;
@@ -95,6 +96,9 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
   private byte[] crsID;
   private final byte[] certificateExpiry;
 
+  // If the card is locked, it won't respond to provisioning commands.
+  private boolean locked;
+
   // Used by KDF function named deriveKey().
   private MessageDigest hashDigest;
 
@@ -124,6 +128,8 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
   private byte[] skcfrmOtherInfo;
   private byte[] otidICC;
   private byte[] authCryptogramInputData;
+  // For basic auth protocol.
+  private byte[] nonceSignature;
 
   private OpacityForwardSecrecyImplementationApplet() {
     terminalPublicKey = (ECPublicKey)KeyBuilder.buildKey(TERMINAL_KEY_TYPE,
@@ -134,6 +140,14 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
     // This needs to be persistently stored.
     cardSignature = new byte[SIGNATURE_LENGTH];
     certificateExpiry = new byte[CERTIFICATE_EXPIRY_LENGTH];
+
+    // Before the card is provisioned, it's unlocked and responds to
+    // provisioning commands.
+    locked = false;
+
+    // For basic auth protocol.
+    nonceSignature = JCSystem.makeTransientByteArray(SIGNATURE_LENGTH,
+        JCSystem.CLEAR_ON_DESELECT);
 
     hashDigest = MessageDigest.getInstance(KDF_HASH_ALGORITHM, false);
 
@@ -210,10 +224,11 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
       new OpacityForwardSecrecyImplementationApplet();
   }
 
-  public void process(APDU apdu) {
-    byte[] buffer = apdu.getBuffer();
+public void process(APDU apdu) {
+  byte[] buffer = apdu.getBuffer();
 
-    if (!apdu.isISOInterindustryCLA()) {
+  if (!apdu.isISOInterindustryCLA()) {
+    if (!locked) {
       switch (buffer[ISO7816.OFFSET_INS]) {
         case GENERATE_KEY_PAIR:
           processGenerateKeyPair(apdu);
@@ -224,6 +239,22 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
         case CHECK_STORED_DATA:
           processCheckStoredData(apdu);
           break;
+        case LOCK_CARD:
+          processLockCard(apdu);
+          break;
+        case BASIC_AUTH:
+        case INITIATE_AUTH:
+          ISOException.throwIt(ISO7816.SW_COMMAND_NOT_ALLOWED);
+          break;
+      }
+    } else {
+      switch (buffer[ISO7816.OFFSET_INS]) {
+        case GENERATE_KEY_PAIR:
+        case STORE_SIGNATURE:
+        case CHECK_STORED_DATA:
+        case LOCK_CARD:
+          ISOException.throwIt(ISO7816.SW_COMMAND_NOT_ALLOWED);
+          break;
         case BASIC_AUTH:
           processBasicAuth(apdu);
           break;
@@ -233,6 +264,7 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
       }
     }
   }
+}
 
   private void processGenerateKeyPair(APDU apdu) {
     byte[] buffer = apdu.getBuffer();
@@ -390,6 +422,16 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
   }
 
   /**
+   *
+   * This method sets the card's `locked` instance variable to true. This prevents
+   * the card from responding to any further provisioning commands.
+   *
+   */
+  private void processLockCard(APDU apdu) {
+    locked = true;
+  }
+
+  /**
    * This is the basic auth protocol that I had to implement in order to satisfy
    * the "will authenticate in under 1 second" part of the project's success
    * criteria.
@@ -413,9 +455,6 @@ public class OpacityForwardSecrecyImplementationApplet extends Applet {
     short nonceLength = Util.getShort(buffer, ISO7816.OFFSET_CDATA);
 
     ecdsaSignature.init(cardKeyPair.getPrivate(), Signature.MODE_SIGN);
-
-    // Create array to hold signature.
-    byte[] nonceSignature = new byte[SIGNATURE_LENGTH];
 
     // We add 2 to the offset here to skip over the 2-byte length tag.
     ecdsaSignature.sign(buffer, (short)(ISO7816.OFFSET_CDATA+2), nonceLength,

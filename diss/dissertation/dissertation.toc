@@ -53,7 +53,19 @@
 \contentsline {subsection}{\numberline {3.5.2}Processing incoming APDUs}{36}{subsection.3.5.2}
 \contentsline {subsection}{\numberline {3.5.3}Memory}{37}{subsection.3.5.3}
 \contentsline {chapter}{\numberline {4}Evaluation}{41}{chapter.4}
-\contentsline {chapter}{\numberline {5}Conclusion}{43}{chapter.5}
-\contentsline {chapter}{Bibliography}{43}{chapter.5}
-\contentsline {chapter}{\numberline {A}Project Proposal}{47}{appendix.A}
-\contentsline {chapter}{\numberline {B}Card Application Build File}{53}{appendix.B}
+\contentsline {section}{\numberline {4.1}APDU logs}{41}{section.4.1}
+\contentsline {subsection}{\numberline {4.1.1}Log of provisioning protocol}{41}{subsection.4.1.1}
+\contentsline {subsection}{\numberline {4.1.2}Log of basic authentication protocol}{41}{subsection.4.1.2}
+\contentsline {subsection}{\numberline {4.1.3}Log of mutual authentication protocol}{41}{subsection.4.1.3}
+\contentsline {section}{\numberline {4.2}Runtime of the authentication protocols}{42}{section.4.2}
+\contentsline {subsection}{\numberline {4.2.1}Runtime of the basic authentication protocol}{42}{subsection.4.2.1}
+\contentsline {subsection}{\numberline {4.2.2}Runtime of the mutual authentication protocol}{42}{subsection.4.2.2}
+\contentsline {subsection}{\numberline {4.2.3}Comparison to MIFARE Classic authentication protocol runtime}{42}{subsection.4.2.3}
+\contentsline {section}{\numberline {4.3}Security of the protocols}{43}{section.4.3}
+\contentsline {subsection}{\numberline {4.3.1}Resistance to replay attacks}{43}{subsection.4.3.1}
+\contentsline {subsection}{\numberline {4.3.2}Resistance to cloning attacks}{44}{subsection.4.3.2}
+\contentsline {subsection}{\numberline {4.3.3}Vulnerability to relay attacks}{45}{subsection.4.3.3}
+\contentsline {chapter}{\numberline {5}Conclusion}{51}{chapter.5}
+\contentsline {chapter}{Bibliography}{51}{chapter.5}
+\contentsline {chapter}{\numberline {A}Project Proposal}{55}{appendix.A}
+\contentsline {chapter}{\numberline {B}Card Application Build File}{61}{appendix.B}

@@ -36,6 +36,7 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {1.2}{\ignorespaces Sector trailer}}{16}{figure.1.2}}
 \newlabel{mifarememory2}{{1.2}{16}{Sector trailer}{figure.1.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.2.3}Vulnerabilities}{16}{subsection.1.2.3}}
+\newlabel{mifarevulnerabilities}{{1.2.3}{16}{Vulnerabilities}{subsection.1.2.3}{}}
 \@writefile{toc}{\contentsline {subsubsection}{Brute-forcing the sector keys}{16}{section*.9}}
 \@writefile{toc}{\contentsline {subsubsection}{Predicting the output of the card's PRNG}{16}{section*.10}}
 \citation{darkside}
@@ -101,7 +102,7 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces Card-provisioning protocol}}{29}{figure.3.2}}
 \newlabel{provisioningprotocol}{{3.2}{29}{Card-provisioning protocol}{figure.3.2}{}}
 \@writefile{toc}{\contentsline {subsubsection}{ECDSA signature format}{29}{section*.20}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.1}ASN.1 structure of an ECDSA signature}{30}{lstlisting.3.1}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.1}ASN.1 structure of an ECDSA signature}{29}{lstlisting.3.1}}
 \@writefile{toc}{\contentsline {section}{\numberline {3.2}Basic authentication protocol}{30}{section.3.2}}
 \newlabel{basicauth}{{3.2}{30}{Basic authentication protocol}{section.3.2}{}}
 \citation{OPACITY}
@@ -117,6 +118,7 @@
 \@writefile{lol}{\contentsline {listing}{\numberline {3.2}{\ignorespaces The main loop of the concatenation KDF}}{33}{listing.3.2}}
 \newlabel{concatkdf}{{3.2}{33}{Concatenation KDF}{listing.3.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}Mutual authentication}{33}{subsection.3.3.2}}
+\newlabel{sec:mutualauth}{{3.3.2}{33}{Mutual authentication}{subsection.3.3.2}{}}
 \citation{opacityanalysis}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3.3}Privacy properties}{34}{subsection.3.3.3}}
 \@writefile{toc}{\contentsline {subsubsection}{Deniability}{34}{section*.21}}
@@ -134,25 +136,47 @@
 \@writefile{lol}{\contentsline {listing}{\numberline {3.5}{\ignorespaces Applet \texttt  {install()} method}}{36}{listing.3.5}}
 \newlabel{appletinstall}{{3.5}{36}{Instantiation}{listing.3.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.5.2}Processing incoming APDUs}{36}{subsection.3.5.2}}
-\@writefile{lol}{\contentsline {listing}{\numberline {3.6}{\ignorespaces Applet \texttt  {process()} method}}{37}{listing.3.6}}
-\newlabel{appletprocess}{{3.6}{37}{Processing incoming APDUs}{listing.3.6}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.5.3}Memory}{37}{subsection.3.5.3}}
-\@writefile{lol}{\contentsline {listing}{\numberline {3.7}{\ignorespaces Creation of byte array to hold derived keys $K1$ and $K2$}}{37}{listing.3.7}}
-\newlabel{k1k2array}{{3.7}{37}{Memory}{listing.3.7}{}}
-\@writefile{lol}{\contentsline {listing}{\numberline {3.8}{\ignorespaces Creation of the object that will store the card's permanent key pair}}{38}{listing.3.8}}
-\newlabel{cardkeypair}{{3.8}{38}{Memory}{listing.3.8}{}}
-\@writefile{lol}{\contentsline {listing}{\numberline {3.9}{\ignorespaces Creation of the byte arrays that store the CRSID and group ID}}{38}{listing.3.9}}
-\newlabel{crsidgroupcreation}{{3.9}{38}{Memory}{listing.3.9}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces Mutual authentication protocol}}{39}{figure.3.4}}
-\newlabel{fig:mutualauth}{{3.4}{39}{Mutual authentication protocol}{figure.3.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces Mutual authentication protocol}}{38}{figure.3.4}}
+\newlabel{fig:mutualauth}{{3.4}{38}{Mutual authentication protocol}{figure.3.4}{}}
+\@writefile{lol}{\contentsline {listing}{\numberline {3.6}{\ignorespaces Applet \texttt  {process()} method}}{39}{listing.3.6}}
+\newlabel{appletprocess}{{3.6}{39}{Processing incoming APDUs}{listing.3.6}{}}
+\@writefile{lol}{\contentsline {listing}{\numberline {3.7}{\ignorespaces Creation of byte array to hold derived keys $K1$ and $K2$}}{40}{listing.3.7}}
+\newlabel{k1k2array}{{3.7}{40}{Memory}{listing.3.7}{}}
+\@writefile{lol}{\contentsline {listing}{\numberline {3.8}{\ignorespaces Creation of the object that will store the card's permanent key pair}}{40}{listing.3.8}}
+\newlabel{cardkeypair}{{3.8}{40}{Memory}{listing.3.8}{}}
+\@writefile{lol}{\contentsline {listing}{\numberline {3.9}{\ignorespaces Creation of the byte arrays that store the CRSID and group ID}}{40}{listing.3.9}}
+\newlabel{crsidgroupcreation}{{3.9}{40}{Memory}{listing.3.9}{}}
 \@writefile{toc}{\contentsline {chapter}{\numberline {4}Evaluation}{41}{chapter.4}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{toc}{\contentsline {section}{\numberline {4.1}APDU logs}{41}{section.4.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1.1}Log of provisioning protocol}{41}{subsection.4.1.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1.2}Log of basic authentication protocol}{41}{subsection.4.1.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1.3}Log of mutual authentication protocol}{41}{subsection.4.1.3}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.2}Runtime of the authentication protocols}{42}{section.4.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.1}Runtime of the basic authentication protocol}{42}{subsection.4.2.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.2}Runtime of the mutual authentication protocol}{42}{subsection.4.2.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.3}Comparison to MIFARE Classic authentication protocol runtime}{42}{subsection.4.2.3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.1}{\ignorespaces Gaussian distribution of basic authentication protocol runtime}}{43}{figure.4.1}}
+\newlabel{basicauthplot}{{4.1}{43}{Gaussian distribution of basic authentication protocol runtime}{figure.4.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.3}Security of the protocols}{43}{section.4.3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.1}Resistance to replay attacks}{43}{subsection.4.3.1}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.2}{\ignorespaces Gaussian distribution of mutual authentication protocol runtime}}{44}{figure.4.2}}
+\newlabel{mutualauthplot}{{4.2}{44}{Gaussian distribution of mutual authentication protocol runtime}{figure.4.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.2}Resistance to cloning attacks}{44}{subsection.4.3.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.3}Vulnerability to relay attacks}{45}{subsection.4.3.3}}
+\@writefile{lol}{\contentsline {listing}{\numberline {4.1}{\ignorespaces Log showning APDUs sent and received by the provisioning terminal during the provisioning protocol}}{47}{listing.4.1}}
+\newlabel{provisionlog}{{4.1}{47}{Log of provisioning protocol}{listing.4.1}{}}
+\@writefile{lol}{\contentsline {listing}{\numberline {4.2}{\ignorespaces Log showning APDUs sent and received by the reader during the basic authentication protocol}}{48}{listing.4.2}}
+\newlabel{basicauthlog}{{4.2}{48}{Log of basic authentication protocol}{listing.4.2}{}}
+\@writefile{lol}{\contentsline {listing}{\numberline {4.3}{\ignorespaces Log showning APDUs sent and received by the reader during the mutual authentication protocol}}{49}{listing.4.3}}
+\newlabel{mutualauthlog}{{4.3}{49}{Log of mutual authentication protocol}{listing.4.3}{}}
 \bibdata{refs}
-\@writefile{toc}{\contentsline {chapter}{\numberline {5}Conclusion}{43}{chapter.5}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {5}Conclusion}{51}{chapter.5}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {chapter}{Bibliography}{43}{chapter.5}}
+\@writefile{toc}{\contentsline {chapter}{Bibliography}{51}{chapter.5}}
 \bibcite{ant}{1}
 \bibcite{apachecommonscli}{2}
 \bibcite{apachecommonscodec}{3}
@@ -170,14 +194,14 @@
 \bibcite{fips1802}{15}
 \bibcite{OPACITY}{16}
 \bibcite{mifarebruteforce}{17}
-\@writefile{toc}{\contentsline {chapter}{\numberline {A}Project Proposal}{47}{appendix.A}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {A}Project Proposal}{55}{appendix.A}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\newlabel{appendix:proposal}{{A}{47}{Project Proposal}{appendix.A}{}}
-\@writefile{toc}{\contentsline {chapter}{\numberline {B}Card Application Build File}{53}{appendix.B}}
+\newlabel{appendix:proposal}{{A}{55}{Project Proposal}{appendix.A}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {B}Card Application Build File}{61}{appendix.B}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\newlabel{appendix:cardappbuildfile}{{B}{53}{Card Application Build File}{appendix.B}{}}
+\newlabel{appendix:cardappbuildfile}{{B}{61}{Card Application Build File}{appendix.B}{}}
 \gdef\minted@oldcachelist{,
   default-pyg-prefix.pygstyle,
   default.pygstyle,
@@ -185,8 +209,11 @@
   9FF0A8421D3581F8DD27595DF1D253C0D4CEE09E523CA3C1AF283CD4A9B4518A.pygtex,
   38A9828B4889F29F31AB2E98644B3022D4CEE09E523CA3C1AF283CD4A9B4518A.pygtex,
   0FA66B84F28D73C95B5C876B2F587FCED4CEE09E523CA3C1AF283CD4A9B4518A.pygtex,
-  7D49C8CAFBA847130B8EBEDF16EB3EE0D4CEE09E523CA3C1AF283CD4A9B4518A.pygtex,
+  C57EF03DC982BA20EEDF3929E7AB38B1D4CEE09E523CA3C1AF283CD4A9B4518A.pygtex,
   C1FDC7626B092D91E401542C3DB590DAD4CEE09E523CA3C1AF283CD4A9B4518A.pygtex,
   B7D8C34045C83EF33497FAF0BF659424D4CEE09E523CA3C1AF283CD4A9B4518A.pygtex,
   B988B3F160A5B610F67D9764807CF85DD4CEE09E523CA3C1AF283CD4A9B4518A.pygtex,
+  116842139186C8E11C485699B8CEF90DD52FAB91481C80287F541235105B7BE2.pygtex,
+  CD42FBC1A6F4772114BDC58E9D76333AD52FAB91481C80287F541235105B7BE2.pygtex,
+  B7ABEB83DCE0B38B564EB16DF78B4380D52FAB91481C80287F541235105B7BE2.pygtex,
   4103B39439E4DDEE1BF1C9D0904A6BA71F50B4A7FFBE90BF50882A80E17A3E57.pygtex}

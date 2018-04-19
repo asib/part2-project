@@ -68,7 +68,6 @@ public class DoorTerminal {
 
   private static final Provider BOUNCY_CASTLE_PROVIDER = new BouncyCastleProvider();
 
-  private static final boolean TEST_BASIC_AUTH = false;
   private static final int BASIC_AUTH_NONCE_LENGTH = 100;
 
   private static byte[] loadDoorSignature() throws IOException {
@@ -548,7 +547,12 @@ public class DoorTerminal {
   }
 
   public static void main (String[] args) {
+    boolean testBasicAuth = false;
+    if (args.length == 1)
+      testBasicAuth = true;
+
     CardTerminalAPI api = null;
+    int count = 0;
 
     // Load in the signature and permanent key pair from file.
     byte[] doorSignature = null;
@@ -621,7 +625,7 @@ public class DoorTerminal {
          * This is here just to test the BASIC_AUTH command (specifically, that
          * it runs in under 1 second.
          */
-        if (TEST_BASIC_AUTH) {
+        if (testBasicAuth) {
           long t1 = System.nanoTime();
           // Generate random nonce.
           SecureRandom rand = new SecureRandom();
@@ -642,13 +646,14 @@ public class DoorTerminal {
           rOff += 2;
           byte[] nonceSignature = new byte[nonceSigLength];
           System.arraycopy(response, rOff, nonceSignature, 0, nonceSigLength);
+          // Remove any incorrect 0x00 pads on points.
+          nonceSignature = checkSignature(nonceSignature);
           rOff += nonceSigLength;
 
           byte[] cardSignature = new byte[SIGNATURE_LENGTH];
           System.arraycopy(response, rOff, cardSignature, 0, SIGNATURE_LENGTH);
           // Remove any incorrect 0x00 pads on points.
           cardSignature = checkSignature(cardSignature);
-          System.out.println("SIG: " + Hex.encodeHexString(cardSignature));
           rOff += SIGNATURE_LENGTH;
 
           rOff += 2; // Skip over length tag.
@@ -712,11 +717,13 @@ public class DoorTerminal {
           // so we remove those from the signature data.
           ecdsaObj.update(nonce, 2, BASIC_AUTH_NONCE_LENGTH);
           verified = ecdsaObj.verify(nonceSignature);
-          System.out.println(verified);
-
-          // TODO: Complete auth by verifying certificate, checking group ID, etc.
           long t2 = System.nanoTime();
-          System.out.println((double)(t2-t1)/1000000000.0);
+          if (verified) {
+            //System.out.println("Access granted.");
+            System.out.println((double)(t2-t1)/1000000000.0);
+          } else {
+            System.out.println("Access denied.");
+          }
 
           return;
         }
@@ -731,15 +738,20 @@ public class DoorTerminal {
             terminalPublicKey);
         long t2 = System.nanoTime();
 
-        System.out.println("Authenticated: " + authd);
-        System.out.println((double)(t2-t1)/1000000000.0);
+        //System.out.println("Authenticated: " + authd);
+        if (authd)
+          System.out.println((double)(t2-t1)/1000000000.0);
+
+        count++;
+        if (count > 400)
+          return;
       } catch (Exception e) {
         e.printStackTrace();
         return;
       }
 
       try {
-        System.out.println("Run complete");
+        //System.out.println("Run complete");
         Thread.sleep(2000);
       } catch (InterruptedException e) {}
     }

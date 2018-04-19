@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.11.6)  17 APR 2018 19:16
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.11.6)  19 APR 2018 22:35
 entering extended mode
  \write18 enabled.
  file:line:error style messages enabled.
@@ -670,7 +670,7 @@ onverted-to.pdf figures/mifarememory1.eps>
 (epstopdf)             \includegraphics on input line 146.
 Package epstopdf Info: Output file is already uptodate.
 
-<figures/mifarememory1-eps-converted-to.pdf, id=347, 411.5375pt x 322.20375pt>
+<figures/mifarememory1-eps-converted-to.pdf, id=420, 411.5375pt x 322.20375pt>
 File: figures/mifarememory1-eps-converted-to.pdf Graphic file (type pdf)
 
 <use figures/mifarememory1-eps-converted-to.pdf>
@@ -696,7 +696,7 @@ onverted-to.pdf figures/mifarememory2.eps>
 (epstopdf)             \includegraphics on input line 154.
 Package epstopdf Info: Output file is already uptodate.
 
-<figures/mifarememory2-eps-converted-to.pdf, id=356, 374.39874pt x 155.58125pt>
+<figures/mifarememory2-eps-converted-to.pdf, id=429, 374.39874pt x 155.58125pt>
 File: figures/mifarememory2-eps-converted-to.pdf Graphic file (type pdf)
 <use figures/mifarememory2-eps-converted-to.pdf>
 Package pdftex.def Info: figures/mifarememory2-eps-converted-to.pdf used on inp
@@ -707,7 +707,7 @@ ut line 154.
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.174 
+l.175 
        <./figures/mifarememory2-eps-converted-to.pdf>] [17] [18]
 Chapter 2.
 [19
@@ -721,15 +721,15 @@ Package epstopdf Info: Source file: <figures/commandapdu.eps>
 (epstopdf)                    size: 17570 bytes
 (epstopdf)             Command: <epstopdf --outfile=figures/commandapdu-eps-con
 verted-to.pdf figures/commandapdu.eps>
-(epstopdf)             \includegraphics on input line 224.
+(epstopdf)             \includegraphics on input line 225.
 Package epstopdf Info: Output file is already uptodate.
 
-<figures/commandapdu-eps-converted-to.pdf, id=395, 358.33875pt x 93.34875pt>
+<figures/commandapdu-eps-converted-to.pdf, id=468, 358.33875pt x 93.34875pt>
 File: figures/commandapdu-eps-converted-to.pdf Graphic file (type pdf)
 
 <use figures/commandapdu-eps-converted-to.pdf>
 Package pdftex.def Info: figures/commandapdu-eps-converted-to.pdf used on input
- line 224.
+ line 225.
 (pdftex.def)             Requested size: 358.33788pt x 93.34851pt.
 Package epstopdf Info: Source file: <figures/responseapdu.eps>
 (epstopdf)                    date: 2018-04-12 22:01:05
@@ -740,28 +740,28 @@ Package epstopdf Info: Source file: <figures/responseapdu.eps>
 (epstopdf)                    size: 16812 bytes
 (epstopdf)             Command: <epstopdf --outfile=figures/responseapdu-eps-co
 nverted-to.pdf figures/responseapdu.eps>
-(epstopdf)             \includegraphics on input line 234.
+(epstopdf)             \includegraphics on input line 235.
 Package epstopdf Info: Output file is already uptodate.
 
-<figures/responseapdu-eps-converted-to.pdf, id=397, 202.7575pt x 93.34875pt>
+<figures/responseapdu-eps-converted-to.pdf, id=470, 202.7575pt x 93.34875pt>
 File: figures/responseapdu-eps-converted-to.pdf Graphic file (type pdf)
 
 <use figures/responseapdu-eps-converted-to.pdf>
 Package pdftex.def Info: figures/responseapdu-eps-converted-to.pdf used on inpu
-t line 234.
+t line 235.
 (pdftex.def)             Requested size: 202.757pt x 93.34851pt.
  [20pdfTeX warning (ext4): destination with the same identifier (name{figure.2.
 1}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.242 
+l.243 
       pdfTeX warning (ext4): destination with the same identifier (name{figure.
 2.2}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.242 
+l.243 
        <./figures/commandapdu-eps-converted-to.pdf> <./figures/responseapdu-eps
 -converted-to.pdf>]
 Package epstopdf Info: Source file: <figures/capconverter.eps>
@@ -773,22 +773,22 @@ Package epstopdf Info: Source file: <figures/capconverter.eps>
 (epstopdf)                    size: 10629 bytes
 (epstopdf)             Command: <epstopdf --outfile=figures/capconverter-eps-co
 nverted-to.pdf figures/capconverter.eps>
-(epstopdf)             \includegraphics on input line 252.
+(epstopdf)             \includegraphics on input line 253.
 Package epstopdf Info: Output file is already uptodate.
 
-<figures/capconverter-eps-converted-to.pdf, id=409, 466.74374pt x 82.3075pt>
+<figures/capconverter-eps-converted-to.pdf, id=483, 466.74374pt x 82.3075pt>
 File: figures/capconverter-eps-converted-to.pdf Graphic file (type pdf)
 
 <use figures/capconverter-eps-converted-to.pdf>
 Package pdftex.def Info: figures/capconverter-eps-converted-to.pdf used on inpu
-t line 252.
+t line 253.
 (pdftex.def)             Requested size: 466.7426pt x 82.30728pt.
  [21pdfTeX warning (ext4): destination with the same identifier (name{figure.2.
 3}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.261 
+l.262 
        <./figures/capconverter-eps-converted-to.pdf>]
 Package epstopdf Info: Source file: <figures/appletlifecycle.eps>
 (epstopdf)                    date: 2018-04-12 22:33:50
@@ -799,56 +799,56 @@ df>
 (epstopdf)                    size: 38186 bytes
 (epstopdf)             Command: <epstopdf --outfile=figures/appletlifecycle-eps
 -converted-to.pdf figures/appletlifecycle.eps>
-(epstopdf)             \includegraphics on input line 271.
+(epstopdf)             \includegraphics on input line 272.
 Package epstopdf Info: Output file is already uptodate.
 
-<figures/appletlifecycle-eps-converted-to.pdf, id=420, 483.8075pt x 255.95625pt
+<figures/appletlifecycle-eps-converted-to.pdf, id=494, 483.8075pt x 255.95625pt
 >
 File: figures/appletlifecycle-eps-converted-to.pdf Graphic file (type pdf)
  <use figures/appletlifecycle-eps-converted-to.pdf>
 Package pdftex.def Info: figures/appletlifecycle-eps-converted-to.pdf used on i
-nput line 271.
+nput line 272.
 (pdftex.def)             Requested size: 483.80632pt x 255.95561pt.
  [22pdfTeX warning (ext4): destination with the same identifier (name{figure.2.
 4}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.279 
+l.280 
        <./figures/appletlifecycle-eps-converted-to.pdf>] [23]
 Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on i
-nput line 308.
+nput line 309.
 
-Underfull \hbox (badness 10000) in paragraph at lines 330--331
+Underfull \hbox (badness 10000) in paragraph at lines 331--332
 []\OT1/cmtt/m/n/12 open[]sc -security 1 -keyind 0 -keyver 0 -mac[]key
  []
 
 
-Overfull \hbox (29.3518pt too wide) in paragraph at lines 330--331
+Overfull \hbox (29.3518pt too wide) in paragraph at lines 331--332
 \OT1/cmtt/m/n/12 404142434445464748494a4b4c4d4e4f -enc[]key 4041424344454647484
 94a4b4c4d4e4f
  []
 
 [24]
-Underfull \hbox (badness 10000) in paragraph at lines 332--333
+Underfull \hbox (badness 10000) in paragraph at lines 333--334
 []\OT1/cmtt/m/n/12 install -file opacity[]fs[]impl.cap -sdAID a000000003000000 
 -priv 2
  []
 
 
-Underfull \hbox (badness 3701) in paragraph at lines 343--344
+Underfull \hbox (badness 3701) in paragraph at lines 344--345
 \OT1/cmr/m/n/12 Four ex-ter-nal li-braries were used in this project. The first
  of these was
  []
 
 
-Underfull \hbox (badness 5316) in paragraph at lines 343--344
+Underfull \hbox (badness 5316) in paragraph at lines 344--345
 \OT1/cmr/m/n/12 the Apache Com-mons Codec [[]] li-brary, which was use-ful be-c
 ause of the
  []
 
 
-Underfull \hbox (badness 1325) in paragraph at lines 343--344
+Underfull \hbox (badness 1325) in paragraph at lines 344--345
 \OT1/cmtt/m/n/12 org.apache.commons.codec.binary.Hex \OT1/cmr/m/n/12 class, spe
 cif-i-cally the \OT1/cmtt/m/n/12 encodeHexString()
  []
@@ -857,20 +857,19 @@ cif-i-cally the \OT1/cmtt/m/n/12 encodeHexString()
 
 ]
 Chapter 3.
-<figures/provisionhelp.png, id=488, 542.025pt x 248.93pt>
+<figures/provisionhelp.png, id=561, 542.025pt x 248.93pt>
 File: figures/provisionhelp.png Graphic file (type png)
 
 <use figures/provisionhelp.png>
-Package pdftex.def Info: figures/provisionhelp.png used on input line 355.
+Package pdftex.def Info: figures/provisionhelp.png used on input line 356.
 (pdftex.def)             Requested size: 379.4149pt x 174.2498pt.
  [27pdfTeX warning (ext4): destination with the same identifier (name{figure.3.
 1}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.362 \subsubsection
-                    {Card-provisioning terminal key pair} <./figures/provisionh
-elp.png>] [28]
+l.366 
+       <./figures/provisionhelp.png>] [28]
 Package epstopdf Info: Source file: <figures/provisioningprotocol.eps>
 (epstopdf)                    date: 2018-04-16 00:55:03
 (epstopdf)                    size: 176594 bytes
@@ -880,24 +879,24 @@ Package epstopdf Info: Source file: <figures/provisioningprotocol.eps>
 (epstopdf)                    size: 59613 bytes
 (epstopdf)             Command: <epstopdf --outfile=figures/provisioningprotoco
 l-eps-converted-to.pdf figures/provisioningprotocol.eps>
-(epstopdf)             \includegraphics on input line 387.
+(epstopdf)             \includegraphics on input line 388.
 Package epstopdf Info: Output file is already uptodate.
 
-<figures/provisioningprotocol-eps-converted-to.pdf, id=504, 469.755pt x 449.68p
+<figures/provisioningprotocol-eps-converted-to.pdf, id=579, 469.755pt x 449.68p
 t>
 File: figures/provisioningprotocol-eps-converted-to.pdf Graphic file (type pdf)
 
  <use figures/provisioningprotocol-eps-converted-to.pdf>
 Package pdftex.def Info: figures/provisioningprotocol-eps-converted-to.pdf used
- on input line 387.
+ on input line 388.
 (pdftex.def)             Requested size: 375.80452pt x 359.74448pt.
  [29pdfTeX warning (ext4): destination with the same identifier (name{figure.3.
 2}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.398     r 
-               INTEGER, <./figures/provisioningprotocol-eps-converted-to.pdf>]
+l.402 \end{lstlisting}
+                       <./figures/provisioningprotocol-eps-converted-to.pdf>]
 [30]
 Package epstopdf Info: Source file: <figures/basicauth.eps>
 (epstopdf)                    date: 2018-04-16 01:54:33
@@ -907,21 +906,21 @@ Package epstopdf Info: Source file: <figures/basicauth.eps>
 (epstopdf)                    size: 110671 bytes
 (epstopdf)             Command: <epstopdf --outfile=figures/basicauth-eps-conve
 rted-to.pdf figures/basicauth.eps>
-(epstopdf)             \includegraphics on input line 427.
+(epstopdf)             \includegraphics on input line 428.
 Package epstopdf Info: Output file is already uptodate.
- <figures/basicauth-eps-converted-to.pdf, id=527, 469.755pt x 350.30875pt>
+ <figures/basicauth-eps-converted-to.pdf, id=602, 469.755pt x 350.30875pt>
 File: figures/basicauth-eps-converted-to.pdf Graphic file (type pdf)
 
 <use figures/basicauth-eps-converted-to.pdf>
 Package pdftex.def Info: figures/basicauth-eps-converted-to.pdf used on input l
-ine 427.
+ine 428.
 (pdftex.def)             Requested size: 375.80452pt x 280.24738pt.
  [31pdfTeX warning (ext4): destination with the same identifier (name{figure.3.
 3}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.438 
+l.439 
        <./figures/basicauth-eps-converted-to.pdf>]
 Package epstopdf Info: Source file: <figures/mutualauth.eps>
 (epstopdf)                    date: 2018-04-16 17:21:08
@@ -931,19 +930,19 @@ Package epstopdf Info: Source file: <figures/mutualauth.eps>
 (epstopdf)                    size: 207824 bytes
 (epstopdf)             Command: <epstopdf --outfile=figures/mutualauth-eps-conv
 erted-to.pdf figures/mutualauth.eps>
-(epstopdf)             \includegraphics on input line 442.
+(epstopdf)             \includegraphics on input line 443.
 Package epstopdf Info: Output file is already uptodate.
 
-<figures/mutualauth-eps-converted-to.pdf, id=544, 491.8375pt x 724.7075pt>
+<figures/mutualauth-eps-converted-to.pdf, id=618, 491.8375pt x 724.7075pt>
 File: figures/mutualauth-eps-converted-to.pdf Graphic file (type pdf)
 
 <use figures/mutualauth-eps-converted-to.pdf>
 Package pdftex.def Info: figures/mutualauth-eps-converted-to.pdf used on input 
-line 442.
+line 443.
 (pdftex.def)             Requested size: 393.47052pt x 579.76678pt.
  [32]
 
-Package hyperref Warning: No autoref name for `listing' on input line 466.
+Package hyperref Warning: No autoref name for `listing' on input line 467.
 
 \openout3 = `dissertation.pyg'.
 
@@ -955,10 +954,10 @@ LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <12> not available
 (Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 2.
 )
 Package hyperref Info: bookmark level for unknown listing defaults to 0 on inpu
-t line 480.
+t line 481.
  [33] [34]
 
-Package hyperref Warning: No autoref name for `listing' on input line 515.
+Package hyperref Warning: No autoref name for `listing' on input line 517.
 
 \openout3 = `dissertation.pyg'.
 
@@ -966,7 +965,7 @@ Package hyperref Warning: No autoref name for `listing' on input line 515.
 (./_minted-dissertation/9FF0A8421D3581F8DD27595DF1D253C0D4CEE09E523CA3C1AF283CD
 4A9B4518A.pygtex)
 
-Package hyperref Warning: No autoref name for `listing' on input line 538.
+Package hyperref Warning: No autoref name for `listing' on input line 540.
 
 \openout3 = `dissertation.pyg'.
 
@@ -977,7 +976,7 @@ Package hyperref Warning: No autoref name for `listing' on input line 538.
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 
-Package hyperref Warning: No autoref name for `listing' on input line 556.
+Package hyperref Warning: No autoref name for `listing' on input line 558.
 
 [35]
 \openout3 = `dissertation.pyg'.
@@ -986,27 +985,30 @@ Package hyperref Warning: No autoref name for `listing' on input line 556.
 (./_minted-dissertation/0FA66B84F28D73C95B5C876B2F587FCED4CEE09E523CA3C1AF283CD
 4A9B4518A.pygtex)
 
-Package hyperref Warning: No autoref name for `listing' on input line 573.
+Package hyperref Warning: No autoref name for `listing' on input line 575.
 
 \openout3 = `dissertation.pyg'.
 
 
-(./_minted-dissertation/7D49C8CAFBA847130B8EBEDF16EB3EE0D4CEE09E523CA3C1AF283CD
+(./_minted-dissertation/C57EF03DC982BA20EEDF3929E7AB38B1D4CEE09E523CA3C1AF283CD
 4A9B4518A.pygtex)
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 [36]
 
-Package hyperref Warning: No autoref name for `listing' on input line 609.
+Package hyperref Warning: No autoref name for `listing' on input line 629.
 
 \openout3 = `dissertation.pyg'.
 
 
 (./_minted-dissertation/C1FDC7626B092D91E401542C3DB590DAD4CEE09E523CA3C1AF283CD
-4A9B4518A.pygtex) [37]
+4A9B4518A.pygtex)
 
-Package hyperref Warning: No autoref name for `listing' on input line 623.
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Package hyperref Warning: No autoref name for `listing' on input line 643.
 
 \openout3 = `dissertation.pyg'.
 
@@ -1014,28 +1016,121 @@ Package hyperref Warning: No autoref name for `listing' on input line 623.
 (./_minted-dissertation/B7D8C34045C83EF33497FAF0BF659424D4CEE09E523CA3C1AF283CD
 4A9B4518A.pygtex)
 
-Package hyperref Warning: No autoref name for `listing' on input line 634.
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Package hyperref Warning: No autoref name for `listing' on input line 654.
 
 \openout3 = `dissertation.pyg'.
 
 
 (./_minted-dissertation/B988B3F160A5B610F67D9764807CF85DD4CEE09E523CA3C1AF283CD
-4A9B4518A.pygtex) [38] [39pdfTeX warning (ext4): destination with the same iden
-tifier (name{figure.3.4}) has been already used, duplicate ignored
+4A9B4518A.pygtex)
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[37] [38pdfTeX warning (ext4): destination with the same identifier (name{figur
+e.3.4}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.645 \chapter
+l.665 \chapter
               {Evaluation} <./figures/mutualauth-eps-converted-to.pdf>]
-[40
+[39] [40]
+Chapter 4.
+
+Package hyperref Warning: No autoref name for `listing' on input line 671.
+
+\openout3 = `dissertation.pyg'.
+
+
+(./_minted-dissertation/116842139186C8E11C485699B8CEF90DD52FAB91481C80287F54123
+5105B7BE2.pygtex)
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Package hyperref Warning: No autoref name for `listing' on input line 717.
+
+\openout3 = `dissertation.pyg'.
+
+
+(./_minted-dissertation/CD42FBC1A6F4772114BDC58E9D76333AD52FAB91481C80287F54123
+5105B7BE2.pygtex)
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Package hyperref Warning: No autoref name for `listing' on input line 749.
+
+[41
 
 ]
-Chapter 4.
-[41] [42
+\openout3 = `dissertation.pyg'.
+
+
+(./_minted-dissertation/B7ABEB83DCE0B38B564EB16DF78B4380D52FAB91481C80287F54123
+5105B7BE2.pygtex)
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+Package epstopdf Info: Source file: <figures/basicauthplot.eps>
+(epstopdf)                    date: 2018-04-19 21:49:34
+(epstopdf)                    size: 35337 bytes
+(epstopdf)             Output file: <figures/basicauthplot-eps-converted-to.pdf
+>
+(epstopdf)                    date: 2018-04-19 21:49:44
+(epstopdf)                    size: 34077 bytes
+(epstopdf)             Command: <epstopdf --outfile=figures/basicauthplot-eps-c
+onverted-to.pdf figures/basicauthplot.eps>
+(epstopdf)             \includegraphics on input line 791.
+Package epstopdf Info: Output file is already uptodate.
+<figures/basicauthplot-eps-converted-to.pdf, id=698, 562.1pt x 421.575pt>
+File: figures/basicauthplot-eps-converted-to.pdf Graphic file (type pdf)
+
+<use figures/basicauthplot-eps-converted-to.pdf>
+Package pdftex.def Info: figures/basicauthplot-eps-converted-to.pdf used on inp
+ut line 791.
+(pdftex.def)             Requested size: 449.68062pt x 337.26045pt.
+ [42]
+Package epstopdf Info: Source file: <figures/mutualauthplot.eps>
+(epstopdf)                    date: 2018-04-19 21:59:50
+(epstopdf)                    size: 33680 bytes
+(epstopdf)             Output file: <figures/mutualauthplot-eps-converted-to.pd
+f>
+(epstopdf)                    date: 2018-04-19 21:59:55
+(epstopdf)                    size: 32492 bytes
+(epstopdf)             Command: <epstopdf --outfile=figures/mutualauthplot-eps-
+converted-to.pdf figures/mutualauthplot.eps>
+(epstopdf)             \includegraphics on input line 807.
+Package epstopdf Info: Output file is already uptodate.
+
+<figures/mutualauthplot-eps-converted-to.pdf, id=704, 562.1pt x 421.575pt>
+File: figures/mutualauthplot-eps-converted-to.pdf Graphic file (type pdf)
+
+<use figures/mutualauthplot-eps-converted-to.pdf>
+Package pdftex.def Info: figures/mutualauthplot-eps-converted-to.pdf used on in
+put line 807.
+(pdftex.def)             Requested size: 449.68062pt x 337.26045pt.
+ [43pdfTeX warning (ext4): destination with the same identifier (name{figure.4.
+1}) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.819 
+       <./figures/basicauthplot-eps-converted-to.pdf>] [44pdfTeX warning (ext4)
+: destination with the same identifier (name{figure.4.2}) has been already used
+, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.827 
+       <./figures/mutualauthplot-eps-converted-to.pdf>] [45] [46] [47] [48]
+[49] [50
 
 ]
 Chapter 5.
-(./dissertation.bbl [43] [44
+(./dissertation.bbl [51] [52
 
 ]
 Underfull \hbox (badness 10000) in paragraph at lines 12--14
@@ -1055,17 +1150,17 @@ Underfull \hbox (badness 10000) in paragraph at lines 57--62
 lpublication800-[]56ar .
  []
 
-[45]
+[53]
 Underfull \hbox (badness 1127) in paragraph at lines 84--89
 []\OT1/cmr/m/n/12 Eric Le Saint, Dom Fe-dronic, and Steven Liu.  Open Pro-to-co
 l for Ac-cess
  []
 
-) [46]
+) [54]
 Appendix A.
-(../proposal/proposal.tex [47
+(../proposal/proposal.tex [55
 
-] [48] [49] [50]) [51] [52
+] [56] [57] [58]) [59] [60
 
 ]
 Appendix B.
@@ -1085,25 +1180,25 @@ Overfull \hbox (14.05612pt too wide) in paragraph at lines 10--10
 dSecrecy 
  []
 
-[53])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 705.
- [54]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 705.
+[61])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 894.
+ [62]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 894.
  (./dissertation.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 705.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 705.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 894.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 894.
 Package rerunfilecheck Info: File `dissertation.out' has not changed.
-(rerunfilecheck)             Checksum: 05623B231FA2A81390E3B330A79E56CE;2859.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 705.
+(rerunfilecheck)             Checksum: 84A067DF536815DD8D1F1ED38FEE07E0;3896.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 894.
  ) 
 Here is how much of TeX's memory you used:
- 11615 strings out of 492995
- 187946 string characters out of 6132704
- 357387 words of memory out of 5000000
- 14758 multiletter control sequences out of 15000+600000
+ 11685 strings out of 492995
+ 190068 string characters out of 6132704
+ 360205 words of memory out of 5000000
+ 14792 multiletter control sequences out of 15000+600000
  11730 words of font info for 42 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 31i,8n,38p,2605b,1697s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 31i,8n,38p,2605b,944s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2017/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc
 }</usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmitt10.pfb>
@@ -1124,10 +1219,10 @@ exmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/local/texlive/2017/te
 xmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2017/tex
 mf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></usr/local/texlive/2017/texm
 f-dist/fonts/type1/public/cm-super/sfrm1200.pfb>
-Output written on dissertation.pdf (54 pages, 978638 bytes).
+Output written on dissertation.pdf (62 pages, 1060000 bytes).
 PDF statistics:
- 825 PDF objects out of 1000 (max. 8388607)
- 731 compressed objects within 8 object streams
- 207 named destinations out of 1000 (max. 500000)
- 395 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 961 PDF objects out of 1000 (max. 8388607)
+ 848 compressed objects within 9 object streams
+ 232 named destinations out of 1000 (max. 500000)
+ 501 words of extra memory for PDF output out of 10000 (max. 10000000)
 
