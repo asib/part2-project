@@ -118,10 +118,11 @@ In recent years, contactless smart-cards (also known as integrated circuit cards
 Contactless smart-cards come in two kinds: memory cards and microprocessor cards. Both types have an antenna and some form of memory, with microprocessor cards also having a CPU. Thus, memory cards have no ability to process data on-card. Neither type of card has a battery. Instead, the card is powered by the card reader through radio-frequency induction. As a result, smart-cards are very low power and complex computations take significantly longer than they would on an inexpensive laptop or phone. Communication between the card and card reader also occurs over radio frequency.
 
 \section{MIFARE Classic}
+\label{sec:mifareclassic}
 
 The current University of Cambridge access control system is based on the MIFARE Classic smart-card, a memory smart-card which conforms to ISO 14443-A \cite{ISO14443}, a standard for contactless ICCs to communicate with a ``coupling device'' (i.e. a smart-card reader) over radio frequency. There are huge numbers of this particular card in existence --- over 200 million are in use today.
 
-The cryptographic protocol used in the card, a scheme named CRPYTO-1, was developed in-house by the manufacturer of the MIFARE Classic, NXP Semiconductors. NXP chose to keep the scheme secret, a practice known as security by obscurity. Such practice is eschewed by the security community because naturally, all cryptographic schemes are bound to have weaknesses, and if researchers (or others) are not able to analyse a scheme, these weaknesses will likely go unnoticed, leaving them open to exploitation by anyone without pure intentions. Furthermore, obscurity does not prevent others from deducing the details of the scheme by observing it in operation and indeed this was the case for CRYPTO-1. In December 2007, a presentation at the Chaos Communication Congress (an annual security conference) by two German researchers, Nohl and Pl{\"o}tz, described a partial reverse engineering of CRYPTO-1, as well as some weaknesses. They managed to do this by reconstructing the card's electronic circuit from photos of the chip. They then verified their reconstruction by eavesdropping on the reader-card communication. Just a few months later, in March 2008, researchers in the Digital Security group at Radboud University Nijmegen revealed a complete reverse engineering of the scheme and were able to clone and manipulate the contents of a MIFARE Classic card. The most serious attack they detailed in their paper can recover the card's cryptographic key in under a second using only a laptop, without any pre- computation.
+The cryptographic protocol used in the card, a scheme named CRPYTO-1, was developed in-house by the manufacturer of the MIFARE Classic, NXP Semiconductors. NXP chose to keep the scheme secret, a practice known as security by obscurity. Such practice is eschewed by the security community because naturally, all cryptographic schemes are bound to have weaknesses, and if researchers (or others) are not able to analyse a scheme, these weaknesses will likely go unnoticed, leaving them open to exploitation by anyone without pure intentions. Furthermore, obscurity does not prevent others from deducing the details of the scheme by observing it in operation and indeed this was the case for CRYPTO-1. In December 2007, a presentation at the Chaos Communication Congress (an annual security conference) by two German researchers, Nohl and Pl{\"o}tz, described a partial reverse engineering of CRYPTO-1, as well as some weaknesses. They managed to do this by reconstructing the card's electronic circuit from photos of the chip. They then verified their reconstruction by eavesdropping on the reader-card communication. Just a few months later, in March 2008, researchers in the Digital Security group at Radboud University Nijmegen revealed a complete reverse engineering of the scheme and were able to clone and manipulate the contents of a MIFARE Classic card. The most serious attack they detailed in their paper can recover one of the card's cryptographic keys in under a second using only a laptop, without any pre-computation.
 
 \subsection{Use of Symmetric Key Cryptography}
 
@@ -140,7 +141,7 @@ The tradeoffs here are as follows:
 
 Before discussing the vulnerabilities of MIFARE Classic, it helps to understand the memory structure. Memory is divided into data blocks of 16 bytes, with blocks being grouped into sectors. The first block of the first sector contains special read-only data. The first 4 bytes contain the unique identifier of the card (UID), followed by a 1-byte \emph{bit count check} (BCC). The rest of the block stores manufacturer-specific data.
 
-The last data block in every sector, known as the \emph{sector trailer}, contains two secret keys A and B which are used for authenticating to a sector. Once authenticated to a sector, the card reader may perform operations on it, depending on the \emph{access conditions} which are also defined in the sector trailer. Access conditions are defined for both keys, to allow different levels of access depending on which key is used for authentication, e.g. key A may have read/write permissions whilst key B may only have read permissions. A diagram of the memory structure of a MIFARE Classic card is shown in \autoref{mifarememory1}.
+The last data block in every sector, known as the \emph{sector trailer}, contains two secret keys A and B which are used for authenticating to a sector. Once authenticated to a sector, the card reader may perform operations on it, depending on the \emph{access conditions} which are also defined in the sector trailer. Access conditions are defined for both keys, to allow different levels of access depending on which key is used for authentication, e.g. key A may have read/write permissions whilst key B may only have read permissions. A diagram of the memory structure of a MIFARE Classic 4k card is shown in \autoref{mifarememory1}.
 
 \begin{figure}[tbh]
 \centerline{\includegraphics{figures/mifarememory1.eps}}
@@ -171,7 +172,7 @@ A PRNG is supposed to generate a sequence of numbers that are effectively indist
 
 \subsubsection{Nested authentication attack}
 
-This attack allows an adversary to obtain all the keys for every sector on the card if just one key (A or B) is known for any sector. A readily available list of known default keys for MIFARE Classic cards exists and, unfortunately, many systems do not update these keys before issuing cards. When testing my own University of Cambridge card, I discovered that five default keys were in use.
+This attack allows an adversary to obtain all the keys for every sector on the card if just one key (A or B) is known for any sector. A readily available list of known default keys for MIFARE Classic cards exists and, unfortunately, many systems do not update these keys before issuing cards. When testing my own University of Cambridge card, I discovered that five of the sector keys used by the card were default keys.
 
 When a reader attempts to authenticate to a sector on a card, the card produces a nonce, generated by the weak on-card PRNG, which it sends to the reader. Both the card and reader then derive some key stream bits using this nonce and the key for the sector (one of A or B). The trick here is that, once the reader has authenticated to a sector, subsequent authentication requests are encrypted. Furthermore, upon receiving an authentication request for a new sector, the card sets the internal state of the cipher to the key for the new sector. Thus, when the card sends the \emph{encrypted} nonce for a subsequent authentication request, since we are able to predict the nonce value, we can discover the key stream bits --- the first 32 bits of the sector key --- used to encrypt it by XORing the encrypted nonce with our prediction. Now we can easily brute-force the last 16 bits of the key.
 
@@ -280,13 +281,13 @@ JavaCard smart-cards offer two types of memory: transient Random Access Memory (
 
 \subsubsection{Transient RAM}
 
-Transient memory is erased on power down and is thus only suitable for storing temporary data. As an example, during execution of my OPACITY-FS inspired protocol, several encryption keys must be derived using a key derivation function (KDF). These keys are only needed for the duration of the protocol execution, and thus do not need to persist when the card loses power. Therefore, it would be perfectly suitable to use transient buffers to hold them. Transient objects can only be created via the JavaCard API, e.g. to create a transient byte array, one must call \texttt{JCSystem.makeTransientByteArray()}.
+Transient memory is erased on power down and is thus only suitable for storing temporary data. As an example, during execution of the OPACITY-FS inspired protocol described in this dissertation, several encryption keys must be derived using a key derivation function (KDF). These keys are only needed for the duration of the protocol execution, and thus do not need to persist when the card loses power. Therefore, it would be perfectly suitable to use transient buffers to hold them.
 
-Note that, although the actual memory is transient, the reference that points to the memory is persistent. Thus a transient object should only ever be created once, and the ideal place to do this is in the applet's constructor (which should be called by the \texttt{install()} method).
+Transient objects can only be created via the JavaCard API, e.g. to create a transient byte array, one must call \texttt{JCSystem.makeTransientByteArray()}. Note that, although the actual memory is transient, the reference that points to the memory is persistent. Thus a transient object should only ever be created once, and the ideal place to do this is in the applet's constructor (which should be called by the \texttt{install()} method).
 
 \subsubsection{Persistent EEPROM}
 
-Anytime the \texttt{new} keyword is used, a persistent object will be created. As stated earlier, certain cards do not actually have a garbage collector. Thus it's very important to ensure careful use of EEPROM, since once created, an object may never be erased and memory leaks can easily occur. Writes to EEPROM are atomic, meaning that there's no need for concern over data inconsistencies in the event that power is unexpected lost, e.g. because the card is removed from the reader. Unfortunately, writes also wear out the physical memory circuit, and thus frequent writes will reduce the lifetime of the card.
+Anytime the \texttt{new} keyword is used, a persistent object will be created. As stated earlier, certain cards do not actually have a garbage collector. Thus it's very important to ensure careful use of EEPROM, since once created, an object may never be erased and memory leaks can easily occur. Writes to EEPROM are atomic, meaning that there's no need for concern over data inconsistencies in the event that power is unexpectedly lost, e.g. because the card is moved out of the range of the reader. Unfortunately, writes also wear out the physical memory circuit, and thus frequent writes will reduce the lifetime of the card.
 
 \section{Resources}
 
@@ -345,7 +346,7 @@ Four external libraries were used in this project. The first of these was the Ap
 
 \chapter{Implementation}
 
-The project consists of three applications: the card-provisioning application, described in \autoref{provisionapp}, and two separate applications that implement the authentication protocol, one that runs on the card, the other on the reader. Two authentication protocols were devised for the project --- the first protocol, described in \autoref{basicauth}, is very basic and only authenticates the card's identity. The second, described in \autoref{mutualauth}, performs mutual authentication and provides user untraceability.
+The project consists of three applications: the card-provisioning application, described in \autoref{provisionapp}, and two separate applications that implement the authentication protocol, one that runs on the card, the other on the reader. Two authentication protocols were devised for the project --- the first protocol, described in \autoref{basicauth}, is very basic and only authenticates the card's identity. The second, described in \autoref{mutualauth}, performs mutual authentication and provides strong privacy properties.
 
 \section{Card-provisioning application}
 \label{provisionapp}
@@ -362,7 +363,7 @@ Note that the provision command takes as input three items: CRSID, a \emph{group
 
 \subsubsection{Card-provisioning terminal key pair}
 
-In order to generate ECDSA signatures, the card terminal needs a key pair of its own. This can be generated using the \texttt{genkeypair} command. It's important that this key pair is kept safe, since all cards and readers contain a copy, in order to perform the mutual authentication protocol. Thus, if it has to be replaced (e.g. if it was accidentally deleted or overwritten), then all cards and readers will have to be re-provisioned.
+In order to generate ECDSA signatures, the card terminal needs a key pair of its own. This can be generated using the \texttt{genkeypair} command. It's important that this key pair is kept safe, since all cards and readers contain a copy, in order to perform the mutual authentication protocol. Thus, if it has to be replaced (e.g. if it was accidentally deleted or overwritten), then all cards and readers will have to be re-provisioned. Further, if it falls into the hands of an adversary, then they could provision cards with whatever access permissions they choose.
 
 \subsubsection{Provisioning readers}
 
@@ -374,7 +375,7 @@ The CRSID is stored on the card in a byte array. When the provisioning applicati
 
 \subsection{Format of group ID}
 
-The group ID specifies the access permissions of the card. It is variable-length, and thus no format has been hard-coded into the implementation. One possible option is to have each bit correspond to a certain location. If the bit is set, then the card has access to that location. For example, the sixth bit being set could correspond to permission to access a certain faculty.
+The group ID specifies the access permissions of the card. It is variable-length, and thus no format has been hard-coded into the implementation. One possible option is to have each bit correspond to a certain location. If the bit is set, then the card has access to that location. For example, the sixth bit being set could correspond to permission to access a certain faculty. This format would make the group ID easily extensible.
 
 \subsection{Format of card expiry date}
 
@@ -392,7 +393,7 @@ The provisioning protocol is very straightforward. First, the provisioning termi
 
 \subsubsection{ECDSA signature format}
 
-DER is the data format used to encode an ECDSA signature, which is defined by SEC1 as an ASN.1 sequence of two integers \texttt{r} and \texttt{s}.
+Distinguished Encoding Rules (DER) is the data format used to encode an ECDSA signature, which is defined by SEC1 as an Abstract Syntax Notation One (ASN.1) sequence of two integers \texttt{r} and \texttt{s}.
 
 \begin{lstlisting}[caption={ASN.1 structure of an ECDSA signature},captionpos=b]
 ECDSASignature ::= SEQUENCE {
@@ -402,20 +403,20 @@ ECDSASignature ::= SEQUENCE {
 \end{lstlisting}
 
 \noindent
-The following sequence of bytes shows the DER-encoding of an ECDSA signature: \texttt{0x30 b1 0x02 b2 (vr) 0x02 b3 (vs)}.
+The following sequence of bytes shows the DER encoding of an ECDSA signature: \texttt{0x30 b1 0x02 b2 (vr) 0x02 b3 (vs)}.
 
 \begin{itemize}
 \item \texttt{0x30} signifies the start of a sequence.
 \item \texttt{0x02} signifies the start of an integer.
-\item \texttt{b1} is a single byte value, equal to the length, in bytes, of the remaining list of bytes (from the first \texttt{0x02} to the end of the encoding).
-\item \texttt{b2} is a single byte value, equal to the length, in bytes, of (vr).
-\item \texttt{b3} is a single byte value, equal to the length, in bytes, of (vs).
-\item \texttt{(vr)} is the signed, big-endian encoding of the value \texttt{r}, of minimal length.
-\item \texttt{(vs)} is the signed, big-endian encoding of the value \texttt{s}, of minimal length.
+\item \texttt{b1} is a single byte value, equal to the length, in bytes, of the remaining sequence of bytes (from the first \texttt{0x02} to the end of the encoding).
+\item \texttt{b2} is a single byte value, equal to the length, in bytes, of \texttt{(vr)}.
+\item \texttt{b3} is a single byte value, equal to the length, in bytes, of \texttt{(vs)}.
+\item \texttt{(vr)} is the signed, big-endian, minimal length encoding of the value \texttt{r}.
+\item \texttt{(vs)} is the signed, big-endian, minimal length encoding of the value \texttt{s}.
 \end{itemize}
 
 \noindent
-\emph{Minimal length} means that the total length is the shortest possible to represent the value, and \emph{signed} means that the first bit of the first byte specifies the sign of the value. Since \texttt{r} and \texttt{s} are always positive, the first bit of the first byte of both \texttt{(vr)} and \texttt{(vs)} must be \texttt{0}, i.e. the first byte must have a value between \texttt{0x00} and \texttt{0x7F}. If the minimal, unsigned representation of either value has a first byte with value greater than \texttt{0x7F}, the encoded representation must be padded with an \texttt{0x00} byte.
+\emph{Minimal length} means that the total length is the shortest possible to represent the value, and \emph{signed} means that the first bit of the first byte specifies the sign of the value. Since \texttt{r} and \texttt{s} are always positive, the first bit of the first byte of both \texttt{(vr)} and \texttt{(vs)} must be \texttt{0}, i.e. the first byte must have a value between \texttt{0x00} and \texttt{0x7F}. If the minimal, \emph{unsigned} representation of either value has a first byte with value greater than \texttt{0x7F}, the DER-encoded representation must be padded with an \texttt{0x00} byte.
 
 The relevance of this is that JavaCard and Bouncy Castle treat signatures slightly differently. JavaCard does not adhere to the ``minimal length'' criteria and always pads \texttt{(vr)} and \texttt{(vs)} with zeros until the signature is the maximum allowed length --- in fact, JavaCard will not be able to decode a signature \emph{unless} it has maximal length. Thus, before sending a signature generated by Bouncy Castle to a card, it must be padded to the maximum length. Equally, when we receive a signature generated by JavaCard, we must remove any incorrectly inserted pads (zeros), else Bouncy Castle will not be able to decode it. This particular issue was extremely difficult to debug.
 
@@ -447,7 +448,7 @@ The protocol begins with the reader generating an ephemeral key pair, ($d_{eH}$;
 
 \subsection{Concatenation KDF}
 
-The KDF used in the protocol is the concatenation KDF as specified in NIST SP800-56A \cite{nistsp80056a} (\S5.8.1). It takes as arguments a key, the desired length of the derived keying material and some ``other information''. In the case of this protocol, the other information is defined as in Annex A of \cite{OPACITY}. Briefly, if $SK_1, ..., SK_p =  KDF(Z, len, info(A_1, ..., A_m)$, then $info(A_1, ..., A_m) = AlgoID(SK_1)~\vert~...~\vert~AlgoID(SK_p)~\vert~A_1~\vert~...~\vert~A_m$, where AlgoID for this protocol is always 0x09, the ID for an AES-128 key, as defined in Annex A of \cite{OPACITY}.
+The KDF used in the protocol is the concatenation KDF as specified in NIST SP800-56A \cite{nistsp80056a} (\S5.8.1). JavaCard 2.2.2 does not support this KDF, and thus I had to implement it myself. It takes as arguments a key, the desired length of the derived keying material and some ``other information''. In the case of this protocol, the other information is defined as in Annex A of \cite{OPACITY}. Briefly, if $SK_1, ..., SK_p =  KDF(Z, len, info(A_1, ..., A_m)$, then $info(A_1, ..., A_m) = AlgoID(SK_1)~\vert~...~\vert~AlgoID(SK_p)~\vert~A_1~\vert~...~\vert~A_m$, where AlgoID for this protocol is always 0x09, the algorithm ID for an AES-128 key, as defined in Annex A of \cite{OPACITY}.
 
 The concatenation KDF is built on an \emph{approved} hash function --- a list of such functions is given in FIPS 180-2 \cite{fips1802}. It works as follows:
 
@@ -456,7 +457,7 @@ The concatenation KDF is built on an \emph{approved} hash function --- a list of
 \item Initialize a 32-bit, big-endian bit string $counter$ as $00000001_{16}$.
 \item For $i = 1$ to $reps$ by $1$, do:
 	\begin{itemize}
-	\item Compute $Hash_i = H(counter \vert Z \vert info(...))$ where $H$ is the chosen hash function.
+	\item Compute $Hash_i = H(counter \vert Z \vert info(...))$, where $H$ is the chosen hash function.
 	\item Increment $counter$ (modulo $2^{32}$), treating it as an unsigned integer.
 	\end{itemize}
 \item Let $Hhash ::= Hash_{reps}$ if $\frac{keydatalen}{hashlen}$ is an integer; otherwise, let $Hhash$ equal the ($keydatalen$ mod $hashlen$) leftmost bits of $Hash_{reps}$.
@@ -485,7 +486,7 @@ for (short counter = (short)1; counter <= numBlocksToGenerate; counter++) {
 \subsection{Mutual authentication}
 \label{sec:mutualauth}
 
-The basic authentication protocol described in \autoref{basicauth} only authenticates the card, i.e. the card cannot tell whether the reader is real (e.g. a reader controlling access to a university door) or adversarial (e.g. someone holding a USB reader up to your pocket). Under such a protocol, the card may reveal sensitive information to an attacker. Even seemingly trivial data, such as a public key, can be used to track a card, and thus should not be divulged at will. The mutual authentication protocol solves this by doing the obvious thing --- authenticating both the card \emph{and} the reader. Strictly speaking, the protocol doesn't actually authenticate the reader. However, it works such that only a valid reader will be able to access sensitive information, which is the intention of mutual authentication, and so the distinction is semantic. This is achieved in a clever way. Notice that, in order to get any sensitive data from the card, the reader must be able to decrypt $OpaqueData_{ICC}$. Thus, it must be able to derive $K1$, which in turn means being able to derive $Z1$. Before continuing, recognise that an attacker could eavesdrop an exchange between a valid reader and card, and thus could know a valid certificate, $C_{H}$, and ephemeral public key, $Q_{eH}$. By replaying this information, the attacker could force a card to engage in the protocol. However, once the card responds with $OpaqueData_{ICC}$, since the attacker doesn't know $d_{sH}$, they cannot derive $Z1$, and therefore, ultimately, cannot decrypt the sensitive data. Notice also that an attacker cannot simply choose $C_{H}$ at random, since $Q_{sH}$ must be signed by the provisioning terminal. In this way, only valid readers are able to read a card's sensitive data.
+The basic authentication protocol described in \autoref{basicauth} only authenticates the card, i.e. the card cannot tell whether the reader is real (e.g. a reader controlling access to a university door) or adversarial (e.g. someone holding a USB reader up to a victim's pocket). Under such a protocol, the card may reveal sensitive information to an attacker. Even seemingly trivial data, such as a public key, can be used to track a card, and thus should not be divulged at will. The mutual authentication protocol solves this by doing the obvious thing --- authenticating both the card \emph{and} the reader. Strictly speaking, the protocol doesn't actually authenticate the reader. However, it works such that only a valid reader will be able to access sensitive information, which is the intention of mutual authentication, and so the distinction is semantic. This is achieved in a clever way. Notice that, in order to get any sensitive data from the card, the reader must be able to decrypt $OpaqueData_{ICC}$. Thus, it must be able to derive $K1$, which in turn means being able to derive $Z1$. Before continuing, recognise that an attacker could eavesdrop an exchange between a valid reader and card, and thus could know a valid certificate, $C_{H}$, and ephemeral public key, $Q_{eH}$. By replaying this information, the attacker could force a card to engage in the protocol. However, once the card responds with $OpaqueData_{ICC}$, since the attacker doesn't know $d_{sH}$, they cannot derive $Z1$, and therefore, ultimately, cannot decrypt the sensitive data. Notice also that an attacker cannot simply choose $C_{H}$ at random, since $Q_{sH}$ must be signed by the provisioning terminal. In this way, only valid readers are able to read a card's sensitive data.
 
 \subsection{Privacy properties}
 
@@ -493,7 +494,7 @@ The mutual authentication protocol has strong privacy properties. In particular,
 
 \subsubsection{Deniability}
 
-Deniability is the inability to use transcripts of communications as proofs towards third parties, i.e. an outsider cannot prove that a specific card has communicated with a specific reader based on, for instance, transcripts of communications from the reader. The protocol ensures a very basic level of deniability, protecting only against abuse of transcripts between a real card and reader. This is referred to as \emph{outsider deniability}.
+Deniability is the inability to use transcripts of communications as proofs towards third parties, i.e. an outsider cannot prove that a specific card has communicated with a specific reader based on, for instance, transcripts of communications taken from logs stored by the reader. The protocol ensures a very basic level of deniability, protecting only against abuse of transcripts between a real card and reader. This is referred to as \emph{outsider deniability}.
 
 \subsubsection{Untraceability}
 
@@ -508,7 +509,7 @@ Identity hiding is a weaker property than untraceability, in that it allows mult
 
 The OPACITY-FS protocol is designed such that, at the end of the protocol, the reader and card have established a pair\footnote{One for encrypting the message, the other for generating a MAC.} of shared keys, which they can use to securely exchange messages. These keys are usually derived at the same time that the $SK_{CFRM}$ key is derived. I opted not to implement this part of the protocol as further secure messaging wasn't required.
 
-The OPACITY-FS protocol also offers a feature known as persistent binding. The idea behind this feature is that the protocol is slow due to the use of asymmetric cryptography on the card. So, once both parties have been mutually authenticated, it's unnecessary to repeat the slow protocol again, next time the card wants access. Instead, they can agree during the first authentication to remember one another. By storing certain pieces of data, they're able to perform a much faster authentication protocol the next time the card tries to authenticate. This protocol is faster because it doesn't use an asymmetric key algorithms. Unfortunately, a cryptographic analysis \cite{opacityanalysis} of OPACITY-FS revealed that the use of persistent binding violates user untraceability. However, without persistent binding, the protocol achieves untraceability. For this reason, I opted not to implement it.
+The OPACITY-FS protocol also offers a feature known as persistent binding. The idea behind this feature is that the protocol is slow due to the use of asymmetric cryptography on the card. So, once both parties have been mutually authenticated, it's unnecessary to repeat the slow protocol again, next time the card wants access. Instead, they can agree during the first authentication to remember one another. By storing certain pieces of data, they're able to perform a much faster authentication protocol the next time the card tries to authenticate. This protocol is faster because it doesn't use any asymmetric key algorithms. Unfortunately, a cryptographic analysis \cite{opacityanalysis} of OPACITY-FS revealed that the use of persistent binding violates untraceability and outsider deniability. However, without persistent binding, the protocol achieves both. For this reason, I opted not to implement it.
 
 \section{Card communication API}
 
@@ -572,7 +573,7 @@ As mentioned in \autoref{javacardmemory}, it's far and away best practice to do 
 
 \subsection{Processing incoming APDUs}
 
-Once the applet has been selected, all incoming APDUs are directed by the JCRE to the applet's \texttt{process()} method. This method acts as a dispatch, directing the APDU to the relevant method within the applet class. Listing \autoref{appletprocess} shows the implementation of the \texttt{process()} method for the authentication protocol applet. The \texttt{ISO7816.OFFSET\_INS} constant is the offset into the APDU buffer at which the instruction code is located.
+Once the applet has been selected, all incoming APDUs are directed by the JCRE to the applet's \texttt{process()} method. This method acts as a dispatch, directing the APDU to the relevant method within the applet class. Listing \autoref{appletprocess} shows part of the implementation of the \texttt{process()} method for the authentication protocol applet. The \texttt{ISO7816.OFFSET\_INS} constant is the offset into the APDU buffer at which the instruction code is located.
 
 \begin{listing}
 \begin{minted}[linenos]{java}
@@ -600,20 +601,7 @@ public void process(APDU apdu) {
           break;
       }
     } else {
-      switch (buffer[ISO7816.OFFSET_INS]) {
-        case GENERATE_KEY_PAIR:
-        case STORE_SIGNATURE:
-        case CHECK_STORED_DATA:
-        case LOCK_CARD:
-          ISOException.throwIt(ISO7816.SW_COMMAND_NOT_ALLOWED);
-          break;
-        case BASIC_AUTH:
-          processBasicAuth(apdu);
-          break;
-        case INITIATE_AUTH:
-          processInitiateAuthentication(apdu);
-          break;
-      }
+      // ...
     }
   }
 }
@@ -837,6 +825,28 @@ Relay attacks can be prevented by a distance-bounding protocol, which would allo
 
 \chapter{Conclusion}
 
+The access control system described in this dissertation avoids the mistakes made by the MIFARE Classic system, which were discussed in \autoref{sec:mifareclassic}. It offers two protocols based on asymmetric key cryptography: a basic protocol that authenticates the card's identity, and a more advanced protocol which performs mutual authentication of both the card and reader.
+
+The system utilising the basic protocol is able to perform authentication in at most 276.9 ms, with 95\% confidence, whilst the system utilising the mutual authentication protocol is able to perform authentication in at most 1.103 s, with 95\% confidence.
+
+\section{Achievements}
+
+Two protocols were devised and implemented in two separate applications, one running on the card, the other on the reader. A command-line provisioning application for provisioning and reprogramming cards was written. The system utilising the basic protocol is able to authenticate a card in at most 280 ms, to a high degree of confidence --- well under the requirement of one second. Furthermore, three of the listed extensions were implemented: mutual authentication, untraceability and resilience to cloning.
+
+\section{Lessons learned}
+
+The process of getting to grips with the details of smart-card development was certainly the most difficult part of this project. If this learning curve had not been so steep, I would've perhaps had more time to implement further extensions to the project.
+
+Much was learnt about the considerations specific to developing for memory-impoverished systems. Specifically, the importance of ensuring that different data items must necessarily be stored in different types of memory, in order to ensure efficient execution and to maximise the lifetime of the system.
+
+\section{Further work}
+
+\begin{itemize}
+\item Implement the secure messaging capability from the OPACITY-FS protocol.
+\item Design and implement a filesystem for the card.
+\item Implement persistent binding, as in OPACITY-FS.
+\item Implement an attack, as discussed in \cite{opacityanalysis}, targetting the properties of outsider deniability and untraceability, for the protocol featuring persistent binding.
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % the bibliography

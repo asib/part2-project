@@ -23,20 +23,7 @@
           \PYG{k}{break}\PYG{o}{;}
       \PYG{o}{\PYGZcb{}}
     \PYG{o}{\PYGZcb{}} \PYG{k}{else} \PYG{o}{\PYGZob{}}
-      \PYG{k}{switch} \PYG{o}{(}\PYG{n}{buffer}\PYG{o}{[}\PYG{n}{ISO7816}\PYG{o}{.}\PYG{n+na}{OFFSET\PYGZus{}INS}\PYG{o}{])} \PYG{o}{\PYGZob{}}
-        \PYG{k}{case} \PYG{n}{GENERATE\PYGZus{}KEY\PYGZus{}PAIR}\PYG{o}{:}
-        \PYG{k}{case} \PYG{n}{STORE\PYGZus{}SIGNATURE}\PYG{o}{:}
-        \PYG{k}{case} \PYG{n}{CHECK\PYGZus{}STORED\PYGZus{}DATA}\PYG{o}{:}
-        \PYG{k}{case} \PYG{n}{LOCK\PYGZus{}CARD}\PYG{o}{:}
-          \PYG{n}{ISOException}\PYG{o}{.}\PYG{n+na}{throwIt}\PYG{o}{(}\PYG{n}{ISO7816}\PYG{o}{.}\PYG{n+na}{SW\PYGZus{}COMMAND\PYGZus{}NOT\PYGZus{}ALLOWED}\PYG{o}{);}
-          \PYG{k}{break}\PYG{o}{;}
-        \PYG{k}{case} \PYG{n}{BASIC\PYGZus{}AUTH}\PYG{o}{:}
-          \PYG{n}{processBasicAuth}\PYG{o}{(}\PYG{n}{apdu}\PYG{o}{);}
-          \PYG{k}{break}\PYG{o}{;}
-        \PYG{k}{case} \PYG{n}{INITIATE\PYGZus{}AUTH}\PYG{o}{:}
-          \PYG{n}{processInitiateAuthentication}\PYG{o}{(}\PYG{n}{apdu}\PYG{o}{);}
-          \PYG{k}{break}\PYG{o}{;}
-      \PYG{o}{\PYGZcb{}}
+      \PYG{c+c1}{// ...}
     \PYG{o}{\PYGZcb{}}
   \PYG{o}{\PYGZcb{}}
 \PYG{o}{\PYGZcb{}}

@@ -11,7 +11,7 @@
 \contentsline {figure}{\numberline {3.1}{\ignorespaces Card-provisioning application help output}}{27}{figure.3.1}
 \contentsline {figure}{\numberline {3.2}{\ignorespaces Card-provisioning protocol}}{29}{figure.3.2}
 \contentsline {figure}{\numberline {3.3}{\ignorespaces Basic authentication protocol}}{31}{figure.3.3}
-\contentsline {figure}{\numberline {3.4}{\ignorespaces Mutual authentication protocol}}{38}{figure.3.4}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Mutual authentication protocol}}{39}{figure.3.4}
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {4.1}{\ignorespaces Gaussian distribution of basic authentication protocol runtime}}{43}{figure.4.1}
 \contentsline {figure}{\numberline {4.2}{\ignorespaces Gaussian distribution of mutual authentication protocol runtime}}{44}{figure.4.2}
