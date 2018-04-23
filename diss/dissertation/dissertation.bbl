@@ -68,10 +68,16 @@ Nicolas~T. Courtois.
 \bibitem{opacityanalysis}
 {\"O}zg{\"u}r Dagdelen, Marc Fischlin, Tommaso Gagliardoni, Giorgia~Azzurra
   Marson, Arno Mittelbach, and Cristina Onete.
-\newblock A cryptographic analysis of opacity.
+\newblock A cryptographic analysis of {OPACITY}.
 \newblock In Jason Crampton, Sushil Jajodia, and Keith Mayes, editors, {\em
   Computer Security -- ESORICS 2013}, pages 345--362, Berlin, Heidelberg, 2013.
   Springer Berlin Heidelberg.
+
+\bibitem{nestedattack}
+Flavio~D. Garcia, Peter van Rossum, Roel Verdult, and Ronny~Wichers Schreur.
+\newblock Wirelessly pickpocketing a {MIFARE} {Classic} card.
+\newblock
+  \url{http://www.cs.ru.nl/~flaviog/publications/Pickpocketing.Mifare.pdf}.
 
 \bibitem{fips1802}
 {National Institute of Standards and Technology}.

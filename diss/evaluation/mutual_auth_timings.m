@@ -400,36 +400,39 @@ ts = [1.095859387,
 1.07529512,
 1.073687199];
 
-[mu,s] = normfit(ts);
+histogram(ts);
 
-conf = 3.3;
-bottomXLim = mu-conf*s;
-topXLim = mu+conf*s;
-step = s*0.001;
-
-x = [bottomXLim:step:topXLim];
-norm = normpdf(x, mu, s);
-
-zval = 1.6448;
-confint = zval*s + mu;
-
-specialx = [[bottomXLim:step:confint] confint];
-specialnorm = normpdf(specialx, mu, s);
-
-figure;
-p = plot(x, norm);
-colour = get(p,'Color');
-hold on;
-a = area(specialx, specialnorm);
-a.FaceAlpha = 0.2;
-a.FaceColor = colour;
-plot([mu mu], [0 max(norm)], 'Color', 'k');
-line([bottomXLim topXLim], [0 0], 'Color', 'k');
-box off;
-xlim([bottomXLim topXLim]);
+% [mu,s] = normfit(ts);
+% 
+% conf = 3.3;
+% bottomXLim = mu-conf*s;
+% topXLim = mu+conf*s;
+% step = s*0.001;
+% 
+% x = [bottomXLim:step:topXLim];
+% norm = normpdf(x, mu, s);
+% 
+% zval = 1.6448;
+% confint = zval*s + mu;
+% 
+% specialx = [[bottomXLim:step:confint] confint];
+% specialnorm = normpdf(specialx, mu, s);
+% 
+% figure;
+% p = plot(x, norm);
+% colour = get(p,'Color');
+% hold on;
+% a = area(specialx, specialnorm);
+% a.FaceAlpha = 0.2;
+% a.FaceColor = colour;
+% plot([mu mu], [0 max(norm)], 'Color', 'k');
+% line([bottomXLim topXLim], [0 0], 'Color', 'k');
+% box off;
+% xlim([bottomXLim topXLim]);
 xlabel('Authentication time / s');
-yticks([]);
-xticks([mu-3*s:s:mu+3*s]);
-text(confint+0.0003, normpdf(confint, mu, s)+2, 'p = 0.95');
-text(confint+0.0003, normpdf(confint, mu, s)+4, sprintf('z = %.3f', confint));
-set(gca,'YColor','white','TickDir','out','XTickLabel',num2str(get(gca,'xtick')','%.3f'));
+ylabel('Number of recorded timings');
+% yticks([]);
+% xticks([mu-3*s:s:mu+3*s]);
+% text(confint+0.0003, normpdf(confint, mu, s)+2, 'p = 0.95');
+% text(confint+0.0003, normpdf(confint, mu, s)+4, sprintf('z = %.3f', confint));
+% set(gca,'YColor','white','TickDir','out','XTickLabel',num2str(get(gca,'xtick')','%.3f'));

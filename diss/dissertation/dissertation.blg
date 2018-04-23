@@ -1,0 +1,56 @@
+This is BibTeX, Version 0.99d (TeX Live 2017)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: dissertation.aux
+The style file: plain.bst
+Database file #1: refs.bib
+Warning--to sort, need author or key in writingapplets
+Warning--to sort, need author or key in jcalgtest
+Warning--to sort, need author or key in gpshell
+Warning--to sort, need author or key in ant
+Warning--to sort, need author or key in apachecommonscodec
+Warning--to sort, need author or key in bouncycastle
+Warning--to sort, need author or key in apachecommonscli
+Warning--to sort, need author or key in sec1
+Warning--empty publisher in fips1802
+You've used 18 entries,
+            2118 wiz_defined-function locations,
+            580 strings with 6674 characters,
+and the built_in function-call counts, 4016 in all, are:
+= -- 369
+> -- 153
+< -- 1
++ -- 66
+- -- 47
+* -- 203
+:= -- 612
+add.period$ -- 48
+call.type$ -- 18
+change.case$ -- 78
+chr.to.int$ -- 0
+cite$ -- 27
+duplicate$ -- 150
+empty$ -- 402
+format.name$ -- 47
+if$ -- 882
+int.to.chr$ -- 0
+int.to.str$ -- 18
+missing$ -- 3
+newline$ -- 86
+num.names$ -- 22
+pop$ -- 168
+preamble$ -- 1
+purify$ -- 58
+quote$ -- 0
+skip$ -- 121
+stack$ -- 0
+substring$ -- 123
+swap$ -- 24
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 70
+warning$ -- 9
+while$ -- 24
+width$ -- 20
+write$ -- 165
+(There were 9 warnings)
