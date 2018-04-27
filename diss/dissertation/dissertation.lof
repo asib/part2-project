@@ -8,13 +8,13 @@
 \contentsline {figure}{\numberline {2.3}{\ignorespaces CAP Converter Tool}}{22}{figure.2.3}
 \contentsline {figure}{\numberline {2.4}{\ignorespaces Applet Life-Cycle}}{23}{figure.2.4}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Card-provisioning application help output}}{27}{figure.3.1}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Card-provisioning application help output}}{28}{figure.3.1}
 \contentsline {figure}{\numberline {3.2}{\ignorespaces Card-provisioning protocol}}{29}{figure.3.2}
 \contentsline {figure}{\numberline {3.3}{\ignorespaces Basic authentication protocol}}{31}{figure.3.3}
 \contentsline {figure}{\numberline {3.4}{\ignorespaces Mutual authentication protocol}}{39}{figure.3.4}
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {4.1}{\ignorespaces Histogram of basic authentication protocol runtime ($n = 400$)}}{42}{figure.4.1}
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Gaussian distribution of mutual authentication protocol runtime}}{43}{figure.4.2}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Histogram of mutual authentication protocol runtime ($n = 400$)}}{43}{figure.4.2}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }

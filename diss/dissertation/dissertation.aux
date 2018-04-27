@@ -97,18 +97,18 @@
 \@writefile{loa}{\addvspace {10\p@ }}
 \@writefile{toc}{\contentsline {section}{\numberline {3.1}Card-provisioning application}{27}{section.3.1}}
 \newlabel{provisionapp}{{3.1}{27}{Card-provisioning application}{section.3.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces Card-provisioning application help output}}{27}{figure.3.1}}
-\newlabel{provisionhelp}{{3.1}{27}{Card-provisioning application help output}{figure.3.1}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Card-provisioning terminal key pair}{27}{section*.18}}
 \citation{sec1}
-\@writefile{toc}{\contentsline {subsubsection}{Card-provisioning terminal key pair}{28}{section*.18}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces Card-provisioning application help output}}{28}{figure.3.1}}
+\newlabel{provisionhelp}{{3.1}{28}{Card-provisioning application help output}{figure.3.1}{}}
 \@writefile{toc}{\contentsline {subsubsection}{Provisioning readers}{28}{section*.19}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1.1}Format of CRSID}{28}{subsection.3.1.1}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1.2}Format of group ID}{28}{subsection.3.1.2}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1.3}Format of card expiry date}{28}{subsection.3.1.3}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.4}Card provisioning protocol}{28}{subsection.3.1.4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.4}Card provisioning protocol}{29}{subsection.3.1.4}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces Card-provisioning protocol}}{29}{figure.3.2}}
 \newlabel{provisioningprotocol}{{3.2}{29}{Card-provisioning protocol}{figure.3.2}{}}
-\@writefile{toc}{\contentsline {subsubsection}{ECDSA signature format}{29}{section*.20}}
+\@writefile{toc}{\contentsline {subsubsection}{ECDSA signature format}{30}{section*.20}}
 \@writefile{lol}{\contentsline {lstlisting}{\numberline {3.1}ASN.1 structure of an ECDSA signature}{30}{lstlisting.3.1}}
 \@writefile{toc}{\contentsline {section}{\numberline {3.2}Basic authentication protocol}{30}{section.3.2}}
 \newlabel{basicauth}{{3.2}{30}{Basic authentication protocol}{section.3.2}{}}
@@ -120,8 +120,8 @@
 \citation{nistsp80056a}
 \citation{OPACITY}
 \citation{OPACITY}
-\citation{fips1802}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}Concatenation KDF}{32}{subsection.3.3.1}}
+\citation{fips1802}
 \@writefile{lol}{\contentsline {listing}{\numberline {3.2}{\ignorespaces The main loop of the concatenation KDF}}{33}{listing.3.2}}
 \newlabel{concatkdf}{{3.2}{33}{Concatenation KDF}{listing.3.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}Mutual authentication}{33}{subsection.3.3.2}}
@@ -167,29 +167,30 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {4.1}{\ignorespaces Histogram of basic authentication protocol runtime ($n = 400$)}}{42}{figure.4.1}}
 \newlabel{basicauthplot}{{4.1}{42}{Histogram of basic authentication protocol runtime ($n = 400$)}{figure.4.1}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.2.2}Runtime of the mutual authentication protocol}{43}{subsection.4.2.2}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4.2}{\ignorespaces Gaussian distribution of mutual authentication protocol runtime}}{43}{figure.4.2}}
-\newlabel{mutualauthplot}{{4.2}{43}{Gaussian distribution of mutual authentication protocol runtime}{figure.4.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.2}{\ignorespaces Histogram of mutual authentication protocol runtime ($n = 400$)}}{43}{figure.4.2}}
+\newlabel{mutualauthplot}{{4.2}{43}{Histogram of mutual authentication protocol runtime ($n = 400$)}{figure.4.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.2.3}Comparison to MIFARE Classic authentication protocol runtime}{43}{subsection.4.2.3}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.3}Security of the protocols}{44}{section.4.3}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.1}Resistance to replay attacks}{44}{subsection.4.3.1}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.2}Resistance to cloning attacks}{44}{subsection.4.3.2}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.3}Vulnerability to relay attacks}{45}{subsection.4.3.3}}
-\@writefile{lol}{\contentsline {listing}{\numberline {4.1}{\ignorespaces Log showning APDUs sent and received by the provisioning terminal during the provisioning protocol}}{46}{listing.4.1}}
-\newlabel{provisionlog}{{4.1}{46}{Log of provisioning protocol}{listing.4.1}{}}
-\@writefile{lol}{\contentsline {listing}{\numberline {4.2}{\ignorespaces Log showning APDUs sent and received by the reader during the basic authentication protocol}}{47}{listing.4.2}}
-\newlabel{basicauthlog}{{4.2}{47}{Log of basic authentication protocol}{listing.4.2}{}}
-\@writefile{lol}{\contentsline {listing}{\numberline {4.3}{\ignorespaces Log showning APDUs sent and received by the reader during the mutual authentication protocol}}{48}{listing.4.3}}
-\newlabel{mutualauthlog}{{4.3}{48}{Log of mutual authentication protocol}{listing.4.3}{}}
-\@writefile{toc}{\contentsline {chapter}{\numberline {5}Conclusion}{49}{chapter.5}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.3}Correctness of the OPACITY-inspired protocol}{44}{section.4.3}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.4}Security of the protocols}{44}{section.4.4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.1}Resistance to replay attacks}{44}{subsection.4.4.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.2}Resistance to cloning attacks}{45}{subsection.4.4.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.3}Vulnerability to relay attacks}{46}{subsection.4.4.3}}
+\@writefile{lol}{\contentsline {listing}{\numberline {4.1}{\ignorespaces Log showning APDUs sent and received by the provisioning terminal during the provisioning protocol}}{47}{listing.4.1}}
+\newlabel{provisionlog}{{4.1}{47}{Log of provisioning protocol}{listing.4.1}{}}
+\@writefile{lol}{\contentsline {listing}{\numberline {4.2}{\ignorespaces Log showning APDUs sent and received by the reader during the basic authentication protocol}}{48}{listing.4.2}}
+\newlabel{basicauthlog}{{4.2}{48}{Log of basic authentication protocol}{listing.4.2}{}}
+\@writefile{lol}{\contentsline {listing}{\numberline {4.3}{\ignorespaces Log showning APDUs sent and received by the reader during the mutual authentication protocol}}{49}{listing.4.3}}
+\newlabel{mutualauthlog}{{4.3}{49}{Log of mutual authentication protocol}{listing.4.3}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {5}Conclusion}{51}{chapter.5}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{loa}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {section}{\numberline {5.1}Achievements}{49}{section.5.1}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.2}Lessons learned}{49}{section.5.2}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.3}Further work}{49}{section.5.3}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.1}Achievements}{51}{section.5.1}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.2}Lessons learned}{51}{section.5.2}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.3}Further work}{51}{section.5.3}}
 \citation{opacityanalysis}
 \bibdata{refs}
-\@writefile{toc}{\contentsline {chapter}{Bibliography}{50}{section.5.3}}
+\@writefile{toc}{\contentsline {chapter}{Bibliography}{52}{section.5.3}}
 \bibcite{ant}{1}
 \bibcite{apachecommonscli}{2}
 \bibcite{apachecommonscodec}{3}
@@ -208,16 +209,16 @@
 \bibcite{fips1802}{16}
 \bibcite{OPACITY}{17}
 \bibcite{mifarebruteforce}{18}
-\@writefile{toc}{\contentsline {chapter}{\numberline {A}Project Proposal}{53}{appendix.A}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {A}Project Proposal}{55}{appendix.A}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{loa}{\addvspace {10\p@ }}
-\newlabel{appendix:proposal}{{A}{53}{Project Proposal}{appendix.A}{}}
-\@writefile{toc}{\contentsline {chapter}{\numberline {B}Card Application Build File}{59}{appendix.B}}
+\newlabel{appendix:proposal}{{A}{55}{Project Proposal}{appendix.A}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {B}Card Application Build File}{61}{appendix.B}}
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{loa}{\addvspace {10\p@ }}
-\newlabel{appendix:cardappbuildfile}{{B}{59}{Card Application Build File}{appendix.B}{}}
+\newlabel{appendix:cardappbuildfile}{{B}{61}{Card Application Build File}{appendix.B}{}}
 \gdef\minted@oldcachelist{,
   default-pyg-prefix.pygstyle,
   default.pygstyle,

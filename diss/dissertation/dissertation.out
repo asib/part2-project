@@ -47,14 +47,15 @@
 \BOOKMARK [2][-]{subsection.4.2.1}{Runtime of the basic authentication protocol}{section.4.2}% 47
 \BOOKMARK [2][-]{subsection.4.2.2}{Runtime of the mutual authentication protocol}{section.4.2}% 48
 \BOOKMARK [2][-]{subsection.4.2.3}{Comparison to MIFARE Classic authentication protocol runtime}{section.4.2}% 49
-\BOOKMARK [1][-]{section.4.3}{Security of the protocols}{chapter.4}% 50
-\BOOKMARK [2][-]{subsection.4.3.1}{Resistance to replay attacks}{section.4.3}% 51
-\BOOKMARK [2][-]{subsection.4.3.2}{Resistance to cloning attacks}{section.4.3}% 52
-\BOOKMARK [2][-]{subsection.4.3.3}{Vulnerability to relay attacks}{section.4.3}% 53
-\BOOKMARK [0][-]{chapter.5}{Conclusion}{}% 54
-\BOOKMARK [1][-]{section.5.1}{Achievements}{chapter.5}% 55
-\BOOKMARK [1][-]{section.5.2}{Lessons learned}{chapter.5}% 56
-\BOOKMARK [1][-]{section.5.3}{Further work}{chapter.5}% 57
-\BOOKMARK [0][-]{section.5.3}{Bibliography}{}% 58
-\BOOKMARK [0][-]{appendix.A}{Project Proposal}{}% 59
-\BOOKMARK [0][-]{appendix.B}{Card Application Build File}{}% 60
+\BOOKMARK [1][-]{section.4.3}{Correctness of the OPACITY-inspired protocol}{chapter.4}% 50
+\BOOKMARK [1][-]{section.4.4}{Security of the protocols}{chapter.4}% 51
+\BOOKMARK [2][-]{subsection.4.4.1}{Resistance to replay attacks}{section.4.4}% 52
+\BOOKMARK [2][-]{subsection.4.4.2}{Resistance to cloning attacks}{section.4.4}% 53
+\BOOKMARK [2][-]{subsection.4.4.3}{Vulnerability to relay attacks}{section.4.4}% 54
+\BOOKMARK [0][-]{chapter.5}{Conclusion}{}% 55
+\BOOKMARK [1][-]{section.5.1}{Achievements}{chapter.5}% 56
+\BOOKMARK [1][-]{section.5.2}{Lessons learned}{chapter.5}% 57
+\BOOKMARK [1][-]{section.5.3}{Further work}{chapter.5}% 58
+\BOOKMARK [0][-]{section.5.3}{Bibliography}{}% 59
+\BOOKMARK [0][-]{appendix.A}{Project Proposal}{}% 60
+\BOOKMARK [0][-]{appendix.B}{Card Application Build File}{}% 61

@@ -8,6 +8,6 @@
 \contentsline {listing}{\numberline {3.7}{\ignorespaces Creation of byte array to hold derived keys $K1$ and $K2$}}{38}{listing.3.7}
 \contentsline {listing}{\numberline {3.8}{\ignorespaces Creation of the object that will store the card's permanent key pair}}{38}{listing.3.8}
 \contentsline {listing}{\numberline {3.9}{\ignorespaces Creation of the byte arrays that store the CRSID and group ID}}{38}{listing.3.9}
-\contentsline {listing}{\numberline {4.1}{\ignorespaces Log showning APDUs sent and received by the provisioning terminal during the provisioning protocol}}{46}{listing.4.1}
-\contentsline {listing}{\numberline {4.2}{\ignorespaces Log showning APDUs sent and received by the reader during the basic authentication protocol}}{47}{listing.4.2}
-\contentsline {listing}{\numberline {4.3}{\ignorespaces Log showning APDUs sent and received by the reader during the mutual authentication protocol}}{48}{listing.4.3}
+\contentsline {listing}{\numberline {4.1}{\ignorespaces Log showning APDUs sent and received by the provisioning terminal during the provisioning protocol}}{47}{listing.4.1}
+\contentsline {listing}{\numberline {4.2}{\ignorespaces Log showning APDUs sent and received by the reader during the basic authentication protocol}}{48}{listing.4.2}
+\contentsline {listing}{\numberline {4.3}{\ignorespaces Log showning APDUs sent and received by the reader during the mutual authentication protocol}}{49}{listing.4.3}

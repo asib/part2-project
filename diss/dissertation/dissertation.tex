@@ -363,7 +363,7 @@ I chose to adopt an agile development strategy for the implementation phase of t
 
 \chapter{Implementation}
 
-The project consists of three applications: the card-provisioning application, described in \autoref{provisionapp}, and two separate applications that implement the authentication protocol, one that runs on the card, the other on the reader. Two authentication protocols were devised for the project -- the first protocol, described in \autoref{basicauth}, is very basic and only authenticates the card's identity. The second, described in \autoref{mutualauth}, performs mutual authentication and provides strong privacy properties.
+The project consists of three applications: the card-provisioning application, described in \autoref{provisionapp}, and two separate applications that implement the authentication protocol, one that runs on the card, the other on the reader. Two authentication protocols were devised for the project -- the first protocol, described in \autoref{basicauth}, is very basic and only authenticates the card's identity. The second, described in \autoref{mutualauth}, performs mutual authentication and provides strong privacy properties. The motivation for designing and implementing two protocols was that it was necessary to produce the basic protocol in order to satisfy the success criteria outlined in the project proposal (specifically, the requirement that the system be able to perform authentication in under one second). The advanced protocol was then designed separately, in order to complete a handful of the extensions listed in the proposal.
 
 \section{Card-provisioning application}
 \label{provisionapp}
@@ -814,15 +814,24 @@ To three significant figures, the sample mean for the runtime of the mutual auth
 
 \begin{figure}[tbh]
 \centerline{\includegraphics[scale=0.8]{figures/mutualauthplot.eps}}
-\caption{Gaussian distribution of mutual authentication protocol runtime}
+\caption{Histogram of mutual authentication protocol runtime ($n = 400$)}
 \label{mutualauthplot}
 \end{figure}
 
-We can see clearly that the mutual authentication protocol is significantly slower. This is likely due mostly to two reasons. For one, many more cryptographic operations are performed -- the basic protocol does ECDSA once, whilst the mutual protocol generates an EC key pair, does ECDH and the KDF twice, AES once and CBC-MAC once. Further, I had to implement the concatenation KDF myself, and thus it doesn't have the benefit of hardware acceleration.
+\noindent
+We can see clearly that the mutual authentication protocol is significantly slower. This is likely due mostly to two reasons. For one, many more cryptographic operations are performed -- the basic protocol does ECDSA once, whilst the mutual protocol generates an EC key pair, does ECDH and the KDF twice, AES once and CBC-MAC once. Further, I had to implement the concatenation KDF myself, and thus it doesn't have the benefit of hardware acceleration, and I didn't spend a significant amount of time optimising it for performance.
 
 \subsection{Comparison to MIFARE Classic authentication protocol runtime}
 
-According to the datasheet of the MIFARE Classic EV1 4k (the card used by the university), authentication should take no longer than roughly 7 ms -- 2 ms to authenticate to a sector on the card, 5 ms to read data, e.g. to fetch CRSID. However, there are many readers around the university that can take up to 2 s to authenticate a card -- this is likely due to the fact that an external database is being queried for the card's access permissions. Therefore, I do not believe that the system utilising either of the protocols described in this dissertation is unusable, by any means.
+According to the datasheet of the MIFARE Classic EV1 4k (the card used by the university), authentication should take no longer than roughly 7 ms -- 2 ms to authenticate to a sector on the card, 5 ms to read data, e.g.\ to fetch CRSID. However, there are many readers around the university that can take up to 2 s to authenticate a card -- this is likely due to the fact that an external database is being queried for the card's access permissions. Therefore, I do not believe that the system utilising either of the protocols described in this dissertation is unusable, by any means.
+
+\section{Correctness of the OPACITY-inspired protocol}
+
+In order to check that the implementation matched the design specification, shown in \autoref{fig:mutualauth}, a number of test vectors were created. Test vectors for OPACITY-FS were not suitable, because of the divergence of my implementation from the OPACITY-FS specification. In order to generate test vectors, the part of the card-side application that performed authentication was reimplemented to run on a laptop. This reimplementation was then tested in very small parts (i.e.\ a couple of lines at a time). The main difference between the reimplementation and the original card-side application was that the protocol inputs were not stored within one big array (as is the case on the card -- all data comes from the APDU buffer). The motivation for this was to avoid having lots of array offsets that would need to be thoroughly tested. Since the provider being used (Bouncy Castle) is well-reputed, most of the testing effort was focussed on the parts of the implementation that did \emph{not} involve calling a cryptographic API function.
+
+Once satisfied with the correctness of the reimplementation, code was added in to ``siphon off'' intermediate results, which would be used to test the correctness of the card application. A handful of protocol inputs were then generated, each input being paired with the intermediate results produced by the tested reimplementation.
+
+Now that a set of test vectors had been generated, a test harness was created for the card application. The purpose of this harness was both to inject protocol inputs into the card application and to return intermediate results. For instance, without the injection capability of the test harness, it would not have been possible to fix the value of the card's ephemeral key. The card application was then checked against all test vectors to ensure correct operation.
 
 \section{Security of the protocols}
 
