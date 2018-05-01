@@ -64,7 +64,7 @@ Name:               & \bf Jacob Fenton                       \\
 College:            & \bf Fitzwilliam College                     \\
 Project Title:      & \bf Efficient Asymmetric Cryptography for RFID Access Control \\
 Examination:        & \bf Computer Science Tripos -- Part II, 2018  \\
-Word Count:         & \bf TODO  \\
+Word Count:         & \bf 11,605  \\
 Project Originator: & Dr Markus Kuhn                    \\
 Supervisor:         & Dr Markus Kuhn                    \\ 
 \end{tabularx}
@@ -356,6 +356,8 @@ I used Git for source control, regularly pushing to a remote Bitbucket repositor
 \subsection{External libraries}
 
 Four external libraries were used in this project. The first of these was the Apache Commons Codec \cite{apachecommonscodec} library, which was useful because of the \texttt{org.apache.commons.codec.binary.Hex} class, specifically the \texttt{encodeHexString()} method. This allowed me to analyse the card's responses in a readable format and was helpful for debugging. The second was the Bouncy Castle \cite{bouncycastle} library, which I used as a provider. In Java, a ``provider'' implements the Java security API, for instance by providing implementations of cryptographic algorithms (ECDSA, SHA-1) or classes for key generation and management. As well as acting as a provider, it offered a handful of useful methods that the standard Java API didn't, for example a method for obtaining a byte array of the encoding of a public ECDSA key. The third was the Apache Commons CLI \cite{apachecommonscli} library, which was helpful in parsing flags and arguments passed to the provisioning application. The final library was the JavaCard 2.2.2 SDK.
+
+Care was taken to ensure that each of these libraries have a license that would allow their use in the project. The two Apache libraries have an Apache license, and Bouncy Castle has an MIT license. Both of these licenses permit free use of the relevant works. The JavaCard SDK license permits use for the purpose of ``designing and developing applications intended to run on the JavaCard platform''.
 
 \section{Development strategy}
 
